@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="initial" author="antti.leppa">
+    <createTable tableName="systemsetting">
+      <column name="id" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="settingkey" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="value" type="longtext">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    
+    <addUniqueConstraint constraintName="UN_SYSTEM_SETTING_SETTING_KEY" columnNames="settingkey" tableName="systemsetting"/>
+  
+    <createTable tableName="localizedentry">
+      <column name="id" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+    </createTable>
+    
+    <createTable tableName="localizedvalue">
+      <column name="id" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="type" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="locale" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="entry_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_LOCALIZEDENTRY_LOCALIZEDVALUE_ID" referencedTableName="localizedentry" referencedColumnNames="id"/>
+      </column>
+      <column name="value" type="longtext"/>
+    </createTable>
+    
+    <createTable tableName="category">
+      <column name="id" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="parent_id" type="uuid">
+        <constraints foreignKeyName="FK_CATEGORY_PARENT_ID" referencedTableName="category" referencedColumnNames="id"/>
+      </column>
+      <column name="title_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_CATEGORY_TITLE_ID" referencedTableName="localizedentry" referencedColumnNames="id"/>
+      </column>
+      <column name="slug" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    
+    <createTable tableName="item">
+      <column name="id" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="title_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEM_ITEM_TITLE_ID" referencedTableName="localizedentry" referencedColumnNames="id"/>
+      </column>
+      <column name="description_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEM_DESCRIPTION_TITLE_ID" referencedTableName="localizedentry" referencedColumnNames="id"/>
+      </column>
+      <column name="category_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEM_CATEGORY_ID" referencedTableName="category" referencedColumnNames="id"/>
+      </column>
+      <column name="slug" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="createdat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="modifiedat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expiresat" type="timestamp"/>
+      <column name="lastmodifier" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="unitprice" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="pricecurrency" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="amount" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="unit" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+    
+</databaseChangeLog>
