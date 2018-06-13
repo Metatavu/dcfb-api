@@ -92,6 +92,21 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+    
+    <createTable tableName="itemimage">
+      <column name="id" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="item_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEM_IMAGE_ITEM_ID" referencedTableName="item" referencedColumnNames="id"/>
+      </column>
+      <column name="url" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="contenttype" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
   </changeSet>
     
 </databaseChangeLog>

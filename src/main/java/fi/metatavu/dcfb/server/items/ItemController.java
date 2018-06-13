@@ -8,6 +8,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import fi.metatavu.dcfb.server.persistence.dao.ItemDAO;
+import fi.metatavu.dcfb.server.persistence.dao.ItemImageDAO;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.Item;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
@@ -17,6 +18,9 @@ public class ItemController {
   
   @Inject
   private ItemDAO itemDAO;
+
+  @Inject
+  private ItemImageDAO itemImageDAO; 
   
   /**
    * Create item
@@ -84,6 +88,21 @@ public class ItemController {
    * @param item item to be deleted
    */
   public void deleteItem(Item item) {
+    deleteItemImages(item);
     itemDAO.delete(item);
   }
+  
+  public void setItemImages(Item item) {
+    
+  }
+  
+  /**
+   * Deletes all images related to specified item
+   * 
+   * @param item item
+   */
+  private void deleteItemImages(Item item) {
+    itemImageDAO.listByItem(item).stream().forEach(itemImageDAO::delete);
+  }
+  
 }
