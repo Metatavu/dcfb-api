@@ -2,6 +2,7 @@ package fi.metatavu.dcfb.server.items;
 
 import java.time.OffsetDateTime;
 import java.util.Currency;
+import java.util.List;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -11,6 +12,7 @@ import fi.metatavu.dcfb.server.persistence.dao.ItemDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemImageDAO;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.Item;
+import fi.metatavu.dcfb.server.persistence.model.ItemImage;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 
 @ApplicationScoped
@@ -92,8 +94,26 @@ public class ItemController {
     itemDAO.delete(item);
   }
   
-  public void setItemImages(Item item) {
-    
+  /**
+   * Creates an item image
+   * 
+   * @param item item
+   * @param contentType image content type
+   * @param url image URL
+   * @return created item image
+   */
+  public ItemImage createImageItem(Item item, String contentType, String url) {
+    return  itemImageDAO.create(UUID.randomUUID(), url, contentType, item);
+  }
+
+  /**
+   * Lists item images
+   * 
+   * @param item item
+   * @return images
+   */
+  public List<ItemImage> listItemImages(Item item) {
+    return itemImageDAO.listByItem(item);
   }
   
   /**
@@ -101,8 +121,8 @@ public class ItemController {
    * 
    * @param item item
    */
-  private void deleteItemImages(Item item) {
-    itemImageDAO.listByItem(item).stream().forEach(itemImageDAO::delete);
+  public void deleteItemImages(Item item) {
+    listItemImages(item).stream().forEach(itemImageDAO::delete);
   }
   
 }

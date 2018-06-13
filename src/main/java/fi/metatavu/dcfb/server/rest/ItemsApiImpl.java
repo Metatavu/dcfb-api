@@ -15,6 +15,7 @@ import fi.metatavu.dcfb.server.items.CategoryController;
 import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
+import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.translate.ItemTranslator;
 
@@ -78,6 +79,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         amount, 
         unit, 
         modifier);
+
+    createImages(payload, item);
     
     return createOk(itemTranslator.translateItem(item));
   }
@@ -150,8 +153,33 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         amount, 
         unit, 
         modifier);
-
+    
+    itemController.deleteItemImages(item);
+    createImages(payload, item);
+    
     return createOk(itemTranslator.translateItem(item));
+  }
+
+  /**
+   * Creates item images from REST request
+   * 
+   * @param payload REST request
+   * @param item item
+   */
+  private void createImages(Item payload, fi.metatavu.dcfb.server.persistence.model.Item item) {
+    if (payload.getImages() != null) {
+      payload.getImages().stream().forEach(image -> createImage(item, image));
+    }
+  }
+
+  /**
+   * Creates item image from REST object
+   * 
+   * @param payload REST object
+   * @param item item
+   */
+  private void createImage(fi.metatavu.dcfb.server.persistence.model.Item item, Image image) {
+    itemController.createImageItem(item, image.getType(), image.getUrl());
   }
 
 }

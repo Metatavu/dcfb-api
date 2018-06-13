@@ -1,12 +1,14 @@
 package fi.metatavu.dcfb.server.rest.translate;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
+import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
+import fi.metatavu.dcfb.server.persistence.model.ItemImage;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.model.Price;
@@ -18,6 +20,9 @@ import fi.metatavu.dcfb.server.rest.model.Price;
  */
 @ApplicationScoped
 public class ItemTranslator extends AbstractTranslator {
+  
+  @Inject
+  private ItemController itemController;
   
   /**
    * Translates JPA item object into REST item object
@@ -42,7 +47,7 @@ public class ItemTranslator extends AbstractTranslator {
     result.setDescription(translatelocalizedValue(item.getDescription()));
     result.setExpiresAt(item.getExpiresAt());
     result.setId(item.getId());
-    result.setImages(getItemImageIds(item));
+    result.setImages(getItemImages(item));
     result.setModifiedAt(item.getModifiedAt());
     result.setSlug(item.getSlug());
     result.setTitle(translatelocalizedValue(item.getTitle()));
@@ -62,9 +67,30 @@ public class ItemTranslator extends AbstractTranslator {
     return items.stream().map(this::translateItem).collect(Collectors.toList());
   }
 
-  private List<Image> getItemImageIds(fi.metatavu.dcfb.server.persistence.model.Item item) {
-    // TODO Implement
-    return Collections.emptyList();
+  /**
+   * Returns translated list of item images
+   * 
+   * @param item item
+   * @return translated images
+   */
+  private List<Image> getItemImages(fi.metatavu.dcfb.server.persistence.model.Item item) {
+    return itemController.listItemImages(item).stream().map(this::translateItemImage).collect(Collectors.toList());
+  }
+  
+  /**
+   * Translates JPA item image into REST entity
+   * 
+   * @param itemImage JPA item image
+   * @return REST entity
+   */
+  private Image translateItemImage(ItemImage itemImage) {
+    Image result = new Image();
+    
+    result.setId(itemImage.getId());
+    result.setType(itemImage.getContentType());
+    result.setUrl(itemImage.getUrl());
+    
+    return result;
   }
 
 }
