@@ -4,13 +4,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.awaitility.Awaitility.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
@@ -25,7 +29,7 @@ import fi.metatavu.dcfb.client.Price;
 public class ItemsTestsIT extends AbstractIntegrationTest {
   
   private static final ZoneId TIMEZONE = ZoneId.of("Europe/Helsinki");
-  
+
   @Test
   public void testCreateItem() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
@@ -87,6 +91,98 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       Item simpleItem = dataBuilder.createSimpleItem(simpleCategory.getId());
       ItemsApi itemApi = dataBuilder.getItemApi();
       assertEquals(simpleItem.toString(), itemApi.findItem(simpleItem.getId()).toString());
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+  
+  @Test
+  public void testSearchItems() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      ItemsApi itemsApi = dataBuilder.getItemApi();
+
+      Category simpleCategory = dataBuilder.createSimpleCategory();
+      Item simpleItem = dataBuilder.createSimpleItem(simpleCategory.getId());
+      
+      await().atMost(1, TimeUnit.MINUTES).until(() -> {
+        return itemsApi.listItems(Collections.emptyMap()).size() == 1;
+      });
+      
+      List<Item> items = itemsApi.listItems(null, "simple", null, null);
+      assertEquals(1, items.size());
+      assertEquals(simpleItem.toString(), items.get(0).toString());
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+  
+  @Test
+  public void testSearchItemsByCategory() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      ItemsApi itemsApi = dataBuilder.getItemApi();
+
+      Category simpleCategory1 = dataBuilder.createSimpleCategory();
+      Category simpleCategory2 = dataBuilder.createSimpleCategory();
+
+      Item simpleItem = dataBuilder.createSimpleItem(simpleCategory1.getId());
+      
+      await().atMost(1, TimeUnit.MINUTES).until(() -> {
+        return itemsApi.listItems(Collections.emptyMap()).size() == 1;
+      });
+      
+      List<Item> items1Items = itemsApi.listItems(simpleCategory1.getId().toString(), null, null, null);
+      assertEquals(1, items1Items.size());
+      assertEquals(simpleItem.toString(), items1Items.get(0).toString());
+
+      List<Item> items2Items = itemsApi.listItems(simpleCategory2.getId().toString(), null, null, null);
+      assertEquals(0, items2Items.size());
+      
+      List<Item> items3Items = itemsApi.listItems(simpleCategory1.getId().toString() + "," + simpleCategory2.getId().toString(), null, null, null); 
+      assertEquals(1, items3Items.size());
+      assertEquals(simpleItem.toString(), items1Items.get(0).toString());
+
+      try {
+        itemsApi.listItems("not-uuid", null, null, null); 
+        fail("List with invalid uuid should return bad request");
+      } catch (FeignException e) {
+        assertEquals(400, e.status());
+      }
+
+      try {
+        itemsApi.listItems(UUID.randomUUID().toString(), null, null, null);
+        fail("List with incorrect uuid should return bad request");
+      } catch (FeignException e) {
+        assertEquals(400, e.status());
+      }
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+  
+  @Test
+  public void testSearchItemsLimit() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      ItemsApi itemsApi = dataBuilder.getItemApi();
+
+      Category simpleCategory = dataBuilder.createSimpleCategory();
+      dataBuilder.createSimpleItem(simpleCategory.getId());
+      dataBuilder.createSimpleItem(simpleCategory.getId());
+      dataBuilder.createSimpleItem(simpleCategory.getId());
+      dataBuilder.createSimpleItem(simpleCategory.getId());
+      dataBuilder.createSimpleItem(simpleCategory.getId());
+      
+      await().atMost(1, TimeUnit.MINUTES).until(() -> {
+        return itemsApi.listItems(Collections.emptyMap()).size() == 5;
+      });
+      
+      assertEquals(3, itemsApi.listItems(null, null, 2l, null).size());
+      assertEquals(2, itemsApi.listItems(null, null, 3l, 60l).size());
+      assertEquals(2, itemsApi.listItems(null, null, 1l, 2l).size());
+      assertEquals(2, itemsApi.listItems(null, null, 0l, 2l).size());
+      assertEquals(3, itemsApi.listItems(null, null, null, 3l).size());
     } finally {
       dataBuilder.clean();
     }
