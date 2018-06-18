@@ -1,9 +1,11 @@
 package fi.metatavu.dcfb.server.items;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.Map.Entry;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -64,8 +66,29 @@ public class LocalizedValueController {
    * @return value or null if not found
    */
   public String getValue(LocalizedEntry entry, Locale locale, LocalizedType type) {
-    LocalizedValue localizedValue = localizedValueDAO.findByEntryLocaleAndType(entry, locale, type); 
+    if (entry == null) {
+      return null;
+    }
+    
+    LocalizedValue localizedValue = localizedValueDAO.findByEntryLocaleAndType(entry, locale, type);
     return localizedValue != null ? localizedValue.getValue() : null;
+  }
+  
+  /**
+   * Returns values for entry and locale
+   * 
+   * @param entry entry
+   * @param locale locale
+   * @return values
+   */
+  public List<String> getValues(LocalizedEntry entry, Locale locale) {
+    if (entry == null) {
+      return Collections.emptyList();
+    }
+    
+    return localizedValueDAO.listByEntryAndLocale(entry, locale).stream()
+      .map(LocalizedValue::getValue)
+      .collect(Collectors.toList());
   }
   
   public List<LocalizedValue> listLocalizedValues(LocalizedEntry entry) {

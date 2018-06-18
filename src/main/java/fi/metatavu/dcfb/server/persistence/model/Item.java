@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
@@ -17,12 +18,15 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import fi.metatavu.dcfb.server.search.handlers.ItemIndexHandler;
+
 /**
  * JPA entity for storing items
  * 
  * @author Antti Leppä
  */
 @Entity
+@EntityListeners(ItemIndexHandler.class)
 @Cacheable(true)
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 public class Item {

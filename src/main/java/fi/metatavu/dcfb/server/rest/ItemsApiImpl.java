@@ -1,8 +1,11 @@
 package fi.metatavu.dcfb.server.rest;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Currency;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateful;
 import javax.enterprise.context.RequestScoped;
@@ -18,6 +21,7 @@ import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.translate.ItemTranslator;
+import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 
 /**
  * Items REST Service implementation
@@ -109,9 +113,29 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
   @Override
   public Response listItems(String categoryIdsParam, String search, Long firstResult, Long maxResults) throws Exception {
-    // TODO: implement
-    
-    return null;
+    List<Category> categories = null;
+
+    if (categoryIdsParam != null) {
+      try {      
+        categories = Arrays.stream(StringUtils.split(categoryIdsParam, ','))
+          .map(UUID::fromString)
+          .map(categoryId -> {
+            Category category = categoryController.findCategory(categoryId);
+            if (category == null) {
+              throw new IllegalArgumentException(String.format("Could not find category %s", categoryId));
+            }
+            
+            return category;
+          })
+          .collect(Collectors.toList());
+      } catch (IllegalArgumentException e) {
+        return createBadRequest(e.getMessage());
+      }
+    }
+
+    SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(categories, search, firstResult, maxResults);
+
+    return createOk(itemTranslator.translateItems(searchResult.getResult()), searchResult.getTotalHits());
   }
 
   @Override

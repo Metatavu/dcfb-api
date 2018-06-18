@@ -158,7 +158,22 @@ public abstract class AbstractApi {
       .entity(entity)
       .build();
   }
-
+  
+  /**
+   * Constructs ok response
+   * 
+   * @param entity payload
+   * @param totalHits total hits
+   * @return response
+   */
+  protected Response createOk(Object entity, Long totalHits) {
+    return Response
+      .status(Response.Status.OK)
+      .entity(entity)
+      .header("Total-Results", totalHits)
+      .build();
+  }
+  
   /**
    * Constructs no content response
    * 
