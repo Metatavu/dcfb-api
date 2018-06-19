@@ -131,6 +131,7 @@ public abstract class AbstractApi {
    * @return list of enums
    * @throws IllegalArgumentException if parameters contain invalid values
    */
+  @SuppressWarnings ("squid:S1168")
   protected <T extends Enum<T>> List<T> getEnumListParameter(Class<T> enumType, List<String> parameter) {
     if (parameter == null) {
       return null;

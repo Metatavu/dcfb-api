@@ -45,9 +45,9 @@ public class ItemSearcher extends AbstractSearcher {
       if (categoryIds != null) {
         BoolQueryBuilder matchOrQuery = boolQuery();
 
-        categoryIds.forEach(categoryId -> {
-          matchOrQuery.should(matchQuery(IndexableItem.CATEGORY_ID_FIELD, categoryId.toString()));
-        });
+        categoryIds.forEach(categoryId -> 
+          matchOrQuery.should(matchQuery(IndexableItem.CATEGORY_ID_FIELD, categoryId.toString()))
+        );
 
         query.must(matchOrQuery);
       }
