@@ -51,6 +51,15 @@
       <column name="slug" type="varchar(255)">
         <constraints nullable="false"/>
       </column>
+      <column name="createdat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="modifiedat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="lastmodifier" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
     </createTable>
     
     <createTable tableName="item">

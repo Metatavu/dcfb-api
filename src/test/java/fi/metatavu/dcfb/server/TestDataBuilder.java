@@ -70,7 +70,7 @@ public class TestDataBuilder {
    * @return initialized categories API
    * @throws IOException
    */
-  public CategoriesApi getCategoryApi() throws IOException {
+  public CategoriesApi getCategoriesApi() throws IOException {
     return test.getCategoriesApi(getAccessToken());
   }
   
@@ -80,7 +80,7 @@ public class TestDataBuilder {
    * @return initialized categories API
    * @throws IOException
    */
-  public CategoriesApi getAdminCategoryApi() throws IOException {
+  public CategoriesApi getAdminCategoriesApi() throws IOException {
     return test.getCategoriesApi(getAdminToken());
   }
   
@@ -92,9 +92,7 @@ public class TestDataBuilder {
    * @throws IOException
    */
   public fi.metatavu.dcfb.client.Item createSimpleItem(UUID categoryId) throws IOException {
-    Price price = new Price();
-    price.setCurrency("EUR");
-    price.setPrice("10.00");
+    Price price = createSimplePrice();
     
     fi.metatavu.dcfb.client.Item payload = new fi.metatavu.dcfb.client.Item();
     payload.setAmount(15l);
@@ -106,7 +104,7 @@ public class TestDataBuilder {
     payload.setUnit("Fake");
     payload.setUnitPrice(price);
     return createItem(payload);
-  }  
+  }
 
   /**
    * Creates an item
@@ -141,7 +139,7 @@ public class TestDataBuilder {
    * @throws IOException
    */
   public Category createCategory(Category payload) throws IOException {
-    Category result = getAdminCategoryApi().createCategory(payload);
+    Category result = getAdminCategoriesApi().createCategory(payload);
     this.categories.add(0, result);
     return result;
   }
@@ -174,7 +172,7 @@ public class TestDataBuilder {
    */
   public void clean() throws IOException {
     ItemsApi itemApi = getAdminItemApi();
-    CategoriesApi categoriesApi = getAdminCategoryApi();
+    CategoriesApi categoriesApi = getAdminCategoriesApi();
     
     items.stream()
       .map(fi.metatavu.dcfb.client.Item::getId)
@@ -185,6 +183,18 @@ public class TestDataBuilder {
       .forEach(categoriesApi::deleteCategory);
   }
   
+  /**
+   * Creates simple price
+   * 
+   * @return simple price
+   */
+  public Price createSimplePrice() {
+	  Price price = new Price();
+    price.setCurrency("EUR");
+    price.setPrice("10.00");
+	  return price;
+  }  
+
   /**
    * Creates LocalizedValue instance for single locale and type
    * 

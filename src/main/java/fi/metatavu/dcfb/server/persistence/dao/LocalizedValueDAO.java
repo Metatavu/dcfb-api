@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -82,7 +83,35 @@ public class LocalizedValueDAO extends AbstractDAO<LocalizedValue> {
       )    
     );
     
-    return getSingleResult(entityManager.createQuery(criteria));
+    TypedQuery<LocalizedValue> query = entityManager.createQuery(criteria);
+    
+    return getSingleResult(query);
+  }
+
+  /**
+   * Listvalue by entry and locale
+   * 
+   * @param entry entry
+   * @param locale locale
+   * @return value
+   */
+  public List<LocalizedValue> listByEntryAndLocale(LocalizedEntry entry, Locale locale) {
+    EntityManager entityManager = getEntityManager();
+
+    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<LocalizedValue> criteria = criteriaBuilder.createQuery(LocalizedValue.class);
+    Root<LocalizedValue> root = criteria.from(LocalizedValue.class);
+    criteria.select(root);
+    criteria.where(
+      criteriaBuilder.and(
+        criteriaBuilder.equal(root.get(LocalizedValue_.entry), entry),
+        criteriaBuilder.equal(root.get(LocalizedValue_.locale), locale)    
+      )    
+    );
+    
+    TypedQuery<LocalizedValue> query = entityManager.createQuery(criteria);
+    
+    return query.getResultList();
   }
 
   /**

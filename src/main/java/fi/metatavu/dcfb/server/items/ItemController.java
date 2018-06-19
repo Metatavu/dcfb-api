@@ -3,7 +3,9 @@ package fi.metatavu.dcfb.server.items;
 import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -14,15 +16,25 @@ import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.Item;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
+import fi.metatavu.dcfb.server.rest.model.ItemListSort;
+import fi.metatavu.dcfb.server.search.handlers.ItemIndexHandler;
+import fi.metatavu.dcfb.server.search.searchers.ItemSearcher;
+import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 
 @ApplicationScoped
 public class ItemController {
+
+  @Inject
+  private ItemSearcher itemSearcher;
+
+  @Inject
+  private ItemIndexHandler itemIndexHandler;
   
   @Inject
   private ItemDAO itemDAO;
 
   @Inject
-  private ItemImageDAO itemImageDAO; 
+  private ItemImageDAO itemImageDAO;
   
   /**
    * Create item
@@ -92,6 +104,7 @@ public class ItemController {
   public void deleteItem(Item item) {
     deleteItemImages(item);
     itemDAO.delete(item);
+    itemIndexHandler.deleteIndexable(item.getId());
   }
   
   /**
@@ -123,6 +136,30 @@ public class ItemController {
    */
   public void deleteItemImages(Item item) {
     listItemImages(item).stream().forEach(itemImageDAO::delete);
+  }
+
+  /**
+   * Searches items
+   * 
+   * @param categories filter by categories. Ignored if null
+   * @param search Search by free-text. Ignored if null
+   * @param firstResult result offset
+   * @param maxResults maximum number of results returned
+   * @return search result
+   */
+  public SearchResult<Item> searchItems(List<Category> categories, String search, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
+    List<UUID> categoryIds = categories == null ? null : categories.stream()
+      .map(Category::getId)
+      .collect(Collectors.toList());
+
+    SearchResult<UUID> searchResult = itemSearcher.searchItems(categoryIds, search, firstResult, maxResults, sorts);
+
+    List<Item> items = searchResult.getResult().stream()
+      .map(itemDAO::findById)
+      .filter(Objects::nonNull)
+      .collect(Collectors.toList());
+
+    return new SearchResult<>(items, searchResult.getTotalHits());
   }
   
 }

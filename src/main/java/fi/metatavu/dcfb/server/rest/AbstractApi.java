@@ -2,6 +2,7 @@ package fi.metatavu.dcfb.server.rest;
 
 import java.security.Principal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -123,6 +124,31 @@ public abstract class AbstractApi {
   }
 
   /**
+   * Parses CSV enum parameter from string list into enum list
+   * 
+   * @param enumType target enum class
+   * @param parameters string values
+   * @return list of enums
+   * @throws IllegalArgumentException if parameters contain invalid values
+   */
+  @SuppressWarnings ("squid:S1168")
+  protected <T extends Enum<T>> List<T> getEnumListParameter(Class<T> enumType, List<String> parameter) {
+    if (parameter == null) {
+      return null;
+    }
+    
+    List<String> merged = new ArrayList<>(parameter.size());
+    
+    parameter.stream()
+      .filter(StringUtils::isNoneEmpty)
+      .forEach(filter -> merged.addAll(Arrays.asList(StringUtils.split(filter, ','))));
+
+    return merged.stream()
+      .map(name -> Enum.valueOf(enumType, name))
+      .collect(Collectors.toList());
+  }
+
+  /**
    * Return current HttpServletRequest
    * 
    * @return current http servlet request
@@ -158,7 +184,22 @@ public abstract class AbstractApi {
       .entity(entity)
       .build();
   }
-
+  
+  /**
+   * Constructs ok response
+   * 
+   * @param entity payload
+   * @param totalHits total hits
+   * @return response
+   */
+  protected Response createOk(Object entity, Long totalHits) {
+    return Response
+      .status(Response.Status.OK)
+      .entity(entity)
+      .header("Total-Results", totalHits)
+      .build();
+  }
+  
   /**
    * Constructs no content response
    * 

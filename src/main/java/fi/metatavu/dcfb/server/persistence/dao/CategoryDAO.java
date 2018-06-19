@@ -18,14 +18,17 @@ public class CategoryDAO extends AbstractDAO<Category> {
   * @param parent parent
   * @param title title
   * @param slug slug
+  * @param lastModifier last modifier
   * @return created category
   */
-  public Category create(UUID id, Category parent, LocalizedEntry title, String slug) {
+  public Category create(UUID id, Category parent, LocalizedEntry title, String slug, UUID lastModifier) {
     Category category = new Category();
     category.setId(id);
     category.setParent(parent);
     category.setTitle(title);
     category.setSlug(slug);
+    category.setLastModifier(lastModifier);
+
     return persist(category);
   }
 
@@ -33,10 +36,12 @@ public class CategoryDAO extends AbstractDAO<Category> {
   * Updates parent
   *
   * @param parent parent
+  * @param lastModifier last modifier
   * @return updated category
   */
-  public Category updateParent(Category category, Category parent) {
+  public Category updateParent(Category category, Category parent, UUID lastModifier) {
     category.setParent(parent);
+    category.setLastModifier(lastModifier);
     return persist(category);
   }
 
@@ -44,10 +49,12 @@ public class CategoryDAO extends AbstractDAO<Category> {
   * Updates title
   *
   * @param title title
+  * @param lastModifier last modifier
   * @return updated category
   */
-  public Category updateTitle(Category category, LocalizedEntry title) {
+  public Category updateTitle(Category category, LocalizedEntry title, UUID lastModifier) {
     category.setTitle(title);
+    category.setLastModifier(lastModifier);
     return persist(category);
   }
 
@@ -55,10 +62,12 @@ public class CategoryDAO extends AbstractDAO<Category> {
   * Updates slug
   *
   * @param slug slug
+  * @param lastModifier last modifier
   * @return updated category
   */
-  public Category updateSlug(Category category, String slug) {
+  public Category updateSlug(Category category, String slug, UUID lastModifier) {
     category.setSlug(slug);
+    category.setLastModifier(lastModifier);
     return persist(category);
   }
 
