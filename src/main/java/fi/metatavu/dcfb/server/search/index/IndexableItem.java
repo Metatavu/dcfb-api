@@ -13,7 +13,9 @@ public class IndexableItem extends AbstractIndexable {
 
   public static final String TYPE = "item";
   public static final String CATEGORY_ID_FIELD = "categoryId";
-
+  public static final String CREATED_AT_FIELD = "createdAt";
+  public static final String MODIFIED_AT_FIELD = "modifiedAt";
+  
   @Field(analyzer = "finnish")
   private List<String> titleFi;
 

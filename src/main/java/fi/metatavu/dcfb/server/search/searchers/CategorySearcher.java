@@ -17,39 +17,33 @@ import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
-import fi.metatavu.dcfb.server.rest.model.ItemListSort;
-import fi.metatavu.dcfb.server.search.index.IndexableItem;
+import fi.metatavu.dcfb.server.rest.model.CategoryListSort;
+import fi.metatavu.dcfb.server.search.index.IndexableCategory;
 
 /**
- * Searcher for items
+ * Searcher for categories
  */
 @ApplicationScoped
-public class ItemSearcher extends AbstractSearcher {
+public class CategorySearcher extends AbstractSearcher {
 
   /**
-   * Searches item and returns result as UUIDs
+   * Searches category and returns result as UUIDs
    * 
-   * @param categoryIds category ids that must exist on the result. Omitted if null
+   * @param parentId parent id of result categories. Omitted if null
    * @param search free text search that must match the result. Omitted if null
    * @param firstResult first result. Defaults to 0
    * @param maxResults max results. Defaults to 20
    * @return search result 
    */
-  public SearchResult<UUID> searchItems(List<UUID> categoryIds, String search, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
-    boolean matchAll = categoryIds == null && search == null;
+  public SearchResult<UUID> searchCategories(UUID parentId, String search, Long firstResult, Long maxResults, List<CategoryListSort> sorts) {
+    boolean matchAll = parentId == null && search == null;
     if (matchAll) {
       return executeSearch(matchAllQuery(), createSorts(sorts), firstResult, maxResults);
     } else {    
       BoolQueryBuilder query = boolQuery();
       
-      if (categoryIds != null) {
-        BoolQueryBuilder matchOrQuery = boolQuery();
-
-        categoryIds.forEach(categoryId -> {
-          matchOrQuery.should(matchQuery(IndexableItem.CATEGORY_ID_FIELD, categoryId.toString()));
-        });
-
-        query.must(matchOrQuery);
+      if (parentId != null) {
+        query.must(matchQuery(IndexableCategory.PARENT_ID_FIELD, parentId.toString()));
       }
 
       if (search != null) {
@@ -62,30 +56,30 @@ public class ItemSearcher extends AbstractSearcher {
 
   @Override
   public String getType() {
-    return IndexableItem.TYPE;
+    return IndexableCategory.TYPE;
   }
-
+   
   /**
    * Creates sorts. Defaults to created at descending
    * 
    * @param sorts list of sorts
    * @return created sort builders
    */
-  private List<SortBuilder<?>> createSorts(List<ItemListSort> sorts) {
+  private List<SortBuilder<?>> createSorts(List<CategoryListSort> sorts) {
     if (sorts == null) {
-      return Collections.singletonList(SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.DESC));
+      return Collections.singletonList(SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.DESC));
     }
 
 	  return sorts.stream().map(sort -> {
       switch (sort) {
         case CREATED_AT_DESC:
-          return SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.DESC);
+          return SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.DESC);
         case CREATED_AT_ASC:
-          return SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.ASC);
+          return SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.ASC);
         case MODIFIED_AT_DESC:
-          return SortBuilders.fieldSort(IndexableItem.MODIFIED_AT_FIELD).order(SortOrder.DESC);
+          return SortBuilders.fieldSort(IndexableCategory.MODIFIED_AT_FIELD).order(SortOrder.DESC);
         case MODIFIED_AT_ASC:
-          return SortBuilders.fieldSort(IndexableItem.MODIFIED_AT_FIELD).order(SortOrder.ASC);
+          return SortBuilders.fieldSort(IndexableCategory.MODIFIED_AT_FIELD).order(SortOrder.ASC);
         case SCORE_DESC:
           return SortBuilders.scoreSort().order(SortOrder.DESC);
         case SCORE_ASC:
@@ -96,5 +90,4 @@ public class ItemSearcher extends AbstractSearcher {
       return null;
     }).collect(Collectors.toList());
   }
-   
 }

@@ -20,6 +20,7 @@ import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
+import fi.metatavu.dcfb.server.rest.model.ItemListSort;
 import fi.metatavu.dcfb.server.rest.translate.ItemTranslator;
 import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 
@@ -112,7 +113,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   }
 
   @Override
-  public Response listItems(String categoryIdsParam, String search, Long firstResult, Long maxResults) throws Exception {
+  public Response listItems(String categoryIdsParam, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
     List<Category> categories = null;
 
     if (categoryIdsParam != null) {
@@ -133,7 +134,14 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       }
     }
 
-    SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(categories, search, firstResult, maxResults);
+    List<ItemListSort> sorts = null;
+    try {
+      sorts = getEnumListParameter(ItemListSort.class, sort);
+    } catch (IllegalArgumentException e) {
+      return createBadRequest(e.getMessage());
+    }
+
+    SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(categories, search, firstResult, maxResults, sorts);
 
     return createOk(itemTranslator.translateItems(searchResult.getResult()), searchResult.getTotalHits());
   }

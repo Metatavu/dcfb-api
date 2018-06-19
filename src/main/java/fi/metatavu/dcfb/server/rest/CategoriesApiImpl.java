@@ -13,7 +13,9 @@ import org.apache.commons.lang3.StringUtils;
 import fi.metatavu.dcfb.server.items.CategoryController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
+import fi.metatavu.dcfb.server.rest.model.CategoryListSort;
 import fi.metatavu.dcfb.server.rest.translate.CategoryTranslator;
+import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 
 /**
  * Items REST Service implementation
@@ -34,6 +36,7 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
   public Response createCategory(fi.metatavu.dcfb.server.rest.model.Category payload) throws Exception {
     Category parent = payload.getParentId() != null ? categoryController.findCategory(payload.getParentId()) : null;
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
+    UUID lastModifier = getLoggerUserId();
     
     if (parent == null && payload.getParentId() != null) {
       return createBadRequest("Invalid parent id");
@@ -41,7 +44,7 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
     
     LocalizedEntry title = createLocalizedEntry(payload.getTitle());
     
-    return createOk(categoryTranslator.translateCategory(categoryController.createCategory(parent, title, slug)));
+    return createOk(categoryTranslator.translateCategory(categoryController.createCategory(parent, title, slug, lastModifier)));
   }
 
   @Override
@@ -67,16 +70,30 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
   }
 
   @Override
-  public Response listCategories(Long firstResult, Long maxResults) throws Exception {
-    List<Category> categories = categoryController.listCategories(firstResult, maxResults);
-    return createOk(categoryTranslator.translateCategories(categories));
+  public Response listCategories(UUID parentId, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
+    Category parent = parentId != null ? categoryController.findCategory(parentId) : null;
+    if (parent == null && parentId != null) {
+      return createBadRequest(String.format("Category %s not found", parentId));
+    }
+
+    List<CategoryListSort> sorts = null;
+    try {
+      sorts = getEnumListParameter(CategoryListSort.class, sort);
+    } catch (IllegalArgumentException e) {
+      return createBadRequest(e.getMessage());
+    }
+
+    SearchResult<Category> searchResult = categoryController.searchCategories(parent, search, firstResult, maxResults, sorts);
+   
+    return createOk(categoryTranslator.translateCategories(searchResult.getResult()), searchResult.getTotalHits());
   }
 
   @Override
   public Response updateCategory(UUID categoryId, fi.metatavu.dcfb.server.rest.model.Category payload) throws Exception {
     Category parent = payload.getParentId() != null ? categoryController.findCategory(payload.getParentId()) : null;
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
-    
+    UUID lastModifier = getLoggerUserId();
+
     if (parent == null && payload.getParentId() != null) {
       return createBadRequest("Invalid parent id");
     }
@@ -88,7 +105,7 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
 
     LocalizedEntry title = updateLocalizedEntry(category.getTitle(), payload.getTitle());
     
-    return createOk(categoryTranslator.translateCategory(categoryController.updateCategory(category, parent, title, slug)));
+    return createOk(categoryTranslator.translateCategory(categoryController.updateCategory(category, parent, title, slug, lastModifier)));
   }
 
 

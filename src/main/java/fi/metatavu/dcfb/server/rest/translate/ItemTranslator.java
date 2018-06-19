@@ -37,7 +37,7 @@ public class ItemTranslator extends AbstractTranslator {
     
     Category category = item.getCategory();
     Price unitPrice = new Price();
-    unitPrice.setCurrency(item.getPriceCurrency().getCurrencyCode());
+    unitPrice.setCurrency(item.getPriceCurrency() != null ? item.getPriceCurrency().getCurrencyCode() : null);
     unitPrice.setPrice(item.getUnitPrice());
     
     Item result = new Item();

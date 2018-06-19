@@ -12,6 +12,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortBuilder;
 
 import fi.metatavu.dcfb.server.search.io.IndexReader;
 
@@ -40,12 +41,14 @@ public abstract class AbstractSearcher {
    * @param maxResults max results
    * @return result
    */
-  protected SearchResult<UUID> executeSearch(QueryBuilder query, Long firstResult, Long maxResults) {
+  protected SearchResult<UUID> executeSearch(QueryBuilder query, List<SortBuilder<?>> sorts, Long firstResult, Long maxResults) {
     SearchRequestBuilder requestBuilder = indexReader
       .requestBuilder(getType())
       .setQuery(query)
       .setFrom(firstResult != null ? firstResult.intValue() : 0)
       .setSize(maxResults != null ? maxResults.intValue() : DEFALT_MAX_RESULTS);
+
+    sorts.stream().forEach(requestBuilder::addSort);
     
     SearchResponse response = indexReader.executeSearch(requestBuilder);
     SearchHits searchHits = response.getHits();
