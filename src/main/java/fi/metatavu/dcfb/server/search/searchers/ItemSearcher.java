@@ -90,11 +90,15 @@ public class ItemSearcher extends AbstractSearcher {
       }
 
       return null;
-    }).collect(Collectors.toList());
+    })
+    .filter(Objects::nonNull)
+    .collect(Collectors.toList());
 
-    if (sorts == null) {
-      return Collections.singletonList(SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.DESC));
-    }    
+    if (result.isEmpty()) {
+      return Collections.singletonList(SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.DESC));      
+    }
+
+    return result;  
   }
    
 }
