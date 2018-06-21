@@ -11,6 +11,7 @@ import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
+import fi.metatavu.dcfb.server.rest.model.Meta;
 import fi.metatavu.dcfb.server.rest.model.Price;
 
 /**
@@ -53,7 +54,13 @@ public class ItemTranslator extends AbstractTranslator {
     result.setTitle(translatelocalizedValue(item.getTitle()));
     result.setUnit(item.getUnit());
     result.setUnitPrice(unitPrice);
-    
+    result.setMeta(itemController.listMetas(item).stream().map(itemMeta -> {
+      Meta meta = new Meta();
+      meta.setKey(itemMeta.getKey());
+      meta.setValue(itemMeta.getValue());
+      return meta;
+    }).collect(Collectors.toList()));
+
     return result;
   }
   

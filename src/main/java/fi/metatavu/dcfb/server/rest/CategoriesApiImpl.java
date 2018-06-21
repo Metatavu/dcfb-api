@@ -1,6 +1,8 @@
 package fi.metatavu.dcfb.server.rest;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.ejb.Stateful;
@@ -14,6 +16,7 @@ import fi.metatavu.dcfb.server.items.CategoryController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.rest.model.CategoryListSort;
+import fi.metatavu.dcfb.server.rest.model.Meta;
 import fi.metatavu.dcfb.server.rest.translate.CategoryTranslator;
 import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 
@@ -37,14 +40,14 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
     Category parent = payload.getParentId() != null ? categoryController.findCategory(payload.getParentId()) : null;
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
     UUID lastModifier = getLoggerUserId();
-    
+
     if (parent == null && payload.getParentId() != null) {
       return createBadRequest("Invalid parent id");
     }
     
     LocalizedEntry title = createLocalizedEntry(payload.getTitle());
     
-    return createOk(categoryTranslator.translateCategory(categoryController.createCategory(parent, title, slug, lastModifier)));
+    return createOk(categoryTranslator.translateCategory(setCategoryMetas(categoryController.createCategory(parent, title, slug, lastModifier), payload.getMeta())));
   }
 
   @Override
@@ -105,7 +108,32 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
 
     LocalizedEntry title = updateLocalizedEntry(category.getTitle(), payload.getTitle());
     
-    return createOk(categoryTranslator.translateCategory(categoryController.updateCategory(category, parent, title, slug, lastModifier)));
+    return createOk(categoryTranslator.translateCategory(setCategoryMetas(categoryController.updateCategory(category, parent, title, slug, lastModifier), payload.getMeta())));
+  }
+
+  /**
+   * Sets meta values for a category
+   * 
+   * @param category
+   * @param metas
+   * @return category
+   */
+  private Category setCategoryMetas(Category category, List<Meta> metas) {
+    if (metas == null) {
+      return category;
+    }
+
+    Set<String> usedKeys = new HashSet<>(metas.size());
+
+    for (Meta meta : metas) {
+      String key = meta.getKey();
+      usedKeys.add(key);
+      categoryController.setMeta(category, key, meta.getValue());  
+    }
+
+    categoryController.deleteMetasNotIn(category, usedKeys);
+
+    return category;
   }
 
 

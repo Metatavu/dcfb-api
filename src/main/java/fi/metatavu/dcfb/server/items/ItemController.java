@@ -4,15 +4,18 @@ import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import fi.metatavu.dcfb.server.persistence.dao.ItemMetaDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemImageDAO;
 import fi.metatavu.dcfb.server.persistence.model.Category;
+import fi.metatavu.dcfb.server.persistence.model.ItemMeta;
 import fi.metatavu.dcfb.server.persistence.model.Item;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
@@ -35,6 +38,9 @@ public class ItemController {
 
   @Inject
   private ItemImageDAO itemImageDAO;
+
+  @Inject
+  private ItemMetaDAO itemMetaDAO;
   
   /**
    * Create item
@@ -102,6 +108,7 @@ public class ItemController {
    * @param item item to be deleted
    */
   public void deleteItem(Item item) {
+    itemMetaDAO.listByItem(item).stream().forEach(itemMetaDAO::delete);
     deleteItemImages(item);
     itemDAO.delete(item);
     itemIndexHandler.deleteIndexable(item.getId());
@@ -161,5 +168,52 @@ public class ItemController {
 
     return new SearchResult<>(items, searchResult.getTotalHits());
   }
+
+  /**
+   * List metas by item
+   * 
+   * @param item item
+   * @return item metas
+   */
+  public List<ItemMeta> listMetas(Item item) {
+    return itemMetaDAO.listByItem(item); 
+  }
+
+  /**
+   * Sets meta value for an item
+   * 
+   * @param item item
+   * @param key key
+   * @param value value
+   * @return created or updatedmeta entity. Null if given value is null
+   */
+  public ItemMeta setMeta(Item item, String key, String value) {
+    ItemMeta itemMeta = itemMetaDAO.findByItemAndKey(item, key);
+    if (itemMeta == null) {
+      if (value == null) {
+        return null;
+      }
+
+      return itemMetaDAO.create(UUID.randomUUID(), item, key, value);
+    } else {
+      if (value == null) {
+        itemMetaDAO.delete(itemMeta);
+        return null;
+      }
+
+      return itemMetaDAO.updateValue(itemMeta, value);
+    }
+  }
+
+  /**
+   * Deletes category metas with keys not in set
+   * 
+   * @param category
+   * @param keys
+   */
+  public void deleteMetasNotIn(Item item, Set<String> keys) {
+    itemMetaDAO.listByKeyNotIn(item, keys).stream().forEach(itemMetaDAO::delete);
+  }
+  
   
 }

@@ -14,6 +14,7 @@ import fi.metatavu.dcfb.client.Category;
 import fi.metatavu.dcfb.client.Item;
 import fi.metatavu.dcfb.client.ItemsApi;
 import fi.metatavu.dcfb.client.LocalizedValue;
+import fi.metatavu.dcfb.client.Meta;
 import fi.metatavu.dcfb.client.Price;
 
 /**
@@ -219,6 +220,20 @@ public class TestDataBuilder {
    */
   public List<LocalizedValue> createLocalized(String value) {
     return createLocalized(Locale.ENGLISH, "SINGLE", value);
+  }
+
+  /**
+   * Creates meta value
+   * 
+   * @param key key
+   * @param value value
+   * @return meta
+   */
+  public Meta createMeta(String key, String value) {
+    Meta result = new Meta();
+    result.setKey(key);
+    result.setValue(value);
+    return result;
   }
   
   /**

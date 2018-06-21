@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
+import fi.metatavu.dcfb.server.items.CategoryController;
 import fi.metatavu.dcfb.server.rest.model.Category;
+import fi.metatavu.dcfb.server.rest.model.Meta;
 
 /**
  * Translator for categories
@@ -14,6 +17,9 @@ import fi.metatavu.dcfb.server.rest.model.Category;
  */
 @ApplicationScoped
 public class CategoryTranslator extends AbstractTranslator {
+
+  @Inject
+  private CategoryController categoryController;
 
   /**
    * Translates JPA category object into REST category object
@@ -31,7 +37,13 @@ public class CategoryTranslator extends AbstractTranslator {
     result.setParentId(category.getParent() != null ? category.getParent().getId() : null);
     result.setSlug(category.getSlug());
     result.setTitle(translatelocalizedValue(category.getTitle()));
-    
+    result.setMeta(categoryController.listMetas(category).stream().map(categoryMeta -> {
+      Meta meta = new Meta();
+      meta.setKey(categoryMeta.getKey());
+      meta.setValue(categoryMeta.getValue());
+      return meta;
+    }).collect(Collectors.toList()));
+
     return result;
   }
 

@@ -3,7 +3,9 @@ package fi.metatavu.dcfb.server.rest;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Currency;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,7 @@ import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
+import fi.metatavu.dcfb.server.rest.model.Meta;
 import fi.metatavu.dcfb.server.rest.translate.ItemTranslator;
 import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 
@@ -86,6 +89,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         modifier);
 
     createImages(payload, item);
+    setItemMetas(item, payload.getMeta());
     
     return createOk(itemTranslator.translateItem(item));
   }
@@ -188,6 +192,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     
     itemController.deleteItemImages(item);
     createImages(payload, item);
+    setItemMetas(item, payload.getMeta());
     
     return createOk(itemTranslator.translateItem(item));
   }
@@ -212,6 +217,31 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
    */
   private void createImage(fi.metatavu.dcfb.server.persistence.model.Item item, Image image) {
     itemController.createImageItem(item, image.getType(), image.getUrl());
+  }
+
+  /**
+   * Sets meta values for a item
+   * 
+   * @param item
+   * @param metas
+   * @return item
+   */
+  private fi.metatavu.dcfb.server.persistence.model.Item setItemMetas(fi.metatavu.dcfb.server.persistence.model.Item item, List<Meta> metas) {
+    if (metas == null) {
+      return item;
+    }
+
+    Set<String> usedKeys = new HashSet<>(metas.size());
+
+    for (Meta meta : metas) {
+      String key = meta.getKey();
+      usedKeys.add(key);
+      itemController.setMeta(item, key, meta.getValue());  
+    }
+
+    itemController.deleteMetasNotIn(item, usedKeys);
+
+    return item;
   }
 
 }

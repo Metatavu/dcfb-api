@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -55,8 +56,13 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       item.setUnit("Unit of Fake");
       item.setUnitPrice(price);
       item.setImages(Arrays.asList(image));
-      
+      item.setMeta(Arrays.asList(
+        dataBuilder.createMeta("test-1", "test value 1"),
+        dataBuilder.createMeta("test-2", "test value 2")
+      ));
+
       Item createdItem = dataBuilder.createItem(item);
+      Map<String, String> metaMap = mapMetas(createdItem.getMeta());
       
       assertNotNull(createdItem);
       assertNotNull(createdItem.getId());
@@ -78,6 +84,9 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(1, createdItem.getImages().size());
       assertEquals("image/jpeg", createdItem.getImages().get(0).getType());
       assertEquals("https://www.example.com/jpeg.jpg", createdItem.getImages().get(0).getUrl());
+      assertEquals(2, createdItem.getMeta().size());
+      assertEquals("test value 1", metaMap.get("test-1"));
+      assertEquals("test value 2", metaMap.get("test-2"));
       
     } finally {
       dataBuilder.clean();
@@ -280,8 +289,27 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       Image image = new Image();
       image.setType("image/png");
       image.setUrl("https://www.example.com/png.png");
+      
+      fi.metatavu.dcfb.client.Item payload = new fi.metatavu.dcfb.client.Item();
+      payload.setAmount(15l);
+      payload.setCategoryId(simpleCategory.getId());
+      payload.setDescription(dataBuilder.createLocalized("desc"));
+      payload.setExpiresAt(null);
+      payload.setImages(Collections.emptyList());
+      payload.setTitle(dataBuilder.createLocalized("simple item"));
+      payload.setUnit("Fake");
+      payload.setUnitPrice(price);
+      payload.setMeta(Arrays.asList(
+        dataBuilder.createMeta("test-1", "test value 1"),
+        dataBuilder.createMeta("test-2", "test value 2")
+      ));
 
-      Item item = dataBuilder.createSimpleItem(simpleCategory.getId());
+      Item item = dataBuilder.createItem(payload);
+
+      Map<String, String> metaMap = mapMetas(item.getMeta());
+      assertEquals(2, item.getMeta().size());
+      assertEquals("test value 1", metaMap.get("test-1"));
+      assertEquals("test value 2", metaMap.get("test-2"));
      
       item.setAmount(25l);
       item.setCategoryId(simpleCategory.getId());
@@ -292,8 +320,14 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       item.setUnit("Unit of Fake");
       item.setUnitPrice(price);
       item.setImages(Arrays.asList(image));
-      
+      item.setMeta(Arrays.asList(
+        dataBuilder.createMeta("test-1", "test value 1"),
+        dataBuilder.createMeta("test-3", "test value 3"),
+        dataBuilder.createMeta("test-4", "test value 4")
+      ));
+
       Item updateItem = itemApi.updateItem(item.getId(), item);
+      Map<String, String> updatedMetaMap = mapMetas(updateItem.getMeta());
 
       assertNotNull(updateItem);
       assertNotNull(updateItem.getId());
@@ -316,7 +350,10 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(1, updateItem.getImages().size());
       assertEquals("image/png", updateItem.getImages().get(0).getType());
       assertEquals("https://www.example.com/png.png", updateItem.getImages().get(0).getUrl());
-      
+      assertEquals(3, updateItem.getMeta().size());
+      assertEquals("test value 1", updatedMetaMap.get("test-1"));
+      assertEquals("test value 3", updatedMetaMap.get("test-3"));
+      assertEquals("test value 4", updatedMetaMap.get("test-4"));
     } finally {
       dataBuilder.clean();
     }

@@ -117,5 +117,40 @@
       </column>
     </createTable>
   </changeSet>
+
+  <changeSet id="metas" author="antti.leppa">
+    <createTable tableName="categorymeta">
+      <column name="id" type="uuid">
+        <constraints unique="true" nullable="false" primaryKey="true"/>
+      </column>
+      <column name="category_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_CATEGORYMETA_CATEGORY_ID" referencedTableName="category" referencedColumnNames="id"/>
+      </column>
+      <column name="key" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="value" type="longtext">
+        <constraints nullable="false"/>
+      </column>      
+    </createTable>
+
+    <createTable tableName="itemmeta">
+      <column name="id" type="uuid">
+        <constraints unique="true" nullable="false" primaryKey="true"/>
+      </column>
+      <column name="item_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEMMETA_ITEM_ID" referencedTableName="item" referencedColumnNames="id"/>
+      </column>
+      <column name="key" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="value" type="longtext">
+        <constraints nullable="false"/>
+      </column>      
+    </createTable>
+
+    <addUniqueConstraint constraintName="UN_CATEGORYMETA_CATEGORY_ID_KEY" columnNames="category_id,key" tableName="categorymeta"/>
+    <addUniqueConstraint constraintName="UN_ITEMMETA_ITEM_ID_KEY" columnNames="item_id,key" tableName="itemmeta"/>
+  </changeSet>
     
 </databaseChangeLog>
