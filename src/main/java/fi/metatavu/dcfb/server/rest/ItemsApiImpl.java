@@ -62,7 +62,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     
     Currency priceCurrency = null;
     try {
-      priceCurrency = payload.getUnitPrice() != null ? Currency.getInstance(payload.getUnitPrice().getCurrency()) : null;
+      priceCurrency = Currency.getInstance(payload.getUnitPrice().getCurrency());
     } catch (IllegalArgumentException e) {
       return createBadRequest(String.format("Invalid currency %s", e.getMessage()));
     }
@@ -71,7 +71,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     LocalizedEntry description = createLocalizedEntry(payload.getDescription());
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
     OffsetDateTime expiresAt = payload.getExpiresAt();
-    String unitPrice = payload.getUnitPrice() != null ? payload.getUnitPrice().getPrice() : null;
+    String unitPrice = payload.getUnitPrice().getPrice();
     Long amount = payload.getAmount();
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
@@ -161,7 +161,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     LocalizedEntry description = updateLocalizedEntry(item.getDescription(), payload.getDescription());
     String slug = payload.getSlug();
     OffsetDateTime expiresAt = payload.getExpiresAt();
-    String unitPrice = payload.getUnitPrice() != null ? payload.getUnitPrice().getPrice() : null;
+    String unitPrice = payload.getUnitPrice().getPrice();
     Long amount = payload.getAmount();
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
@@ -173,7 +173,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     
     Currency priceCurrency = null;
     try {
-      priceCurrency = payload.getUnitPrice() != null ? Currency.getInstance(payload.getUnitPrice().getCurrency()) : null;
+      priceCurrency = Currency.getInstance(payload.getUnitPrice().getCurrency());
     } catch (IllegalArgumentException e) {
       return createBadRequest(String.format("Invalid currency %s", e.getMessage()));
     }
