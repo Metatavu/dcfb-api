@@ -37,7 +37,14 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       Category category = new Category();
       category.setParentId(parentCategory.getId());
       category.setTitle(dataBuilder.createLocalized(Locale.GERMAN, "PLURAL", "new category"));
+      category.setMeta(Arrays.asList(
+        dataBuilder.createMeta("test-1", "test value 1"),
+        dataBuilder.createMeta("test-2", "test value 2")
+      ));
+
       Category createdCategory = dataBuilder.createCategory(category);
+
+      Map<String, String> metaMap = mapMetas(category.getMeta());
       
       assertNotNull(createdCategory);
       assertNotNull(createdCategory.getId());
@@ -46,11 +53,15 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       assertEquals(Locale.GERMAN.getLanguage(), createdCategory.getTitle().get(0).getLanguage());
       assertEquals("PLURAL", createdCategory.getTitle().get(0).getType());
       assertEquals("new category", createdCategory.getTitle().get(0).getValue());
+      assertEquals(2, createdCategory.getMeta().size());
+      assertEquals("test value 1", metaMap.get("test-1"));
+      assertEquals("test value 2", metaMap.get("test-2"));
+
     } finally {
       dataBuilder.clean();
     }
   }
-
+   
   @Test
   public void testFindCategory() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
@@ -240,23 +251,45 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
     try {
       CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
       Category parentCategory = dataBuilder.createSimpleCategory();
-      Category category = dataBuilder.createSimpleCategory();
+
+      Category payload = new Category();
+      payload.setTitle(dataBuilder.createLocalized("simple category"));
+      payload.setMeta(Arrays.asList(
+        dataBuilder.createMeta("test-1", "test value 1"),
+        dataBuilder.createMeta("test-2", "test value 2")
+      ));
+
+      Category category = dataBuilder.createCategory(payload);
       
+      Map<String, String> metaMap = mapMetas(category.getMeta());
       assertNull(category.getParentId());
       assertEquals(1, category.getTitle().size());
       assertEquals(Locale.ENGLISH.getLanguage(), category.getTitle().get(0).getLanguage());
       assertEquals("SINGLE", category.getTitle().get(0).getType());
       assertEquals("simple category", category.getTitle().get(0).getValue());
-      
+      assertEquals(2, category.getMeta().size());
+      assertEquals("test value 1", metaMap.get("test-1"));
+      assertEquals("test value 2", metaMap.get("test-2"));
+
       category.setParentId(parentCategory.getId());
       category.setTitle(dataBuilder.createLocalized(Locale.KOREA, "PLURAL", "updated category"));
-      
+      category.setMeta(Arrays.asList(
+        dataBuilder.createMeta("test-1", "test value 1"),
+        dataBuilder.createMeta("test-3", "test value 3"),
+        dataBuilder.createMeta("test-4", "test value 4")
+      ));
+
       Category updatedCategory = categoriesApi.updateCategory(category.getId(), category);
+      Map<String, String> updatedMetaMap = mapMetas(updatedCategory.getMeta());
       assertEquals(parentCategory.getId(), updatedCategory.getParentId());
       assertEquals(1, updatedCategory.getTitle().size());
       assertEquals(Locale.KOREA.getLanguage(), updatedCategory.getTitle().get(0).getLanguage());
       assertEquals("PLURAL", updatedCategory.getTitle().get(0).getType());
       assertEquals("updated category", updatedCategory.getTitle().get(0).getValue());
+      assertEquals(3, updatedCategory.getMeta().size());
+      assertEquals("test value 1", updatedMetaMap.get("test-1"));
+      assertEquals("test value 3", updatedMetaMap.get("test-3"));
+      assertEquals("test value 4", updatedMetaMap.get("test-4"));
     } finally {
       dataBuilder.clean();
     }

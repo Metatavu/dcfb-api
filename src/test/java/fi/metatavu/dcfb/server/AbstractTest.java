@@ -14,6 +14,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -23,6 +24,8 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import fi.metatavu.dcfb.client.Meta;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -224,6 +227,22 @@ public abstract class AbstractTest {
    */
   protected ZonedDateTime getZonedDateTime(int year, int month, int dayOfMonth, int hour, int minute, int second, ZoneId zone) {
     return ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, 0, zone);
+  }
+
+  /**
+   * Maps list of metas into a map
+   * 
+   * @param metas
+   * @return map
+   */
+  protected Map<String, String> mapMetas(List<Meta> metas) {
+    Map<String, String> result = new HashMap<>(metas.size());
+
+    metas.stream().forEach(meta -> {
+      result.put(meta.getKey(), meta.getValue());
+    });
+
+	  return result;
   }
 
   /**

@@ -2,6 +2,7 @@ package fi.metatavu.dcfb.server.items;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -9,7 +10,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import fi.metatavu.dcfb.server.persistence.dao.CategoryDAO;
+import fi.metatavu.dcfb.server.persistence.dao.CategoryMetaDAO;
 import fi.metatavu.dcfb.server.persistence.model.Category;
+import fi.metatavu.dcfb.server.persistence.model.CategoryMeta;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.rest.model.CategoryListSort;
 import fi.metatavu.dcfb.server.search.handlers.CategoryIndexHandler;
@@ -32,6 +35,9 @@ public class CategoryController {
   
   @Inject
   private CategoryDAO categoryDAO;
+
+  @Inject
+  private CategoryMetaDAO categoryMetaDAO;
 
   /**
    * Creates new category
@@ -98,8 +104,55 @@ public class CategoryController {
    * @param category category
    */
   public void deleteCategory(Category category) {
+    categoryMetaDAO.listByCategory(category).stream().forEach(categoryMetaDAO::delete);
     categoryDAO.delete(category);
     categoryIndexHandler.deleteIndexable(category.getId());
+  }
+
+  /**
+   * List metas by category
+   * 
+   * @param category category
+   * @return category metas
+   */
+  public List<CategoryMeta> listMetas(Category category) {
+    return categoryMetaDAO.listByCategory(category); 
+  }
+
+  /**
+   * Sets meta value for a category
+   * 
+   * @param category category
+   * @param key key
+   * @param value value
+   * @return created or updatedmeta entity. Null if given value is null
+   */
+  public CategoryMeta setMeta(Category category, String key, String value) {
+    CategoryMeta categoryMeta = categoryMetaDAO.findByCategoryAndKey(category, key);
+    if (categoryMeta == null) {
+      if (value == null) {
+        return null;
+      }
+
+      return categoryMetaDAO.create(UUID.randomUUID(), category, key, value);
+    } else {
+      if (value == null) {
+        categoryMetaDAO.delete(categoryMeta);
+        return null;
+      }
+
+      return categoryMetaDAO.updateValue(categoryMeta, value);
+    }
+  }
+
+  /**
+   * Deletes category metas with keys not in set
+   * 
+   * @param category
+   * @param keys
+   */
+  public void deleteMetasNotIn(Category category, Set<String> keys) {
+    categoryMetaDAO.listByKeyNotIn(category, keys).stream().forEach(categoryMetaDAO::delete);
   }
   
 }
