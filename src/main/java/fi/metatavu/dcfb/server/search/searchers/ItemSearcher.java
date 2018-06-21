@@ -7,6 +7,7 @@ import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
+import fi.metatavu.dcfb.server.search.index.IndexableCategory;
 import fi.metatavu.dcfb.server.search.index.IndexableItem;
 
 /**
