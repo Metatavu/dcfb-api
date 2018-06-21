@@ -61,7 +61,7 @@ public class CategorySearcher extends AbstractSearcher {
   }
    
   /**
-   * Creates sorts. Defaults to created at descending
+   * Creates sorts. Defaults to created at ascending
    * 
    * @param sorts list of sorts
    * @return created sort builders
@@ -91,7 +91,7 @@ public class CategorySearcher extends AbstractSearcher {
       .collect(Collectors.toList());
 
     if (result.isEmpty()) {
-      return Collections.singletonList(SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.DESC));      
+      return Collections.singletonList(SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.ASC));      
     }
 
     return result;
