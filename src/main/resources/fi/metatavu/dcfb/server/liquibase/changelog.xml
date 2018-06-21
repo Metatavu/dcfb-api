@@ -4,7 +4,7 @@
   <changeSet id="initial" author="antti.leppa">
     <createTable tableName="systemsetting">
       <column name="id" type="uuid">
-        <constraints nullable="false" primaryKey="true"/>
+        <constraints unique="true" nullable="false" primaryKey="true"/>
       </column>
       <column name="settingkey" type="varchar(255)">
         <constraints nullable="false"/>
@@ -18,13 +18,13 @@
   
     <createTable tableName="localizedentry">
       <column name="id" type="uuid">
-        <constraints nullable="false" primaryKey="true"/>
+        <constraints unique="true" nullable="false" primaryKey="true"/>
       </column>
     </createTable>
     
     <createTable tableName="localizedvalue">
       <column name="id" type="uuid">
-        <constraints nullable="false" primaryKey="true"/>
+        <constraints unique="true" nullable="false" primaryKey="true"/>
       </column>
       <column name="type" type="varchar(255)">
         <constraints nullable="false"/>
@@ -40,7 +40,7 @@
     
     <createTable tableName="category">
       <column name="id" type="uuid">
-        <constraints nullable="false" primaryKey="true"/>
+        <constraints unique="true" nullable="false" primaryKey="true"/>
       </column>
       <column name="parent_id" type="uuid">
         <constraints foreignKeyName="FK_CATEGORY_PARENT_ID" referencedTableName="category" referencedColumnNames="id"/>
@@ -64,7 +64,7 @@
     
     <createTable tableName="item">
       <column name="id" type="uuid">
-        <constraints nullable="false" primaryKey="true"/>
+        <constraints unique="true" nullable="false" primaryKey="true"/>
       </column>
       <column name="title_id" type="uuid">
         <constraints nullable="false" foreignKeyName="FK_ITEM_ITEM_TITLE_ID" referencedTableName="localizedentry" referencedColumnNames="id"/>
@@ -104,7 +104,7 @@
     
     <createTable tableName="itemimage">
       <column name="id" type="uuid">
-        <constraints nullable="false" primaryKey="true"/>
+        <constraints unique="true" nullable="false" primaryKey="true"/>
       </column>
       <column name="item_id" type="uuid">
         <constraints nullable="false" foreignKeyName="FK_ITEM_IMAGE_ITEM_ID" referencedTableName="item" referencedColumnNames="id"/>

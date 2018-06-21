@@ -7,6 +7,7 @@ import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,7 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
+import fi.metatavu.dcfb.server.search.index.IndexableCategory;
 import fi.metatavu.dcfb.server.search.index.IndexableItem;
 
 /**
@@ -66,17 +68,13 @@ public class ItemSearcher extends AbstractSearcher {
   }
 
   /**
-   * Creates sorts. Defaults to created at descending
+   * Creates sorts. Defaults to created at ascending
    * 
    * @param sorts list of sorts
    * @return created sort builders
    */
   private List<SortBuilder<?>> createSorts(List<ItemListSort> sorts) {
-    if (sorts == null) {
-      return Collections.singletonList(SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.DESC));
-    }
-
-	  return sorts.stream().map(sort -> {
+    List<SortBuilder<?>> result = sorts == null ? Collections.emptyList() : sorts.stream().map(sort -> {
       switch (sort) {
         case CREATED_AT_DESC:
           return SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.DESC);
@@ -94,7 +92,15 @@ public class ItemSearcher extends AbstractSearcher {
       }
 
       return null;
-    }).collect(Collectors.toList());
+    })
+    .filter(Objects::nonNull)
+    .collect(Collectors.toList());
+
+    if (result.isEmpty()) {
+      return Collections.singletonList(SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.ASC));      
+    }
+
+    return result;  
   }
    
 }
