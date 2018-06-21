@@ -7,6 +7,7 @@ import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -66,28 +67,34 @@ public class CategorySearcher extends AbstractSearcher {
    * @return created sort builders
    */
   private List<SortBuilder<?>> createSorts(List<CategoryListSort> sorts) {
-    if (sorts == null) {
-      return Collections.singletonList(SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.DESC));
+    List<SortBuilder<?>> result = sorts == null ? Collections.emptyList() : sorts.stream()
+      .map(sort -> {
+        switch (sort) {
+          case CREATED_AT_DESC:
+            return SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.DESC);
+          case CREATED_AT_ASC:
+            return SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.ASC);
+          case MODIFIED_AT_DESC:
+            return SortBuilders.fieldSort(IndexableCategory.MODIFIED_AT_FIELD).order(SortOrder.DESC);
+          case MODIFIED_AT_ASC:
+            return SortBuilders.fieldSort(IndexableCategory.MODIFIED_AT_FIELD).order(SortOrder.ASC);
+          case SCORE_DESC:
+            return SortBuilders.scoreSort().order(SortOrder.DESC);
+          case SCORE_ASC:
+            return SortBuilders.scoreSort().order(SortOrder.ASC);
+          default:
+        }
+
+        return null;
+      })
+      .filter(Objects::nonNull)
+      .collect(Collectors.toList());
+
+    if (result.isEmpty()) {
+      return Collections.singletonList(SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.DESC));      
     }
 
-	  return sorts.stream().map(sort -> {
-      switch (sort) {
-        case CREATED_AT_DESC:
-          return SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.DESC);
-        case CREATED_AT_ASC:
-          return SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.ASC);
-        case MODIFIED_AT_DESC:
-          return SortBuilders.fieldSort(IndexableCategory.MODIFIED_AT_FIELD).order(SortOrder.DESC);
-        case MODIFIED_AT_ASC:
-          return SortBuilders.fieldSort(IndexableCategory.MODIFIED_AT_FIELD).order(SortOrder.ASC);
-        case SCORE_DESC:
-          return SortBuilders.scoreSort().order(SortOrder.DESC);
-        case SCORE_ASC:
-          return SortBuilders.scoreSort().order(SortOrder.ASC);
-        default:
-      }
-
-      return null;
-    }).collect(Collectors.toList());
+    return result;
   }
+  
 }

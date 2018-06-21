@@ -72,11 +72,7 @@ public class ItemSearcher extends AbstractSearcher {
    * @return created sort builders
    */
   private List<SortBuilder<?>> createSorts(List<ItemListSort> sorts) {
-    if (sorts == null) {
-      return Collections.singletonList(SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.DESC));
-    }
-
-	  return sorts.stream().map(sort -> {
+    List<SortBuilder<?>> result = sorts == null ? Collections.emptyList() : sorts.stream().map(sort -> {
       switch (sort) {
         case CREATED_AT_DESC:
           return SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.DESC);
@@ -95,6 +91,10 @@ public class ItemSearcher extends AbstractSearcher {
 
       return null;
     }).collect(Collectors.toList());
+
+    if (sorts == null) {
+      return Collections.singletonList(SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.DESC));
+    }    
   }
    
 }
