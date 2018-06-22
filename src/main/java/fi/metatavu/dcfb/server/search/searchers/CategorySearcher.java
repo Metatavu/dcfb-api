@@ -31,13 +31,14 @@ public class CategorySearcher extends AbstractSearcher {
    * Searches category and returns result as UUIDs
    * 
    * @param parentId parent id of result categories. Omitted if null
+   * @param slug filter results by slug. Omitted if null
    * @param search free text search that must match the result. Omitted if null
    * @param firstResult first result. Defaults to 0
    * @param maxResults max results. Defaults to 20
    * @return search result 
    */
-  public SearchResult<UUID> searchCategories(UUID parentId, String search, Long firstResult, Long maxResults, List<CategoryListSort> sorts) {
-    boolean matchAll = parentId == null && search == null;
+  public SearchResult<UUID> searchCategories(UUID parentId, String slug, String search, Long firstResult, Long maxResults, List<CategoryListSort> sorts) {
+    boolean matchAll = parentId == null && slug == null && search == null;
     if (matchAll) {
       return executeSearch(matchAllQuery(), createSorts(sorts), firstResult, maxResults);
     } else {    
@@ -45,6 +46,10 @@ public class CategorySearcher extends AbstractSearcher {
       
       if (parentId != null) {
         query.must(matchQuery(IndexableCategory.PARENT_ID_FIELD, parentId.toString()));
+      }
+
+      if (slug != null) {
+        query.must(matchQuery(IndexableCategory.SLUG_FIELD, slug));
       }
 
       if (search != null) {

@@ -73,7 +73,7 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
   }
 
   @Override
-  public Response listCategories(UUID parentId, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
+  public Response listCategories(UUID parentId, String search, String slug, List<String> sort, Long firstResult, Long maxResults) throws Exception {
     Category parent = parentId != null ? categoryController.findCategory(parentId) : null;
     if (parent == null && parentId != null) {
       return createBadRequest(String.format("Category %s not found", parentId));
@@ -86,7 +86,7 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
       return createBadRequest(e.getMessage());
     }
 
-    SearchResult<Category> searchResult = categoryController.searchCategories(parent, search, firstResult, maxResults, sorts);
+    SearchResult<Category> searchResult = categoryController.searchCategories(parent, slug, search, firstResult, maxResults, sorts);
    
     return createOk(categoryTranslator.translateCategories(searchResult.getResult()), searchResult.getTotalHits());
   }
