@@ -13,6 +13,7 @@ public class IndexableCategory extends AbstractIndexable {
 
   public static final String TYPE = "category";
   public static final String PARENT_ID_FIELD = "parentId";
+  public static final String SLUG_FIELD = "slug";
   public static final String CREATED_AT_FIELD = "createdAt";
   public static final String MODIFIED_AT_FIELD = "modifiedAt";
   

@@ -87,7 +87,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       
       waitCategoryCount(categoriesApi, 2);
       
-      List<Category> list = categoriesApi.listCategories(null, null, null, null, null);
+      List<Category> list = categoriesApi.listCategories(null, null, null, null, null, null);
       assertEquals(2, list.size());
       assertEquals(category1.toString(), list.get(0).toString());
       assertEquals(category2.toString(), list.get(1).toString());
@@ -97,7 +97,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testSearchCategories() throws IOException, URISyntaxException {
+  public void testSearchCategoriesByText() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
       CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
@@ -106,9 +106,30 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       
       waitCategoryCount(categoriesApi, 1);
       
-      List<Category> categories = categoriesApi.listCategories(null, "simple", null, null, null);
+      List<Category> categories = categoriesApi.listCategories(null, "simple", null, null, null, null);
       assertEquals(1, categories.size());
       assertEquals(simpleCategory.toString(), categories.get(0).toString());
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+
+  @Test
+  public void testSearchCategoriesBySlug() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+
+      Category simpleCategory = dataBuilder.createSimpleCategory();
+      
+      waitCategoryCount(categoriesApi, 1);
+      
+      List<Category> categories = categoriesApi.listCategories(null, null, "simple-category", null, null, null);
+      assertEquals(1, categories.size());
+      assertEquals(simpleCategory.toString(), categories.get(0).toString());
+
+      assertEquals(0, categoriesApi.listCategories(null, null, "simple", null, null, null).size());
+
     } finally {
       dataBuilder.clean();
     }
@@ -130,11 +151,11 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       
       waitCategoryCount(categoriesApi, 2);
       
-      List<Category> categories1Categories = categoriesApi.listCategories(parentCategory.getId(), null, null, null, null);
+      List<Category> categories1Categories = categoriesApi.listCategories(parentCategory.getId(), null, null, null, null, null);
       assertEquals(1, categories1Categories.size());
       assertEquals(childCategory.toString(), categories1Categories.get(0).toString());
 
-      assertEquals(0, categoriesApi.listCategories(childCategory.getId(), null, null, null, null).size());
+      assertEquals(0, categoriesApi.listCategories(childCategory.getId(), null, null, null, null, null).size());
 
       try {
         Map<String, Object> queryParams = new HashMap<>();
@@ -146,7 +167,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       }
 
       try {
-        categoriesApi.listCategories(UUID.randomUUID(), null, null, null, null);
+        categoriesApi.listCategories(UUID.randomUUID(), null, null, null, null, null);
         fail("List with incorrect uuid should return bad request");
       } catch (FeignException e) {
         assertEquals(400, e.status());
@@ -172,11 +193,11 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
         return categoriesApi.listCategories(Collections.emptyMap()).size() == 5;
       });
       
-      assertEquals(3, categoriesApi.listCategories(null, null, null, 2l, null).size());
-      assertEquals(2, categoriesApi.listCategories(null, null, null, 3l, 60l).size());
-      assertEquals(2, categoriesApi.listCategories(null, null, null, 1l, 2l).size());
-      assertEquals(2, categoriesApi.listCategories(null, null, null, 0l, 2l).size());
-      assertEquals(3, categoriesApi.listCategories(null, null, null, null, 3l).size());
+      assertEquals(3, categoriesApi.listCategories(null, null, null, null, 2l, null).size());
+      assertEquals(2, categoriesApi.listCategories(null, null, null, null, 3l, 60l).size());
+      assertEquals(2, categoriesApi.listCategories(null, null, null, null, 1l, 2l).size());
+      assertEquals(2, categoriesApi.listCategories(null, null, null, null, 0l, 2l).size());
+      assertEquals(3, categoriesApi.listCategories(null, null, null, null, null, 3l).size());
     } finally {
       dataBuilder.clean();
     }
@@ -199,10 +220,10 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       Category category5 = dataBuilder.createSimpleCategory();
       waitCategoryCount(categoriesApi, 5);
       
-      List<Category> categoriesCreatedAsc = categoriesApi.listCategories(null, null, Arrays.asList(CategoryListSort.CREATED_AT_ASC.toString()), null, null);
-      List<Category> categoriesCreatedDesc = categoriesApi.listCategories(null, null, Arrays.asList(CategoryListSort.CREATED_AT_DESC.toString()), null, null);
-      List<Category> categoriesModifiedAsc = categoriesApi.listCategories(null, null, Arrays.asList(CategoryListSort.MODIFIED_AT_ASC.toString()), null, null);
-      List<Category> categoriesModifiedDesc = categoriesApi.listCategories(null, null, Arrays.asList(CategoryListSort.MODIFIED_AT_DESC.toString()), null, null);
+      List<Category> categoriesCreatedAsc = categoriesApi.listCategories(null, null, null, Arrays.asList(CategoryListSort.CREATED_AT_ASC.toString()), null, null);
+      List<Category> categoriesCreatedDesc = categoriesApi.listCategories(null, null, null, Arrays.asList(CategoryListSort.CREATED_AT_DESC.toString()), null, null);
+      List<Category> categoriesModifiedAsc = categoriesApi.listCategories(null, null, null, Arrays.asList(CategoryListSort.MODIFIED_AT_ASC.toString()), null, null);
+      List<Category> categoriesModifiedDesc = categoriesApi.listCategories(null, null, null, Arrays.asList(CategoryListSort.MODIFIED_AT_DESC.toString()), null, null);
       
       assertEquals(category1.getId(), categoriesCreatedAsc.get(0).getId());
       assertEquals(category5.getId(), categoriesCreatedAsc.get(4).getId());
@@ -233,8 +254,8 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       Category category2 = dataBuilder.createCategory(payload2);
       waitCategoryCount(categoriesApi, 2);
 
-      List<Category> categoriesScoreAsc = categoriesApi.listCategories(null, "test", Arrays.asList(CategoryListSort.SCORE_ASC.toString()), null, null);
-      List<Category> categoriesScoreDesc = categoriesApi.listCategories(null, "test", Arrays.asList(CategoryListSort.SCORE_DESC.toString()), null, null);
+      List<Category> categoriesScoreAsc = categoriesApi.listCategories(null, "test", null, Arrays.asList(CategoryListSort.SCORE_ASC.toString()), null, null);
+      List<Category> categoriesScoreDesc = categoriesApi.listCategories(null, "test", null, Arrays.asList(CategoryListSort.SCORE_DESC.toString()), null, null);
       
       assertEquals(category1.getId(), categoriesScoreAsc.get(0).getId());
       assertEquals(category2.getId(), categoriesScoreAsc.get(1).getId());

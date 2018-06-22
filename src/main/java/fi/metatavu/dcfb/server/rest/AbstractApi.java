@@ -84,6 +84,10 @@ public abstract class AbstractApi {
    * @return whether the values in list are vaild or nor
    */
   protected boolean isValidLocalizedList(List<LocalizedValue> localizedValues) {
+    if (localizedValues == null) {
+      return true;
+    }
+
     try {
       for (int i = 0; i < localizedValues.size(); i++) {
         LocalizedValue localizedValue = localizedValues.get(i);
@@ -352,27 +356,29 @@ public abstract class AbstractApi {
   private Map<Locale, Map<LocalizedType, String>> getValues(List<LocalizedValue> localizedValues) {
     Map<Locale, Map<LocalizedType, String>> result = new HashMap<>();
     
-    localizedValues.stream().forEach((localizedValue) -> {
-      Locale locale = LocaleUtils.toLocale(localizedValue.getLanguage());
-      if (locale == null) {
-        logger.error("Invalid locale {}, dropped", localizedValue.getLanguage());
-        return;
-      }
-      
-      LocalizedType type = EnumUtils.getEnum(LocalizedType.class, localizedValue.getType());
-      if (type == null) {
-        logger.error("Invalid type {}, dropped", localizedValue.getType());
-        return;
-      }
-      
-      if (!result.containsKey(locale)) {
-        result.put(locale, new HashMap<>());
-      }
-      
-      Map<LocalizedType, String> localeMap = result.get(locale);
-      localeMap.put(type, localizedValue.getValue());
-    });
-    
+    if (localizedValues != null) {
+      localizedValues.stream().forEach((localizedValue) -> {
+        Locale locale = LocaleUtils.toLocale(localizedValue.getLanguage());
+        if (locale == null) {
+          logger.error("Invalid locale {}, dropped", localizedValue.getLanguage());
+          return;
+        }
+        
+        LocalizedType type = EnumUtils.getEnum(LocalizedType.class, localizedValue.getType());
+        if (type == null) {
+          logger.error("Invalid type {}, dropped", localizedValue.getType());
+          return;
+        }
+        
+        if (!result.containsKey(locale)) {
+          result.put(locale, new HashMap<>());
+        }
+        
+        Map<LocalizedType, String> localeMap = result.get(locale);
+        localeMap.put(type, localizedValue.getValue());
+      });
+    }
+
     return result;
   }
   

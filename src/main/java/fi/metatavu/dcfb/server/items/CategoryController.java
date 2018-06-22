@@ -66,13 +66,14 @@ public class CategoryController {
    * Searches categories
    * 
    * @param parent filter results by parent category. Ignored if null
+   * @param slug filter results by slug. Ignored if null
    * @param search Search by free-text. Ignored if null
    * @param firstResult result offset
    * @param maxResults maximum number of results returned
    * @return search result
    */
-  public SearchResult<Category> searchCategories(Category parent, String search, Long firstResult, Long maxResults, List<CategoryListSort> sorts) {
-    SearchResult<UUID> searchResult = categorySearcher.searchCategories(parent != null ? parent.getId() : null, search, firstResult, maxResults, sorts);
+  public SearchResult<Category> searchCategories(Category parent, String slug, String search, Long firstResult, Long maxResults, List<CategoryListSort> sorts) {
+    SearchResult<UUID> searchResult = categorySearcher.searchCategories(parent != null ? parent.getId() : null, slug, search, firstResult, maxResults, sorts);
 
     List<Category> categories = searchResult.getResult().stream()
       .map(categoryDAO::findById)
