@@ -162,7 +162,7 @@ public class LocationsApiImpl extends AbstractApi implements LocationsApi {
 
     Coordinate coordinatePayload = payload.getCoordinate();
     if (coordinatePayload != null) {
-      if (!ArrayUtils.contains(LocationConsts.SUPPORTED_COORDINATE_REFERENCE_SYSTEMS, coordinatePayload.getCrs())) {
+      if (!LocationConsts.SUPPORTED_COORDINATE_REFERENCE_SYSTEMS.contains(coordinatePayload.getCrs())) {
         return createBadRequest(String.format("Unsupported coordinate reference system use one of %s", StringUtils.join(LocationConsts.SUPPORTED_COORDINATE_REFERENCE_SYSTEMS, ',')));
       }
 
