@@ -35,6 +35,7 @@ public class LocationDAO extends AbstractDAO<Location> {
   * @param lastModifier modifier
   * @return created location
   */
+  @SuppressWarnings ("squid:S00107")
   public Location create(UUID id, String slug, LocalizedEntry additionalInformations, String country, BigDecimal latitude, BigDecimal longitude, LocalizedEntry name, String postalCode, String postOffice, String streetAddress, UUID lastModifier) {
     Location location = new Location();
     location.setId(id);

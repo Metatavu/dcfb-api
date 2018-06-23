@@ -1,4 +1,4 @@
-package fi.metatavu.dcfb.server.items;
+package fi.metatavu.dcfb.server.locations;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -46,6 +46,7 @@ public class LocationController {
     * @param lastModifier modifier
     * @return created location
     */
+  @SuppressWarnings ("squid:S00107")
   public Location createLocation(String slug, LocalizedEntry additionalInformations, String country, BigDecimal latitude, BigDecimal longitude, LocalizedEntry name, String postalCode, String postOffice, String streetAddress, UUID lastModifier) {
     return locationDAO.create(UUID.randomUUID(), getUniqueSlug(slug), additionalInformations, country, latitude, longitude, name, postalCode, postOffice, streetAddress, lastModifier);
   }
@@ -74,6 +75,7 @@ public class LocationController {
    * @param modifier modifier
    * @return updated location
    */
+  @SuppressWarnings ("squid:S00107")
   public Location updateLocation(Location location, LocalizedEntry additionalInformations, String country, BigDecimal latitude, BigDecimal longitude, LocalizedEntry name, String postalCode, String postOffice, String streetAddress, UUID modifier) {
     locationDAO.updateAdditionalInformations(location, additionalInformations, modifier);
     locationDAO.updateCountry(location, country, modifier);

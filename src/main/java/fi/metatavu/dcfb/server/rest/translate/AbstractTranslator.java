@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import fi.metatavu.dcfb.server.items.LocalizedValueController;
+import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.rest.model.LocalizedValue;
 

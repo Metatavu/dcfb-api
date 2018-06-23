@@ -1,4 +1,4 @@
-package fi.metatavu.dcfb.server.items;
+package fi.metatavu.dcfb.server.categories;
 
 import java.util.List;
 import java.util.Objects;

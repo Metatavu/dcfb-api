@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import fi.metatavu.dcfb.server.items.CategoryController;
+import fi.metatavu.dcfb.server.categories.CategoryController;
 import fi.metatavu.dcfb.server.rest.model.Category;
 import fi.metatavu.dcfb.server.rest.model.Meta;
 

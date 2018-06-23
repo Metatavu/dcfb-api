@@ -58,6 +58,7 @@ public class IndexableLocation extends AbstractIndexable {
    * @param createdAt created at
    * @param modifiedAt modified at
    */
+  @SuppressWarnings ("squid:S00107")
   public IndexableLocation(UUID id, List<String> nameFi, List<String> nameSv, List<String> nameEn, 
     List<String> additionalInformationsFi, List<String> additionalInformationsSv, List<String> additionalInformationsEn,
     String slug, OffsetDateTime createdAt, OffsetDateTime modifiedAt) {

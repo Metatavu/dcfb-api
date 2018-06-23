@@ -1,14 +1,8 @@
 package fi.metatavu.dcfb.server.rest;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Currency;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.ejb.Stateful;
 import javax.enterprise.context.RequestScoped;
@@ -19,8 +13,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-import fi.metatavu.dcfb.server.items.LocationController;
 import fi.metatavu.dcfb.server.locations.LocationConsts;
+import fi.metatavu.dcfb.server.locations.LocationController;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.rest.model.Address;
 import fi.metatavu.dcfb.server.rest.model.Coordinate;
@@ -75,7 +69,7 @@ public class LocationsApiImpl extends AbstractApi implements LocationsApi {
 
     Coordinate coordinatePayload = payload.getCoordinate();
     if (coordinatePayload != null) {
-      if (!ArrayUtils.contains(LocationConsts.SUPPORTED_COORDINATE_REFERENCE_SYSTEMS, coordinatePayload.getCrs())) {
+      if (!LocationConsts.SUPPORTED_COORDINATE_REFERENCE_SYSTEMS.contains(coordinatePayload.getCrs())) {
         return createBadRequest(String.format("Unsupported coordinate reference system use one of %s", StringUtils.join(LocationConsts.SUPPORTED_COORDINATE_REFERENCE_SYSTEMS, ',')));
       }
 

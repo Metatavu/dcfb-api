@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 
 import com.github.slugify.Slugify;
 
-import fi.metatavu.dcfb.server.items.LocalizedValueController;
+import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedType;
 import fi.metatavu.dcfb.server.rest.model.BadRequest;
@@ -135,6 +135,7 @@ public abstract class AbstractApi {
    * @param translate translate function
    * @return list of <E>
    */
+  @SuppressWarnings ("squid:S1168")
   protected <E> List<E> getListParameter(List<String> parameter, Function<String, E> translate) {
     if (parameter == null) {
       return null;
@@ -147,9 +148,7 @@ public abstract class AbstractApi {
       .forEach(filter -> merged.addAll(Arrays.asList(StringUtils.split(filter, ','))));
 
     return merged.stream()
-      .map((name) -> {
-        return translate.apply(name);
-      })
+      .map(translate::apply)
       .collect(Collectors.toList());
   }
 
@@ -160,6 +159,7 @@ public abstract class AbstractApi {
    * @param translate translate function
    * @return list of <E>
    */
+  @SuppressWarnings ("squid:S1168")
   protected <E> List<E> getListParameter(String parameter, Function<String, E> translate) {
     if (parameter == null) {
       return null;
@@ -386,7 +386,7 @@ public abstract class AbstractApi {
     Map<Locale, Map<LocalizedType, String>> result = new HashMap<>();
     
     if (localizedValues != null) {
-      localizedValues.stream().forEach((localizedValue) -> {
+      localizedValues.stream().forEach(localizedValue -> {
         Locale locale = LocaleUtils.toLocale(localizedValue.getLanguage());
         if (locale == null) {
           logger.error("Invalid locale {}, dropped", localizedValue.getLanguage());

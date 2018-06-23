@@ -14,9 +14,9 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fi.metatavu.dcfb.server.items.CategoryController;
+import fi.metatavu.dcfb.server.categories.CategoryController;
 import fi.metatavu.dcfb.server.items.ItemController;
-import fi.metatavu.dcfb.server.items.LocationController;
+import fi.metatavu.dcfb.server.locations.LocationController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.Location;
@@ -131,7 +131,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     List<Location> locations = null;
 
     try {
-      categories = getListParameter(categoryIdsParam, (param) -> {
+      categories = getListParameter(categoryIdsParam, param -> {
         UUID id = UUID.fromString(param);
         Category category = categoryController.findCategory(id);
         if (category == null) {
@@ -141,7 +141,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         return category;
       });
 
-      locations = getListParameter(locationIdsParam, (param) -> {
+      locations = getListParameter(locationIdsParam, param -> {
         UUID id = UUID.fromString(param);
         Location location = locationController.findLocation(id);
         if (location == null) {

@@ -17,8 +17,8 @@ import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 
-import fi.metatavu.dcfb.server.items.LocationController;
-import fi.metatavu.dcfb.server.items.LocalizedValueController;
+import fi.metatavu.dcfb.server.localization.LocalizedValueController;
+import fi.metatavu.dcfb.server.locations.LocationController;
 import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.search.index.IndexableLocation;
 
