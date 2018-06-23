@@ -17,8 +17,8 @@ import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 
-import fi.metatavu.dcfb.server.items.CategoryController;
-import fi.metatavu.dcfb.server.items.LocalizedValueController;
+import fi.metatavu.dcfb.server.categories.CategoryController;
+import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.search.index.IndexableCategory;
 

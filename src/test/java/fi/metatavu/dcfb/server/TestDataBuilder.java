@@ -9,11 +9,15 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import fi.metatavu.dcfb.client.Address;
 import fi.metatavu.dcfb.client.CategoriesApi;
 import fi.metatavu.dcfb.client.Category;
+import fi.metatavu.dcfb.client.Coordinate;
 import fi.metatavu.dcfb.client.Item;
 import fi.metatavu.dcfb.client.ItemsApi;
 import fi.metatavu.dcfb.client.LocalizedValue;
+import fi.metatavu.dcfb.client.Location;
+import fi.metatavu.dcfb.client.LocationsApi;
 import fi.metatavu.dcfb.client.Meta;
 import fi.metatavu.dcfb.client.Price;
 
@@ -27,6 +31,7 @@ public class TestDataBuilder {
   private AbstractIntegrationTest test;
   private List<fi.metatavu.dcfb.client.Item> items;
   private List<fi.metatavu.dcfb.client.Category> categories;
+  private List<fi.metatavu.dcfb.client.Location> locations;
   private String username;
   private String password;
   private String adminToken;
@@ -43,6 +48,7 @@ public class TestDataBuilder {
     this.password = password;
     this.items = new ArrayList<>();
     this.categories = new ArrayList<>();
+    this.locations = new ArrayList<>();
   }
   
   /**
@@ -84,7 +90,27 @@ public class TestDataBuilder {
   public CategoriesApi getAdminCategoriesApi() throws IOException {
     return test.getCategoriesApi(getAdminToken());
   }
+
+  /**
+   * Returns initialized locations API
+   * 
+   * @return initialized locations API
+   * @throws IOException
+   */
+  public LocationsApi getLocationsApi() throws IOException {
+    return test.getLocationsApi(getAccessToken());
+  }
   
+  /**
+   * Returns initialized locations API
+   * 
+   * @return initialized locations API
+   * @throws IOException
+   */
+  public LocationsApi getAdminLocationsApi() throws IOException {
+    return test.getLocationsApi(getAdminToken());
+  }
+
   /**
    * Creates a simple item
    * 
@@ -92,7 +118,7 @@ public class TestDataBuilder {
    * @return created item
    * @throws IOException
    */
-  public fi.metatavu.dcfb.client.Item createSimpleItem(UUID categoryId) throws IOException {
+  public fi.metatavu.dcfb.client.Item createSimpleItem(UUID categoryId, UUID locationId) throws IOException {
     Price price = createSimplePrice();
     
     fi.metatavu.dcfb.client.Item payload = new fi.metatavu.dcfb.client.Item();
@@ -104,6 +130,8 @@ public class TestDataBuilder {
     payload.setTitle(createLocalized("simple item"));
     payload.setUnit("Fake");
     payload.setUnitPrice(price);
+    payload.setLocationId(locationId);
+
     return createItem(payload);
   }
 
@@ -146,6 +174,46 @@ public class TestDataBuilder {
   }
 
   /**
+   * Creates a simple location
+   * 
+   * @return created location
+   * @throws IOException
+   */
+  public fi.metatavu.dcfb.client.Location createSimpleLocation() throws IOException {
+    Address address = new Address();
+    address.setAdditionalInformations(createLocalized("simple test address"));
+    address.setCountry("Finland");
+    address.setPostalCode("10000");
+    address.setPostOffice("Example");
+    address.setStreetAddress("Example street");
+
+    Coordinate coordinate = new Coordinate();
+    coordinate.setCrs("epsg4326");
+    coordinate.setLongitude("27.273488");
+    coordinate.setLatitude("61.685807");
+
+    fi.metatavu.dcfb.client.Location payload = new fi.metatavu.dcfb.client.Location();
+    payload.setAddress(address);
+    payload.setCoordinate(coordinate);
+    payload.setName(createLocalized("simple location"));
+
+    return createLocation(payload);
+  }
+
+  /**
+   * Creates an location
+   * 
+   * @param payload location payload
+   * @return created location
+   * @throws IOException
+   */
+  public fi.metatavu.dcfb.client.Location createLocation(fi.metatavu.dcfb.client.Location payload) throws IOException {
+    fi.metatavu.dcfb.client.Location result = getAdminLocationsApi().createLocation(payload);
+    this.locations.add(0, result);
+    return result;
+  }
+
+  /**
    * Excludes item from cleanup
    * 
    * @param item item
@@ -168,12 +236,24 @@ public class TestDataBuilder {
   }
   
   /**
+   * Excludes location from cleanup
+   * 
+   * @param location location
+   */
+  public void excludeLocationFromClean(Location location) {
+    locations = locations.stream().filter((listLocation) -> {
+      return !listLocation.getId().equals(location.getId());
+    }).collect(Collectors.toList());
+  }
+
+  /**
    * Cleans created test data
    * @throws IOException 
    */
   public void clean() throws IOException {
     ItemsApi itemApi = getAdminItemApi();
     CategoriesApi categoriesApi = getAdminCategoriesApi();
+    LocationsApi locationsApi = getAdminLocationsApi();
     
     items.stream()
       .map(fi.metatavu.dcfb.client.Item::getId)
@@ -182,6 +262,10 @@ public class TestDataBuilder {
     categories.stream()
       .map(fi.metatavu.dcfb.client.Category::getId)
       .forEach(categoriesApi::deleteCategory);
+
+    locations.stream()
+      .map(fi.metatavu.dcfb.client.Location::getId)
+      .forEach(locationsApi::deleteLocation);    
   }
   
   /**

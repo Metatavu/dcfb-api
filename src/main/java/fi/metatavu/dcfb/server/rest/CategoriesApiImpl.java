@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 
-import fi.metatavu.dcfb.server.items.CategoryController;
+import fi.metatavu.dcfb.server.categories.CategoryController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.rest.model.CategoryListSort;

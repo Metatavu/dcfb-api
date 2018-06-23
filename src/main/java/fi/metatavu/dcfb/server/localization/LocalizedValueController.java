@@ -1,4 +1,4 @@
-package fi.metatavu.dcfb.server.items;
+package fi.metatavu.dcfb.server.localization;
 
 import java.util.Collections;
 import java.util.List;

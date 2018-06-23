@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
+import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.model.Meta;
@@ -37,6 +38,7 @@ public class ItemTranslator extends AbstractTranslator {
     }
     
     Category category = item.getCategory();
+    Location location = item.getLocation();
     Price unitPrice = new Price();
     unitPrice.setCurrency(item.getPriceCurrency() != null ? item.getPriceCurrency().getCurrencyCode() : null);
     unitPrice.setPrice(item.getUnitPrice());
@@ -44,6 +46,7 @@ public class ItemTranslator extends AbstractTranslator {
     Item result = new Item();
     result.setAmount(item.getAmount());
     result.setCategoryId(category != null ? category.getId() : null);
+    result.setLocationId(location != null ? location.getId() : null);
     result.setCreatedAt(item.getCreatedAt());
     result.setDescription(translatelocalizedValue(item.getDescription()));
     result.setExpiresAt(item.getExpiresAt());

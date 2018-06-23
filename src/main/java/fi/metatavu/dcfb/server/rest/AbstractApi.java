@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -30,7 +31,7 @@ import org.slf4j.Logger;
 
 import com.github.slugify.Slugify;
 
-import fi.metatavu.dcfb.server.items.LocalizedValueController;
+import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedType;
 import fi.metatavu.dcfb.server.rest.model.BadRequest;
@@ -128,6 +129,46 @@ public abstract class AbstractApi {
   }
 
   /**
+   * Returns list parameter as <E> translated by given translate function.
+   * 
+   * @param parameter list parameter as string list
+   * @param translate translate function
+   * @return list of <E>
+   */
+  @SuppressWarnings ("squid:S1168")
+  protected <E> List<E> getListParameter(List<String> parameter, Function<String, E> translate) {
+    if (parameter == null) {
+      return null;
+    }
+
+    List<String> merged = new ArrayList<>();
+    
+    parameter.stream()
+      .filter(StringUtils::isNoneEmpty)
+      .forEach(filter -> merged.addAll(Arrays.asList(StringUtils.split(filter, ','))));
+
+    return merged.stream()
+      .map(translate::apply)
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Returns list parameter as <E> translated by given translate function.
+   * 
+   * @param parameter list parameter as string
+   * @param translate translate function
+   * @return list of <E>
+   */
+  @SuppressWarnings ("squid:S1168")
+  protected <E> List<E> getListParameter(String parameter, Function<String, E> translate) {
+    if (parameter == null) {
+      return null;
+    }
+
+    return getListParameter(Arrays.asList(StringUtils.split(parameter, ',')), translate);
+  }
+
+  /**
    * Parses CSV enum parameter from string list into enum list
    * 
    * @param enumType target enum class
@@ -137,19 +178,7 @@ public abstract class AbstractApi {
    */
   @SuppressWarnings ("squid:S1168")
   protected <T extends Enum<T>> List<T> getEnumListParameter(Class<T> enumType, List<String> parameter) {
-    if (parameter == null) {
-      return null;
-    }
-    
-    List<String> merged = new ArrayList<>(parameter.size());
-    
-    parameter.stream()
-      .filter(StringUtils::isNoneEmpty)
-      .forEach(filter -> merged.addAll(Arrays.asList(StringUtils.split(filter, ','))));
-
-    return merged.stream()
-      .map(name -> Enum.valueOf(enumType, name))
-      .collect(Collectors.toList());
+    return getListParameter(parameter, name -> Enum.valueOf(enumType, name));
   }
 
   /**
@@ -357,7 +386,7 @@ public abstract class AbstractApi {
     Map<Locale, Map<LocalizedType, String>> result = new HashMap<>();
     
     if (localizedValues != null) {
-      localizedValues.stream().forEach((localizedValue) -> {
+      localizedValues.stream().forEach(localizedValue -> {
         Locale locale = LocaleUtils.toLocale(localizedValue.getLanguage());
         if (locale == null) {
           logger.error("Invalid locale {}, dropped", localizedValue.getLanguage());

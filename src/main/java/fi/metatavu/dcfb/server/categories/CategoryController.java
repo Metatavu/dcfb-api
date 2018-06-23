@@ -1,4 +1,4 @@
-package fi.metatavu.dcfb.server.items;
+package fi.metatavu.dcfb.server.categories;
 
 import java.util.List;
 import java.util.Objects;
@@ -49,7 +49,7 @@ public class CategoryController {
    * @return created category
    */
   public Category createCategory(Category parent, LocalizedEntry title, String slug, UUID lastModifier) {
-    return categoryDAO.create(UUID.randomUUID(), parent, title, slug, lastModifier);
+    return categoryDAO.create(UUID.randomUUID(), parent, title, getUniqueSlug(slug), lastModifier);
   }
   
   /**
@@ -156,4 +156,21 @@ public class CategoryController {
     categoryMetaDAO.listByKeyNotIn(category, keys).stream().forEach(categoryMetaDAO::delete);
   }
   
+  /**
+   * Generates an unique slug
+   * 
+   * @param slug preferred slug
+   * @return unique slug
+   */
+  private String getUniqueSlug(String slug) {
+    String result = slug;
+    int iteration = 0;
+
+    while (categoryDAO.findBySlug(result) != null) {
+      iteration++;
+      result = String.format("%s-%d", slug, iteration);
+    }
+
+	  return result;
+  }
 }

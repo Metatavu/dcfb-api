@@ -4,9 +4,16 @@ import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.Item;
+import fi.metatavu.dcfb.server.persistence.model.Item_;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
+import fi.metatavu.dcfb.server.persistence.model.Location;
 
 /**
  * DAO for Item entity
@@ -31,12 +38,13 @@ public class ItemDAO extends AbstractDAO<Item> {
   * @param lastModifier modifier
   */
   @SuppressWarnings ("squid:S00107")
-  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID lastModifier) {
+  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID lastModifier) {
     Item item = new Item();
     item.setId(id);
     item.setTitle(title);
     item.setDescription(description);
     item.setCategory(category);
+    item.setLocation(location);
     item.setSlug(slug);
     item.setExpiresAt(expiresAt);
     item.setUnitPrice(unitPrice);
@@ -45,6 +53,23 @@ public class ItemDAO extends AbstractDAO<Item> {
     item.setUnit(unit);
     item.setLastModifier(lastModifier);
     return persist(item);
+  }
+
+  /**
+   * Finds location by slug
+   * 
+   * @param slug
+   * @return location
+   */
+  public Item findBySlug(String slug) {
+    EntityManager entityManager = getEntityManager();
+
+    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Item> criteria = criteriaBuilder.createQuery(Item.class);
+    Root<Item> root = criteria.from(Item.class);
+    criteria.select(root);
+    criteria.where(criteriaBuilder.equal(root.get(Item_.slug), slug));
+    return getSingleResult(entityManager.createQuery(criteria));
   }
 
   /**
@@ -83,6 +108,19 @@ public class ItemDAO extends AbstractDAO<Item> {
   public Item updateCategory(Item item, Category category, UUID lastModifier) {
     item.setLastModifier(lastModifier);
     item.setCategory(category);
+    return persist(item);
+  }
+
+  /**
+  * Updates location
+  *
+  * @param location location
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateLocation(Item item, Location location, UUID lastModifier) {
+    item.setLastModifier(lastModifier);
+    item.setLocation(location);
     return persist(item);
   }
 

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import fi.metatavu.dcfb.ApiClient;
 import fi.metatavu.dcfb.client.CategoriesApi;
 import fi.metatavu.dcfb.client.ItemsApi;
+import fi.metatavu.dcfb.client.LocationsApi;
 
 
 /**
@@ -109,6 +110,18 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
     ApiClient apiClient = getApiClient(accessToken);
     return apiClient.buildClient(CategoriesApi.class);
   }
+  
+  /**
+   * Returns locations API authenticated by the given access token
+   * 
+   * @param accessToken access token
+   * @return locations API authenticated by the given access token
+   */
+  protected LocationsApi getLocationsApi(String accessToken) {
+    ApiClient apiClient = getApiClient(accessToken);
+    return apiClient.buildClient(LocationsApi.class);
+  }
+  
 
   /**
    * Returns API client authenticated by the given access token

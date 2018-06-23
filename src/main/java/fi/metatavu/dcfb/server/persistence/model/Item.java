@@ -42,8 +42,11 @@ public class Item {
   
   @ManyToOne (optional = false)
   private Category category;
+
+  @ManyToOne
+  private Location location;
   
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   @NotNull
   @NotEmpty
   private String slug;
@@ -106,6 +109,20 @@ public class Item {
 
   public void setCategory(Category category) {
     this.category = category;
+  }
+
+  /**
+   * @return the location
+   */
+  public Location getLocation() {
+    return location;
+  }
+
+  /**
+   * @param location the location to set
+   */
+  public void setLocation(Location location) {
+    this.location = location;
   }
 
   public String getSlug() {

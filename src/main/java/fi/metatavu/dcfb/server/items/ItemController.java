@@ -19,6 +19,7 @@ import fi.metatavu.dcfb.server.persistence.model.ItemMeta;
 import fi.metatavu.dcfb.server.persistence.model.Item;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
+import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
 import fi.metatavu.dcfb.server.search.handlers.ItemIndexHandler;
 import fi.metatavu.dcfb.server.search.searchers.ItemSearcher;
@@ -48,6 +49,7 @@ public class ItemController {
    * @param title title
    * @param description description
    * @param category category
+   * @param location location
    * @param slug slug
    * @param expiresAt expiresAt
    * @param unitPrice unitPrice
@@ -58,8 +60,8 @@ public class ItemController {
    * @return created item
    */
   @SuppressWarnings ("squid:S00107")
-  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID modifier) {
-    return itemDAO.create(UUID.randomUUID(), title, description, category, slug, expiresAt, unitPrice, priceCurrency, amount, unit, modifier);
+  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID modifier) {
+    return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, priceCurrency, amount, unit, modifier);
   }
 
   /**
@@ -89,10 +91,11 @@ public class ItemController {
    * @return updated item
    */
   @SuppressWarnings ("squid:S00107")
-  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID modifier) {
+  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID modifier) {
     itemDAO.updateTitle(item, title, modifier);
     itemDAO.updateDescription(item, description, modifier);
     itemDAO.updateCategory(item, category, modifier);
+    itemDAO.updateLocation(item, location, modifier);
     itemDAO.updateSlug(item, slug, modifier);
     itemDAO.updateExpiresAt(item, expiresAt, modifier);
     itemDAO.updateUnitPrice(item, unitPrice, modifier);
@@ -149,17 +152,22 @@ public class ItemController {
    * Searches items
    * 
    * @param categories filter by categories. Ignored if null
+   * @param locations filter by locations. Ignored if null
    * @param search Search by free-text. Ignored if null
    * @param firstResult result offset
    * @param maxResults maximum number of results returned
    * @return search result
    */
-  public SearchResult<Item> searchItems(List<Category> categories, String search, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
+  public SearchResult<Item> searchItems(List<Category> categories, List<Location> locations, String search, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
     List<UUID> categoryIds = categories == null ? null : categories.stream()
       .map(Category::getId)
       .collect(Collectors.toList());
 
-    SearchResult<UUID> searchResult = itemSearcher.searchItems(categoryIds, search, firstResult, maxResults, sorts);
+    List<UUID> locationIds = locations == null ? null : locations.stream()
+      .map(Location::getId)
+      .collect(Collectors.toList());
+
+    SearchResult<UUID> searchResult = itemSearcher.searchItems(categoryIds, locationIds, search, firstResult, maxResults, sorts);
 
     List<Item> items = searchResult.getResult().stream()
       .map(itemDAO::findById)
@@ -215,5 +223,21 @@ public class ItemController {
     itemMetaDAO.listByKeyNotIn(item, keys).stream().forEach(itemMetaDAO::delete);
   }
   
-  
+  /**
+   * Generates an unique slug
+   * 
+   * @param slug preferred slug
+   * @return unique slug
+   */
+  private String getUniqueSlug(String slug) {
+    String result = slug;
+    int iteration = 0;
+
+    while (itemDAO.findBySlug(result) != null) {
+      iteration++;
+      result = String.format("%s-%d", slug, iteration);
+    }
+
+	  return result;
+  }
 }
