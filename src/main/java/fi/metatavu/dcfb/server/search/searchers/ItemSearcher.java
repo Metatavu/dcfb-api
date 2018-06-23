@@ -32,34 +32,47 @@ public class ItemSearcher extends AbstractSearcher {
    * Searches item and returns result as UUIDs
    * 
    * @param categoryIds category ids that must exist on the result. Omitted if null
+   * @param locationId location id that must exist on the result. Omitted if null
    * @param search free text search that must match the result. Omitted if null
    * @param firstResult first result. Defaults to 0
    * @param maxResults max results. Defaults to 20
    * @return search result 
    */
-  public SearchResult<UUID> searchItems(List<UUID> categoryIds, String search, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
-    boolean matchAll = categoryIds == null && search == null;
+  public SearchResult<UUID> searchItems(List<UUID> categoryIds, List<UUID> locationIds, String search, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
+    boolean matchAll = categoryIds == null && locationIds == null && search == null;
     if (matchAll) {
       return executeSearch(matchAllQuery(), createSorts(sorts), firstResult, maxResults);
     } else {    
       BoolQueryBuilder query = boolQuery();
       
       if (categoryIds != null) {
-        BoolQueryBuilder matchOrQuery = boolQuery();
-
-        categoryIds.forEach(categoryId -> 
-          matchOrQuery.should(matchQuery(IndexableItem.CATEGORY_ID_FIELD, categoryId.toString()))
-        );
-
-        query.must(matchOrQuery);
+        query.must(createOrMatchQuery(IndexableItem.CATEGORY_ID_FIELD, categoryIds));
       }
 
+      if (locationIds != null) {
+        query.must(createOrMatchQuery(IndexableItem.LOCATION_ID_FIELD, locationIds));
+      }
+      
       if (search != null) {
         query.must(queryStringQuery(search));
       }
 
       return executeSearch(query, createSorts(sorts), firstResult, maxResults);
     }
+  }
+
+  /**
+   * Creates match queries for all given ids for given field. 
+   * Fields are combined within bool query with or operator 
+   * 
+   * @param field field
+   * @param ids ids
+   * @return bool query
+   */
+  private BoolQueryBuilder createOrMatchQuery(String field, List<UUID> ids) {
+    BoolQueryBuilder matchOrQuery = boolQuery();
+    ids.forEach(id -> matchOrQuery.should(matchQuery(field, id.toString())));
+    return matchOrQuery;
   }
 
   @Override

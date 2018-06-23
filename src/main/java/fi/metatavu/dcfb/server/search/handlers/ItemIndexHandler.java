@@ -92,6 +92,7 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
     List<String> descriptionEn = localizedValueController.getValues(item.getDescription(), localeEn);
 
     UUID categoryId = item.getCategory() != null ? item.getCategory().getId() : null;
+    UUID locationId = item.getLocation() != null ? item.getLocation().getId() : null;
     String slug = item.getSlug();
     OffsetDateTime createdAt = item.getCreatedAt();
     OffsetDateTime modifiedAt = item.getModifiedAt();
@@ -104,7 +105,8 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
         descriptionFi, 
         descriptionSv, 
         descriptionEn, 
-        categoryId, 
+        categoryId,
+        locationId,
         slug, 
         createdAt, 
         modifiedAt, 

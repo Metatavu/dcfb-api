@@ -13,6 +13,7 @@ public class IndexableItem extends AbstractIndexable {
 
   public static final String TYPE = "item";
   public static final String CATEGORY_ID_FIELD = "categoryId";
+  public static final String LOCATION_ID_FIELD = "locationId";
   public static final String CREATED_AT_FIELD = "createdAt";
   public static final String MODIFIED_AT_FIELD = "modifiedAt";
   
@@ -38,6 +39,9 @@ public class IndexableItem extends AbstractIndexable {
   private UUID categoryId;
 
   @Field(index = "not_analyzed", store = true)
+  private UUID locationId;
+
+  @Field(index = "not_analyzed", store = true)
   private String slug;
 
   @Field(index = "not_analyzed", store = true, type = "date")
@@ -56,7 +60,7 @@ public class IndexableItem extends AbstractIndexable {
   @SuppressWarnings ("squid:S00107")
   public IndexableItem(UUID id, List<String> titleFi, List<String> titleSv, List<String> titleEn, 
       List<String> descriptionFi, List<String> descriptionSv, List<String> descriptionEn, 
-      UUID categoryId, String slug, OffsetDateTime createdAt, OffsetDateTime modifiedAt,
+      UUID categoryId, UUID locationId, String slug, OffsetDateTime createdAt, OffsetDateTime modifiedAt,
       OffsetDateTime expiresAt) {
     super(id);
     this.titleFi = titleFi;
@@ -66,6 +70,7 @@ public class IndexableItem extends AbstractIndexable {
     this.descriptionSv = descriptionSv;
     this.descriptionEn = descriptionEn;
     this.categoryId = categoryId;
+    this.locationId = locationId;
     this.slug = slug;
     this.createdAt = createdAt;
     this.modifiedAt = modifiedAt;
@@ -129,20 +134,69 @@ public class IndexableItem extends AbstractIndexable {
     return categoryId;
   }
 
+  /**
+   * @param categoryId the categoryId to set
+   */
+  public void setCategoryId(UUID categoryId) {
+    this.categoryId = categoryId;
+  }
+
+  /**
+   * @return the locationId
+   */
+  public UUID getLocationId() {
+    return locationId;
+  }
+
+  /**
+   * @param locationId the locationId to set
+   */
+  public void setLocationId(UUID locationId) {
+    this.locationId = locationId;
+  }
+
   public String getSlug() {
     return slug;
+  }
+
+  /**
+   * @param slug the slug to set
+   */
+  public void setSlug(String slug) {
+    this.slug = slug;
   }
 
   public OffsetDateTime getCreatedAt() {
     return createdAt;
   }
 
+  /**
+   * @param createdAt the createdAt to set
+   */
+  public void setCreatedAt(OffsetDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
   public OffsetDateTime getModifiedAt() {
     return modifiedAt;
   }
 
+  /**
+   * @param modifiedAt the modifiedAt to set
+   */
+  public void setModifiedAt(OffsetDateTime modifiedAt) {
+    this.modifiedAt = modifiedAt;
+  }
+
   public OffsetDateTime getExpiresAt() {
     return expiresAt;
+  }
+
+  /**
+   * @param expiresAt the expiresAt to set
+   */
+  public void setExpiresAt(OffsetDateTime expiresAt) {
+    this.expiresAt = expiresAt;
   }
 
 }

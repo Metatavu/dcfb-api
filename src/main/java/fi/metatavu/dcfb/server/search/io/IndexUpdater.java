@@ -59,6 +59,11 @@ public class IndexUpdater extends AbstractIndexHander {
       return;
     }
 
+    if (indexable == null) {
+      logger.warn("Indexable is null");
+      return;
+    }
+
     getClient().prepareIndex(getIndex(), indexable.getType(), indexable.getId().toString())
       .setSource(serialize(indexable), XContentType.JSON)
       .execute()

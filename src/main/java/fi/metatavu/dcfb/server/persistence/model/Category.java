@@ -39,7 +39,7 @@ public class Category {
   @ManyToOne (optional = false)
   private LocalizedEntry title;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   @NotNull
   @NotEmpty
   private String slug;

@@ -1,13 +1,11 @@
 package fi.metatavu.dcfb.server.rest;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.Currency;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.ejb.Stateful;
 import javax.enterprise.context.RequestScoped;
@@ -18,8 +16,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import fi.metatavu.dcfb.server.items.CategoryController;
 import fi.metatavu.dcfb.server.items.ItemController;
+import fi.metatavu.dcfb.server.items.LocationController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
+import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
@@ -40,6 +40,9 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   private CategoryController categoryController;
 
   @Inject
+  private LocationController locationController;
+
+  @Inject
   private ItemController itemController;
 
   @Inject
@@ -58,6 +61,11 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     Category category = categoryController.findCategory(payload.getCategoryId());
     if (category == null) {
       return createBadRequest(String.format("Invalid category %s", payload.getCategoryId()));
+    }
+
+    Location location = payload.getLocationId() != null ? locationController.findLocation(payload.getLocationId()) : null;
+    if (payload.getLocationId() != null && location == null) {
+      return createBadRequest(String.format("Invalid location %s", payload.getLocationId()));
     }
     
     Currency priceCurrency = null;
@@ -80,6 +88,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         title, 
         description, 
         category, 
+        location,
         slug, 
         expiresAt, 
         unitPrice, 
@@ -117,27 +126,35 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   }
 
   @Override
-  public Response listItems(String categoryIdsParam, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
+  public Response listItems(String categoryIdsParam, String locationIdsParam, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
     List<Category> categories = null;
+    List<Location> locations = null;
 
-    if (categoryIdsParam != null) {
-      try {      
-        categories = Arrays.stream(StringUtils.split(categoryIdsParam, ','))
-          .map(UUID::fromString)
-          .map(categoryId -> {
-            Category category = categoryController.findCategory(categoryId);
-            if (category == null) {
-              throw new IllegalArgumentException(String.format("Could not find category %s", categoryId));
-            }
-            
-            return category;
-          })
-          .collect(Collectors.toList());
-      } catch (IllegalArgumentException e) {
-        return createBadRequest(e.getMessage());
-      }
+    try {
+      categories = getListParameter(categoryIdsParam, (param) -> {
+        UUID id = UUID.fromString(param);
+        Category category = categoryController.findCategory(id);
+        if (category == null) {
+          throw new IllegalArgumentException(String.format("Could not find category %s", id));
+        }
+        
+        return category;
+      });
+
+      locations = getListParameter(locationIdsParam, (param) -> {
+        UUID id = UUID.fromString(param);
+        Location location = locationController.findLocation(id);
+        if (location == null) {
+          throw new IllegalArgumentException(String.format("Could not find location %s", id));
+        }
+        
+        return location;
+      });
+
+    } catch (IllegalArgumentException e) {
+      return createBadRequest(e.getMessage());
     }
-
+    
     List<ItemListSort> sorts = null;
     try {
       sorts = getEnumListParameter(ItemListSort.class, sort);
@@ -145,7 +162,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createBadRequest(e.getMessage());
     }
 
-    SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(categories, search, firstResult, maxResults, sorts);
+    SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(categories, locations, search, firstResult, maxResults, sorts);
 
     return createOk(itemTranslator.translateItems(searchResult.getResult()), searchResult.getTotalHits());
   }
@@ -170,6 +187,11 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     if (category == null) {
       return createBadRequest(String.format("Invalid category %s", payload.getCategoryId()));
     }
+
+    Location location = payload.getLocationId() != null ? locationController.findLocation(payload.getLocationId()) : null;
+    if (payload.getLocationId() != null && location == null) {
+      return createBadRequest(String.format("Invalid location %s", payload.getLocationId()));
+    }
     
     Currency priceCurrency = null;
     try {
@@ -181,7 +203,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     item = itemController.updateItem(item, 
         title, 
         description, 
-        category, 
+        category,
+        location,
         slug, 
         expiresAt, 
         unitPrice, 

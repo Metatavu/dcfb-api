@@ -2,7 +2,13 @@ package fi.metatavu.dcfb.server.persistence.dao;
 
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import fi.metatavu.dcfb.server.persistence.model.Category;
+import fi.metatavu.dcfb.server.persistence.model.Category_;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 
 /**
@@ -30,6 +36,23 @@ public class CategoryDAO extends AbstractDAO<Category> {
     category.setLastModifier(lastModifier);
 
     return persist(category);
+  }
+
+  /**
+   * Finds location by slug
+   * 
+   * @param slug
+   * @return location
+   */
+  public Category findBySlug(String slug) {
+    EntityManager entityManager = getEntityManager();
+
+    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Category> criteria = criteriaBuilder.createQuery(Category.class);
+    Root<Category> root = criteria.from(Category.class);
+    criteria.select(root);
+    criteria.where(criteriaBuilder.equal(root.get(Category_.slug), slug));
+    return getSingleResult(entityManager.createQuery(criteria));
   }
 
   /**

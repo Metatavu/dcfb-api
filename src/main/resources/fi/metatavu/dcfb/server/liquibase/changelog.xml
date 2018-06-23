@@ -49,7 +49,7 @@
         <constraints nullable="false" foreignKeyName="FK_CATEGORY_TITLE_ID" referencedTableName="localizedentry" referencedColumnNames="id"/>
       </column>
       <column name="slug" type="varchar(255)">
-        <constraints nullable="false"/>
+        <constraints unique="true" nullable="false"/>
       </column>
       <column name="createdat" type="timestamp">
         <constraints nullable="false"/>
@@ -76,7 +76,7 @@
         <constraints nullable="false" foreignKeyName="FK_ITEM_CATEGORY_ID" referencedTableName="category" referencedColumnNames="id"/>
       </column>
       <column name="slug" type="varchar(255)">
-        <constraints nullable="false"/>
+        <constraints unique="true" nullable="false"/>
       </column>
       <column name="createdat" type="timestamp">
         <constraints nullable="false"/>
@@ -151,6 +151,45 @@
 
     <addUniqueConstraint constraintName="UN_CATEGORYMETA_CATEGORY_ID_KEY" columnNames="category_id,key" tableName="categorymeta"/>
     <addUniqueConstraint constraintName="UN_ITEMMETA_ITEM_ID_KEY" columnNames="item_id,key" tableName="itemmeta"/>
+  </changeSet>
+
+  <changeSet id="locations" author="antti.leppa">
+    <createTable tableName="location">
+      <column name="id" type="uuid">
+        <constraints unique="true" nullable="false" primaryKey="true"/>
+      </column>
+      <column name="name_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_LOCATION_NAME_ID" referencedTableName="localizedentry" referencedColumnNames="id"/>
+      </column>
+      <column name="additionalinformations_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_LOCATION_ADDITIONAL_INFORMATIONS_ID" referencedTableName="localizedentry" referencedColumnNames="id"/>
+      </column>
+      <column name="slug" type="varchar(255)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="latitude" type="decimal"/>
+      <column name="longitude" type="decimal"/>
+      <column name="streetaddress" type="varchar(255)"/>
+      <column name="postalcode" type="varchar(255)"/>
+      <column name="postoffice" type="varchar(255)"/>
+      <column name="country" type="varchar(255)"/>
+      <column name="createdat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="modifiedat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="lastmodifier" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+    </createTable>
+
+    <addColumn tableName="item">
+      <column name="location_id" type="uuid">
+        <constraints nullable="true" foreignKeyName="FK_ITEM_LOCATION_ID" referencedTableName="location" referencedColumnNames="id"/>
+      </column>
+    </addColumn>
+
   </changeSet>
     
 </databaseChangeLog>
