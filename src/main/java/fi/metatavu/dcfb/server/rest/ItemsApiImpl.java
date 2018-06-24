@@ -50,6 +50,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
   @Override
   public Response createItem(Item payload) throws Exception {
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not create items");
+    }
+
     if (!isValidLocalizedList(payload.getTitle())) {
       return createBadRequest("Invalid title");
     }
@@ -105,6 +109,12 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
   @Override
   public Response deleteItem(UUID itemId) throws Exception {
+    // TODO: Add resource based permission check
+
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not delete items");
+    }
+
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
     if (item == null) {
       return createNotFound(NOT_FOUND_MESSAGE);
@@ -117,6 +127,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
   @Override
   public Response findItem(UUID itemId) throws Exception {
+    // TODO: Add resource based permission check
+
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
     if (item == null) {
       return createNotFound(NOT_FOUND_MESSAGE);
@@ -127,6 +139,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
   @Override
   public Response listItems(String categoryIdsParam, String locationIdsParam, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
+    // TODO: Add resource based permission check
+
     List<Category> categories = null;
     List<Location> locations = null;
 
@@ -169,6 +183,12 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
   @Override
   public Response updateItem(UUID itemId, Item payload) throws Exception {
+    // TODO: Add resource based permission check
+
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not update items");
+    }
+
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
     if (item == null) {
       return createNotFound(NOT_FOUND_MESSAGE);
