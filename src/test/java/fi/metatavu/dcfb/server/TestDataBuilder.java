@@ -36,6 +36,7 @@ public class TestDataBuilder {
   private String password;
   private String adminToken;
   private String accessToken;
+  private String anonymousToken;
   
   /**
    * Constructor
@@ -79,6 +80,16 @@ public class TestDataBuilder {
    */
   public CategoriesApi getCategoriesApi() throws IOException {
     return test.getCategoriesApi(getAccessToken());
+  }
+  
+  /**
+   * Returns initialized categories API
+   * 
+   * @return initialized categories API
+   * @throws IOException
+   */
+  public CategoriesApi getAnonymousCategoriesApi() throws IOException {
+    return test.getCategoriesApi(getAnonymousToken());
   }
   
   /**
@@ -330,8 +341,22 @@ public class TestDataBuilder {
     if (adminToken == null) {
       adminToken = test.getAdminToken();
     }
-    
+
     return adminToken;
+  }
+  
+  /**
+   * Returns anonymous token
+   * 
+   * @return anonymous token
+   * @throws IOException
+   */
+  private String getAnonymousToken() throws IOException {
+    if (anonymousToken == null) {
+      anonymousToken = test.getAnonymousToken();
+    }
+
+    return anonymousToken;
   }
 
   /**

@@ -51,6 +51,9 @@ public abstract class AbstractApi {
   protected static final String NOT_FOUND_MESSAGE = "Not found";
   protected static final String UNAUTHORIZED = "Unauthorized";
 
+  private static final String REALM_ADMIN = "admin";
+  private static final String REALM_USER = "user";
+
   @Inject
   private Logger logger;
   
@@ -325,6 +328,24 @@ public abstract class AbstractApi {
   }
 
   /**
+   * Returns whether logged user is in realm admin role
+   * 
+   * @return whether logged user is in realm admin role
+   */
+  protected boolean isRealmAdmin() {
+    return hasRealmRole(REALM_ADMIN);
+  }
+
+  /**
+   * Returns whether logged user is in realm user role
+   * 
+   * @return whether logged user is in realm user role
+   */
+  protected boolean isRealmUser() {
+    return hasRealmRole(REALM_USER);
+  }
+
+  /**
    * Returns whether logged user has at least one of specified realm roles
    * 
    * @param role role
@@ -342,7 +363,7 @@ public abstract class AbstractApi {
     if (keycloakSecurityContext == null) {
       return false;
     }
-    
+
     AccessToken token = keycloakSecurityContext.getToken();
     if (token == null) {
       return false;
@@ -352,7 +373,7 @@ public abstract class AbstractApi {
     if (realmAccess == null) {
       return false;
     }
-    
+
     for (int i = 0; i < roles.length; i++) {
       if (realmAccess.isUserInRole(roles[i])) {
         return true;

@@ -37,6 +37,10 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
 
   @Override
   public Response createCategory(fi.metatavu.dcfb.server.rest.model.Category payload) throws Exception {
+    if (!isRealmAdmin()) { 
+      return createForbidden(UNAUTHORIZED);
+    }
+
     Category parent = payload.getParentId() != null ? categoryController.findCategory(payload.getParentId()) : null;
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
     UUID lastModifier = getLoggerUserId();
@@ -52,6 +56,10 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
 
   @Override
   public Response deleteCategory(UUID categoryId) throws Exception {
+    if (!isRealmAdmin()) { 
+      return createForbidden(UNAUTHORIZED);
+    }
+
     Category category = categoryController.findCategory(categoryId);
     if (category == null) {
       return createNotFound(NOT_FOUND_MESSAGE);
@@ -93,6 +101,10 @@ public class CategoriesApiImpl extends AbstractApi implements CategoriesApi {
 
   @Override
   public Response updateCategory(UUID categoryId, fi.metatavu.dcfb.server.rest.model.Category payload) throws Exception {
+    if (!isRealmAdmin()) { 
+      return createForbidden(UNAUTHORIZED);
+    }
+
     Category parent = payload.getParentId() != null ? categoryController.findCategory(payload.getParentId()) : null;
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
     UUID lastModifier = getLoggerUserId();

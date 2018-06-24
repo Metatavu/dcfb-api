@@ -61,12 +61,52 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       dataBuilder.clean();
     }
   }
-   
+
+  @Test
+  public void testCreateCategoryAsUser() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      
+      try {
+        Category category = new Category();
+        category.setTitle(dataBuilder.createLocalized(Locale.GERMAN, "PLURAL", "new category"));
+        categoriesApi.createCategory(category);
+        fail("Creating categories as user should be forbidden");
+      } catch (FeignException e) {
+        assertEquals(403, e.status());
+      }
+
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+
+  @Test
+  public void testCreateCategoryAsAnonymous() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
+      
+      try {
+        Category category = new Category();
+        category.setTitle(dataBuilder.createLocalized(Locale.GERMAN, "PLURAL", "new category"));
+        categoriesApi.createCategory(category);
+        fail("Creating categories as anonymous should be forbidden");
+      } catch (FeignException e) {
+        assertEquals(403, e.status());
+      }
+
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+  
   @Test
   public void testFindCategory() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
-      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
       Category createdCategory = dataBuilder.createSimpleCategory();
       assertEquals(createdCategory.toString(), categoriesApi.findCategory(createdCategory.getId()).toString());
     } finally {
@@ -78,7 +118,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
   public void testListCategory() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
-      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
       Category category1 = dataBuilder.createSimpleCategory();
 
       waitCategoryCount(categoriesApi, 1);
@@ -100,7 +140,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
   public void testSearchCategoriesByText() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
-      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
 
       Category simpleCategory = dataBuilder.createSimpleCategory();
       
@@ -118,7 +158,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
   public void testSearchCategoriesBySlug() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
-      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
 
       Category simpleCategory = dataBuilder.createSimpleCategory();
       
@@ -139,7 +179,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
   public void testSearchCategoriesByParent() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
-      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
 
       Category parentCategory = dataBuilder.createSimpleCategory();
 
@@ -181,7 +221,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
   public void testSearchCategoriesLimit() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
-      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
 
       dataBuilder.createSimpleCategory();
       dataBuilder.createSimpleCategory();
@@ -207,7 +247,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
   public void testSearchCategoriesSortDates() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
-      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
 
       Category category1 = dataBuilder.createSimpleCategory();
       waitCategoryCount(categoriesApi, 1);
@@ -242,7 +282,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
   public void testSearchCategoriesSortScore() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
-      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
 
       fi.metatavu.dcfb.client.Category payload1 = new fi.metatavu.dcfb.client.Category();
       payload1.setTitle(dataBuilder.createLocalized("example title test"));
@@ -270,7 +310,7 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
   public void testUpdateCategory() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
-      CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+      CategoriesApi categoriesApi = dataBuilder.getAdminCategoriesApi();
       Category parentCategory = dataBuilder.createSimpleCategory();
 
       Category payload = new Category();
@@ -315,6 +355,42 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       dataBuilder.clean();
     }
   }
+
+  @Test
+  public void testUpdateCategoryAsUser() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      Category category = dataBuilder.createSimpleCategory();
+
+      try {
+        CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+        categoriesApi.updateCategory(category.getId(), category);
+        fail("Updating categories as user should be forbidden");
+      } catch (FeignException e) {
+        assertEquals(403, e.status());
+      }
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+
+  @Test
+  public void testUpdateCategoryAsAnonymous() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      Category category = dataBuilder.createSimpleCategory();
+
+      try {
+        CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
+        categoriesApi.updateCategory(category.getId(), category);
+        fail("Updating categories as user should be forbidden");
+      } catch (FeignException e) {
+        assertEquals(403, e.status());
+      }
+    } finally {
+      dataBuilder.clean();
+    }
+  }
   
   @Test
   public void testDeleteCategory() throws IOException, URISyntaxException {
@@ -334,6 +410,42 @@ public class CategoriesTestsIT extends AbstractIntegrationTest {
       }
       
       dataBuilder.excludeCategoryFromClean(simpleCategory);
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+
+  @Test
+  public void testDeleteCategoryAsUser() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      Category category = dataBuilder.createSimpleCategory();
+
+      try {
+        CategoriesApi categoriesApi = dataBuilder.getCategoriesApi();
+        categoriesApi.deleteCategory(category.getId());
+        fail("Deleting categories as user should be forbidden");
+      } catch (FeignException e) {
+        assertEquals(403, e.status());
+      }
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+
+  @Test
+  public void testDeleteCategoryAsAnonymous() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      Category category = dataBuilder.createSimpleCategory();
+
+      try {
+        CategoriesApi categoriesApi = dataBuilder.getAnonymousCategoriesApi();
+        categoriesApi.deleteCategory(category.getId());
+        fail("Deleting categories as user should be forbidden");
+      } catch (FeignException e) {
+        assertEquals(403, e.status());
+      }
     } finally {
       dataBuilder.clean();
     }
