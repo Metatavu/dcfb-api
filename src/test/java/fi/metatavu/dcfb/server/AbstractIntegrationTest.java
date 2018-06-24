@@ -1,11 +1,13 @@
 package fi.metatavu.dcfb.server;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import fi.metatavu.dcfb.ApiClient;
@@ -31,7 +33,8 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
   protected static final String REALM_1 = "test-1";
   protected static final String BASE_URL = "/v1";
   protected static final String AUTH_SERVER_URL = "http://localhost:8280";
-  protected static final String DEFAULT_KEYCLOAK_CLIENT_ID = "ui";
+  protected static final String KEYCLOAK_CLIENT_ID = "ui";
+  protected static final String KEYCLOAK_CLIENT_SECRET = "71926dcf-e676-4a3b-babc-a3900d92492e";
   protected static final UUID REALM1_USER_1_ID = UUID.fromString("c72e219c-71a0-4f5e-9b06-5dafe5394e27");
   
   /**
@@ -135,18 +138,6 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
     apiClient.setBasePath(basePath);
     return apiClient;
   }
-  
-  /**
-   * Resolves an access token for realm, username and password
-   * 
-   * @param username username
-   * @param password password
-   * @return an access token
-   * @throws IOException thrown on communication failure
-   */
-  protected String getAccessToken(String username, String password) throws IOException {
-    return getAccessToken(DEFAULT_KEYCLOAK_CLIENT_ID, username, password);
-  }
 
   /**
    * Resolves an admin access token for realm
@@ -155,24 +146,23 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
    * @throws IOException thrown on communication failure
    */
   protected String getAdminToken() throws IOException {
-    return getAccessToken(DEFAULT_KEYCLOAK_CLIENT_ID, ADMIN_USERNAME, ADMIN_PASSWORD); 
+    return getAccessToken(ADMIN_USERNAME, ADMIN_PASSWORD); 
   }
 
   /**
-   * Resolves an access token for realm, client, username and password
+   * Resolves an access token for username and password
    * 
-   * @param clientId clientId
    * @param username username
    * @param password password
    * @return an access token
    * @throws IOException thrown on communication failure
    */
-  protected String getAccessToken(String clientId, String username, String password) throws IOException {
+  protected String getAccessToken(String username, String password) throws IOException {
     String path = String.format("/auth/realms/%s/protocol/openid-connect/token", KEYCLOAK_REALM);
-    
     String response = given()
       .baseUri(AUTH_SERVER_URL)
-      .formParam("client_id", clientId)
+      .formParam("client_id", KEYCLOAK_CLIENT_ID)
+      .formParam("client_secret", KEYCLOAK_CLIENT_SECRET)
       .formParam("grant_type", "password")
       .formParam("username", username)
       .formParam("password", password)
@@ -181,7 +171,33 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
       .asString();
 
     Map<String, Object> responseMap = readJsonMap(response);
-    return (String) responseMap.get("access_token");
+    String result = (String) responseMap.get("access_token");
+    assertNotNull(result);
+    return result;
+  }
+
+  /**
+   * Resolves an anonymous access token (service account)
+   * 
+   * @return an access token
+   * @throws IOException thrown on communication failure
+   */
+  protected String getAnonymousToken() throws IOException {
+    String path = String.format("/auth/realms/%s/protocol/openid-connect/token", KEYCLOAK_REALM);
+    String passwordEncoded = Base64.encodeBase64String(String.format("%s:%s", KEYCLOAK_CLIENT_ID, KEYCLOAK_CLIENT_SECRET).getBytes());
+    String authorization = String.format("Basic %s", passwordEncoded);
+    String response = given()
+      .baseUri(AUTH_SERVER_URL)
+      .header("Authorization", authorization)
+      .formParam("grant_type", "client_credentials")
+      .post(path)
+      .getBody()
+      .asString();
+      
+    Map<String, Object> responseMap = readJsonMap(response);
+    String result = (String) responseMap.get("access_token");
+    assertNotNull(result);
+    return result;
   }
   
   /**

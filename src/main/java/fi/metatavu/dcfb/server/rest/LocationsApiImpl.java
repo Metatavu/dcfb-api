@@ -39,6 +39,10 @@ public class LocationsApiImpl extends AbstractApi implements LocationsApi {
 
   @Override
   public Response createLocation(Location payload) throws Exception {
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not create locations");
+    }
+
     if (!isValidLocalizedList(payload.getName())) {
       return createBadRequest("Invalid name");
     }
@@ -123,6 +127,12 @@ public class LocationsApiImpl extends AbstractApi implements LocationsApi {
 
   @Override
   public Response updateLocation(UUID locationId, Location payload) throws Exception {
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not update locations");
+    }
+
+    // TODO: Add resource based permission check
+
     fi.metatavu.dcfb.server.persistence.model.Location location = locationController.findLocation(locationId);
     if (location == null) {
       return createNotFound(NOT_FOUND_MESSAGE);
@@ -192,6 +202,12 @@ public class LocationsApiImpl extends AbstractApi implements LocationsApi {
 
   @Override
   public Response deleteLocation(UUID locationId) throws Exception {
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not delete locations");
+    }
+
+    // TODO: Add resource based permission check
+
     fi.metatavu.dcfb.server.persistence.model.Location location = locationController.findLocation(locationId);
     if (location == null) {
       return createNotFound(NOT_FOUND_MESSAGE);
