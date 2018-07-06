@@ -1,3 +1,4 @@
+[![Coverage Status](https://coveralls.io/repos/github/Metatavu/dcfb-api/badge.svg?branch=develop)](https://coveralls.io/github/Metatavu/dcfb-api?branch=develop)
 # DCFB API
 
 API Service for DCFBs.
