@@ -191,5 +191,35 @@
     </addColumn>
 
   </changeSet>
-    
+
+  <changeSet id="item-resource-ids" author="heikki.kurhinen">
+    <addColumn tableName="item">
+      <column name="resourceid" type="uuid">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="item-visibility-limited" author="heikki.kurhinen">
+    <addColumn tableName="item">
+      <column name="visibilitylimited" type="boolean">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+  </changeSet> 
+
+  <changeSet id="item-user" author="heikki.kurhinen">
+    <createTable tableName="itemuser">
+      <column name="id" type="uuid">
+        <constraints unique="true" nullable="false" primaryKey="true"/>
+      </column>
+      <column name="item_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEMUSER_ITEM_ID" referencedTableName="item" referencedColumnNames="id"/>
+      </column>      
+      <column name="userid" type="uuid">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+  </changeSet>
+
 </databaseChangeLog>

@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import fi.metatavu.dcfb.server.search.handlers.ItemIndexHandler;
@@ -32,6 +33,7 @@ import fi.metatavu.dcfb.server.search.handlers.ItemIndexHandler;
 public class Item {
 
   @Id
+  @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID id;
 
   @ManyToOne (optional = false)
@@ -61,6 +63,7 @@ public class Item {
   private OffsetDateTime expiresAt;
 
   @Column (nullable = false)
+  @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID lastModifier;
 
   @Column(nullable = false)
@@ -78,7 +81,14 @@ public class Item {
   @NotNull
   @NotEmpty
   private String unit;
-  
+
+  @Column (nullable = false)
+  private boolean visibilityLimited;
+
+  @Column (nullable = true)
+  @Type(type="org.hibernate.type.PostgresUUIDType")
+  private UUID resourceId;
+
   public UUID getId() {
     return id;
   }
@@ -109,6 +119,14 @@ public class Item {
 
   public void setCategory(Category category) {
     this.category = category;
+  }
+
+  public void setVisibilityLimited(boolean visibilityLimited) {
+    this.visibilityLimited = visibilityLimited;
+  }
+
+  public boolean getVisibilityLimited() {
+    return visibilityLimited;
   }
 
   /**
@@ -188,7 +206,21 @@ public class Item {
   public void setUnit(String unit) {
     this.unit = unit;
   }
-  
+
+  /**
+   * @return the resourceId
+   */
+  public UUID getResourceId() {
+    return resourceId;
+  }
+
+  /**
+   * @param resourceId the resourceId to set
+   */
+  public void setResourceId(UUID resourceId) {
+    this.resourceId = resourceId;
+  }
+
   public UUID getLastModifier() {
     return lastModifier;
   }

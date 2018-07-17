@@ -29,6 +29,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class LocalizedValue {
 
   @Id
+  @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID id;
 
   @ManyToOne (optional = false)

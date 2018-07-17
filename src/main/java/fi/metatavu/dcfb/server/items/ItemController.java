@@ -12,10 +12,12 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import fi.metatavu.dcfb.server.persistence.dao.ItemMetaDAO;
+import fi.metatavu.dcfb.server.persistence.dao.ItemUserDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemImageDAO;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.ItemMeta;
+import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.Item;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
@@ -43,6 +45,9 @@ public class ItemController {
   @Inject
   private ItemMetaDAO itemMetaDAO;
   
+  @Inject
+  private ItemUserDAO itemUserDAO;
+
   /**
    * Create item
    *
@@ -56,12 +61,13 @@ public class ItemController {
    * @param priceCurrency priceCurrency
    * @param amount amount
    * @param unit unit
+   * @param visibilityLimited is items visibility limited to only specific users
    * @param modifier modifier
    * @return created item
    */
   @SuppressWarnings ("squid:S00107")
-  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID modifier) {
-    return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, priceCurrency, amount, unit, modifier);
+  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, UUID modifier) {
+    return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, priceCurrency, amount, unit, visibilityLimited, resourceId, modifier);
   }
 
   /**
@@ -87,11 +93,12 @@ public class ItemController {
    * @param priceCurrency priceCurrency
    * @param amount amount
    * @param unit unit
+   * @param visibilityLimited visibility limited
    * @param modifier modifier
    * @return updated item
    */
   @SuppressWarnings ("squid:S00107")
-  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID modifier) {
+  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID modifier) {
     itemDAO.updateTitle(item, title, modifier);
     itemDAO.updateDescription(item, description, modifier);
     itemDAO.updateCategory(item, category, modifier);
@@ -101,6 +108,7 @@ public class ItemController {
     itemDAO.updateUnitPrice(item, unitPrice, modifier);
     itemDAO.updatePriceCurrency(item, priceCurrency, modifier);
     itemDAO.updateAmount(item, amount, modifier);
+    itemDAO.updateVisibilityLimited(item, visibilityLimited, modifier);
     itemDAO.updateUnit(item, unit, modifier);
     return item;
   }
@@ -113,6 +121,7 @@ public class ItemController {
   public void deleteItem(Item item) {
     itemMetaDAO.listByItem(item).stream().forEach(itemMetaDAO::delete);
     deleteItemImages(item);
+    deleteItemUsers(item);
     itemDAO.delete(item);
     itemIndexHandler.deleteIndexable(item.getId());
   }
@@ -148,6 +157,37 @@ public class ItemController {
     listItemImages(item).stream().forEach(itemImageDAO::delete);
   }
 
+    /**
+   * Creates an item user
+   * 
+   * @param item item
+   * @param userId user id
+   * 
+   * @return created item user
+   */
+  public ItemUser createItemUser(Item item, UUID userId) {
+    return  itemUserDAO.create(UUID.randomUUID(), userId, item);
+  }
+
+  /**
+   * Lists item users
+   * 
+   * @param item item
+   * @return users
+   */
+  public List<ItemUser> listItemUsers(Item item) {
+    return itemUserDAO.listByItem(item);
+  }
+  
+  /**
+   * Deletes all users related to specified item
+   * 
+   * @param item item
+   */
+  public void deleteItemUsers(Item item) {
+    listItemUsers(item).stream().forEach(itemUserDAO::delete);
+  }
+
   /**
    * Searches items
    * 
@@ -158,7 +198,7 @@ public class ItemController {
    * @param maxResults maximum number of results returned
    * @return search result
    */
-  public SearchResult<Item> searchItems(List<Category> categories, List<Location> locations, String search, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
+  public SearchResult<Item> searchItems(List<Category> categories, List<Location> locations, String search, UUID currentUserId, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
     List<UUID> categoryIds = categories == null ? null : categories.stream()
       .map(Category::getId)
       .collect(Collectors.toList());
@@ -167,7 +207,7 @@ public class ItemController {
       .map(Location::getId)
       .collect(Collectors.toList());
 
-    SearchResult<UUID> searchResult = itemSearcher.searchItems(categoryIds, locationIds, search, firstResult, maxResults, sorts);
+    SearchResult<UUID> searchResult = itemSearcher.searchItems(categoryIds, locationIds, search, currentUserId, firstResult, maxResults, sorts);
 
     List<Item> items = searchResult.getResult().stream()
       .map(itemDAO::findById)
@@ -186,6 +226,19 @@ public class ItemController {
   public List<ItemMeta> listMetas(Item item) {
     return itemMetaDAO.listByItem(item); 
   }
+
+  /**
+   * Sets resource id value for an item
+   * 
+   * @param item item
+   * @param resourceId resource id
+   * @param value value
+   * @return created or updatedmeta entity. Null if given value is null
+   */
+  public Item setResourceId(Item item, UUID resourceId, UUID lastModifier) {
+    return itemDAO.updateResourceId(item, resourceId, lastModifier);
+  }
+
 
   /**
    * Sets meta value for an item

@@ -12,6 +12,8 @@ import fi.metatavu.dcfb.server.search.annotations.Field;
 public class IndexableItem extends AbstractIndexable {
 
   public static final String TYPE = "item";
+  public static final String VISIBILITY_LIMITED_FIELD = "visibilityLimited";
+  public static final String ALLOWED_USER_IDS_FIELD = "allowedUserIds";
   public static final String CATEGORY_ID_FIELD = "categoryId";
   public static final String LOCATION_ID_FIELD = "locationId";
   public static final String CREATED_AT_FIELD = "createdAt";
@@ -44,6 +46,12 @@ public class IndexableItem extends AbstractIndexable {
   @Field(index = "not_analyzed", store = true)
   private String slug;
 
+  @Field(index = "not_analyzed", store = true)
+  private List<String> allowedUserIds;
+
+  @Field(index = "not_analyzed", store = true)
+  private boolean visibilityLimited;
+
   @Field(index = "not_analyzed", store = true, type = "date")
   private OffsetDateTime createdAt;
 
@@ -60,7 +68,7 @@ public class IndexableItem extends AbstractIndexable {
   @SuppressWarnings ("squid:S00107")
   public IndexableItem(UUID id, List<String> titleFi, List<String> titleSv, List<String> titleEn, 
       List<String> descriptionFi, List<String> descriptionSv, List<String> descriptionEn, 
-      UUID categoryId, UUID locationId, String slug, OffsetDateTime createdAt, OffsetDateTime modifiedAt,
+      UUID categoryId, UUID locationId, String slug, List<String> allowedUserIds, boolean visibilityLimited, OffsetDateTime createdAt, OffsetDateTime modifiedAt,
       OffsetDateTime expiresAt) {
     super(id);
     this.titleFi = titleFi;
@@ -75,6 +83,8 @@ public class IndexableItem extends AbstractIndexable {
     this.createdAt = createdAt;
     this.modifiedAt = modifiedAt;
     this.expiresAt = expiresAt;
+    this.allowedUserIds = allowedUserIds;
+    this.visibilityLimited = visibilityLimited;
   }
 
   @Override
@@ -168,6 +178,34 @@ public class IndexableItem extends AbstractIndexable {
 
   public OffsetDateTime getCreatedAt() {
     return createdAt;
+  }
+
+  /**
+   * @return the allowedUserIds
+   */
+  public List<String> getAllowedUserIds() {
+    return allowedUserIds;
+  }
+
+  /**
+   * @param allowedUserIds the allowedUserIds to set
+   */
+  public void setAllowedUserIds(List<String> allowedUserIds) {
+    this.allowedUserIds = allowedUserIds;
+  }
+
+  /**
+   * @return the visibilityLimited
+   */
+  public boolean getVisibilityLimited() {
+    return visibilityLimited;
+  }
+
+  /**
+   * @param visibilityLimited the visibilityLimited to set
+   */
+  public void setVisibilityLimited(boolean visibilityLimited) {
+    this.visibilityLimited = visibilityLimited;
   }
 
   /**

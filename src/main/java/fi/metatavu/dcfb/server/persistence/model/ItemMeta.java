@@ -26,6 +26,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class ItemMeta {
 
   @Id
+  @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID id;
 
   @ManyToOne

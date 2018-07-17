@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -91,6 +92,9 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
     List<String> descriptionSv = localizedValueController.getValues(item.getDescription(), localeSv);
     List<String> descriptionEn = localizedValueController.getValues(item.getDescription(), localeEn);
 
+    List<String> allowedUserIds = itemController.listItemUsers(item).stream().map(itemUser -> itemUser.getUserId().toString()).collect(Collectors.toList());
+    boolean visibilityLimited = item.getVisibilityLimited();
+
     UUID categoryId = item.getCategory() != null ? item.getCategory().getId() : null;
     UUID locationId = item.getLocation() != null ? item.getLocation().getId() : null;
     String slug = item.getSlug();
@@ -107,10 +111,11 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
         descriptionEn, 
         categoryId,
         locationId,
-        slug, 
+        slug,
+        allowedUserIds,
+        visibilityLimited,
         createdAt, 
         modifiedAt, 
         expiresAt);
   }
-
 }

@@ -49,7 +49,7 @@
     
     <!-- Spec -->
     
-    <dcfb-api-spec.version>0.0.16</dcfb-api-spec.version>
+    <dcfb-api-spec.version>0.0.20</dcfb-api-spec.version>
        
     <!-- Maven -->
 
@@ -67,8 +67,8 @@
     
     <!-- Keycloak admin client -->
     
-    <keycloak-admin-client.version>4.0.0.Beta3</keycloak-admin-client.version>
-    <keycloak-adapter.version>4.0.0.Beta3</keycloak-adapter.version>
+    <keycloak-admin-client.version>4.1.0.Final</keycloak-admin-client.version>
+    <keycloak-adapter.version>4.1.0.Final</keycloak-adapter.version>
     
     <!-- Mailgun -->
     
@@ -307,35 +307,12 @@
     </dependency>
     
     <!-- Keycloak -->
-  
+
     <dependency>
       <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-adapter-spi</artifactId>
+      <artifactId>keycloak-authz-client</artifactId>
       <version>${keycloak-adapter.version}</version>
       <scope>provided</scope>
-    </dependency>
-  
-    <dependency>
-      <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-adapter-core</artifactId>
-      <version>${keycloak-adapter.version}</version>
-      <scope>provided</scope>
-    </dependency>
-  
-    <dependency>
-      <groupId>org.keycloak</groupId>
-      <artifactId>keycloak-admin-client</artifactId>
-      <version>${keycloak-admin-client.version}</version>
-      <exclusions>      
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
-        </exclusion>      
-        <exclusion>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     
     <!-- Mailgun -->

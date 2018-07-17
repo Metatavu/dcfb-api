@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import fi.metatavu.dcfb.server.search.handlers.LocationIndexHandler;
@@ -32,6 +33,7 @@ import fi.metatavu.dcfb.server.search.handlers.LocationIndexHandler;
 public class Location {
 
   @Id
+  @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID id;
 
   @Column(nullable = false, unique = true)
@@ -64,6 +66,7 @@ public class Location {
   private OffsetDateTime modifiedAt;
 
   @Column (nullable = false)
+  @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID lastModifier;
 
   /**

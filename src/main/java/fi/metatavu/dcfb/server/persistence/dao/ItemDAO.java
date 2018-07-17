@@ -38,7 +38,7 @@ public class ItemDAO extends AbstractDAO<Item> {
   * @param lastModifier modifier
   */
   @SuppressWarnings ("squid:S00107")
-  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID lastModifier) {
+  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, UUID lastModifier) {
     Item item = new Item();
     item.setId(id);
     item.setTitle(title);
@@ -51,6 +51,8 @@ public class ItemDAO extends AbstractDAO<Item> {
     item.setPriceCurrency(priceCurrency);
     item.setAmount(amount);
     item.setUnit(unit);
+    item.setVisibilityLimited(visibilityLimited);
+    item.setResourceId(resourceId);
     item.setLastModifier(lastModifier);
     return persist(item);
   }
@@ -199,6 +201,32 @@ public class ItemDAO extends AbstractDAO<Item> {
   public Item updateUnit(Item item, String unit, UUID lastModifier) {
     item.setLastModifier(lastModifier);
     item.setUnit(unit);
+    return persist(item);
+  }
+  
+  /**
+  * Updates visibility limited
+  *
+  * @param item item to update  
+  * @param visbilityLimited visibility limited
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateVisibilityLimited(Item item, boolean visibilityLimited, UUID lastModifier) {
+    item.setLastModifier(lastModifier);
+    item.setVisibilityLimited(visibilityLimited);
+    return persist(item);
+  }
+
+  /**
+   * Updates resourceId
+   * @param item item to update  
+   * @param resourceId resource id
+   * @param lastModifier modifier
+   */
+  public Item updateResourceId(Item item, UUID resourceId, UUID lastModifier) {
+    item.setResourceId(resourceId);
+    item.setLastModifier(lastModifier);
     return persist(item);
   }
 
