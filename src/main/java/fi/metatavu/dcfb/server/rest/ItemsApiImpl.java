@@ -115,7 +115,11 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     Long amount = payload.getAmount();
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
-    boolean visibilityLimited = payload.isVisibilityLimited() == null ? false : payload.isVisibilityLimited();
+    Boolean visibilityLimited = Boolean.FALSE;
+    
+    if (payload.isVisibilityLimited() != null) {
+      visibilityLimited = payload.isVisibilityLimited();
+    } 
     
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.createItem(
         title, 
