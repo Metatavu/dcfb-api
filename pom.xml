@@ -87,7 +87,7 @@
     
     <rest-assured.version>3.0.3</rest-assured.version>
     <wiremock.version>2.18.0</wiremock.version>
-    <dcfb-api-client.version>0.0.12</dcfb-api-client.version>
+    <dcfb-api-client.version>0.0.14</dcfb-api-client.version>
     
   </properties>
 

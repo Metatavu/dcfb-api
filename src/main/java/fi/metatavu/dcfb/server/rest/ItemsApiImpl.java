@@ -2,6 +2,7 @@ package fi.metatavu.dcfb.server.rest;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,7 +115,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     Long amount = payload.getAmount();
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
-    boolean visibilityLimited = payload.isVisibilityLimited();
+    boolean visibilityLimited = payload.isVisibilityLimited() == null ? false : payload.isVisibilityLimited();
     
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.createItem(
         title, 
@@ -134,7 +135,9 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     createImages(payload, item);
     List<ItemUser> itemUsers = createItemUsers(payload, item);
     ResourceRepresentation resource = createProtectedResource(item, itemUsers);
-    itemController.setResourceId(item, UUID.fromString(resource.getId()), modifier);
+    if (resource != null) {
+      itemController.setResourceId(item, UUID.fromString(resource.getId()), modifier);
+    }
     setItemMetas(item, payload.getMeta());
     
     return createOk(itemTranslator.translateItem(item));
@@ -307,6 +310,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
    * @param item item
    */
   private List<ItemUser> createItemUsers(Item payload, fi.metatavu.dcfb.server.persistence.model.Item item) {
+    if (payload.getVisibleToUsers() == null) {
+      return Collections.emptyList();
+    }
+
     return payload.getVisibleToUsers().stream().map(userId -> itemController.createItemUser(item, userId)).collect(Collectors.toList());
   }
 
@@ -353,6 +360,12 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     itemResource.setOwnerManagedAccess(true);
 
     itemResource.setAttributes(createResourceAttributes(item.getVisibilityLimited(), visibleToUsers.stream().map(ItemUser::getUserId).collect(Collectors.toList())));
+
+    AuthzClient client = getAuthzClient();
+    if (client == null) {
+      logger.warn("Error getting authorization client, cannot create resource");
+      return null;
+    }
 
     return getAuthzClient().protection().resource().create(itemResource);
   }

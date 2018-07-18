@@ -48,7 +48,8 @@ public class ItemSearcher extends AbstractSearcher {
       return executeSearch(query, createSorts(sorts), firstResult, maxResults);
     } else {
       BoolQueryBuilder query = boolQuery();
-      query.filter(createPublicOrInAllowedIdsQuery(currentUserId.toString()));
+      query.must(createPublicOrInAllowedIdsQuery(currentUserId.toString()));
+
       if (categoryIds != null) {
         query.must(createOrMatchQuery(IndexableItem.CATEGORY_ID_FIELD, categoryIds));
       }
