@@ -13,6 +13,7 @@
             <module name="org.jsoup"/>
             <module name="org.keycloak.keycloak-adapter-core"/>
             <module name="org.keycloak.keycloak-adapter-spi"/>
+            <module name="org.keycloak.keycloak-authz-client"/>
             <module name="org.wildfly.clustering.api" services="export" />
         </dependencies>
     </deployment>

@@ -19,17 +19,19 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 
+import com.github.slugify.Slugify;
+
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.authorization.client.AuthzClient;
+import org.keycloak.authorization.client.ClientAuthorizationContext;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessToken.Access;
 import org.slf4j.Logger;
-
-import com.github.slugify.Slugify;
 
 import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
@@ -100,6 +102,7 @@ public abstract class AbstractApi {
         }
       }
     } catch (IllegalArgumentException e) {
+      logger.warn("Error parsing localized value list", e);
       return false;
     }
     
@@ -352,14 +355,7 @@ public abstract class AbstractApi {
    * @return whether logged user has specified realm role or not
    */
   protected boolean hasRealmRole(String... roles) {
-    HttpServletRequest request = getHttpServletRequest();
-    Principal userPrincipal = request.getUserPrincipal();
-    KeycloakPrincipal<?> kcPrincipal = (KeycloakPrincipal<?>) userPrincipal;
-    if (kcPrincipal == null) {
-      return false;
-    }
-    
-    KeycloakSecurityContext keycloakSecurityContext = kcPrincipal.getKeycloakSecurityContext();
+    KeycloakSecurityContext keycloakSecurityContext = getKeycloakSecurityContext();
     if (keycloakSecurityContext == null) {
       return false;
     }
@@ -382,6 +378,20 @@ public abstract class AbstractApi {
     
     return false;
   }
+
+  /**
+   * Return keycloak authorization client
+   */
+  protected AuthzClient getAuthzClient() {
+    ClientAuthorizationContext clientAuthorizationContext = getAuthorizationContext();
+    if (clientAuthorizationContext == null) {
+      return null;
+    }
+
+    return clientAuthorizationContext.getClient();
+  }
+
+
 
   /**
    * Parses date time from string
@@ -469,5 +479,31 @@ public abstract class AbstractApi {
     
     return null;
   }
-}
 
+  /**
+   * Returns keycloak security context from request or null if not available
+   */
+  private KeycloakSecurityContext getKeycloakSecurityContext() {
+    HttpServletRequest request = getHttpServletRequest();
+    Principal userPrincipal = request.getUserPrincipal();
+    KeycloakPrincipal<?> kcPrincipal = (KeycloakPrincipal<?>) userPrincipal;
+    if (kcPrincipal == null) {
+      return null;
+    }
+    
+    return kcPrincipal.getKeycloakSecurityContext();
+  }
+
+  /**
+   * Return keycloak authorization client context or null if not available 
+   */
+  private ClientAuthorizationContext getAuthorizationContext() {
+    KeycloakSecurityContext keycloakSecurityContext = getKeycloakSecurityContext();
+    if (keycloakSecurityContext == null) {
+      return null;
+    }
+
+    return (ClientAuthorizationContext) keycloakSecurityContext.getAuthorizationContext();
+  }
+
+}

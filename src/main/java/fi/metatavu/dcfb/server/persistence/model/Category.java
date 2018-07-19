@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import fi.metatavu.dcfb.server.search.handlers.CategoryIndexHandler;
@@ -31,6 +32,7 @@ import fi.metatavu.dcfb.server.search.handlers.CategoryIndexHandler;
 public class Category {
 
   @Id
+  @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID id;
 
   @ManyToOne
@@ -51,6 +53,7 @@ public class Category {
   private OffsetDateTime modifiedAt;
 
   @Column (nullable = false)
+  @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID lastModifier;
 
   public UUID getId() {

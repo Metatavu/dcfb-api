@@ -1,11 +1,16 @@
 package fi.metatavu.dcfb.server.rest;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Currency;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateful;
 import javax.enterprise.context.RequestScoped;
@@ -13,11 +18,16 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
+import org.keycloak.authorization.client.AuthzClient;
+import org.keycloak.representations.idm.authorization.ResourceRepresentation;
+import org.keycloak.representations.idm.authorization.ScopeRepresentation;
+import org.slf4j.Logger;
 
 import fi.metatavu.dcfb.server.categories.CategoryController;
 import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.locations.LocationController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
+import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.Image;
@@ -36,6 +46,20 @@ import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 @Stateful
 public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
+  public static final String SCOPE_ITEM_VIEW = "item:view";
+
+  public static final String SCOPE_ITEM_MANAGE = "item:manage";
+
+  public static final String ITEM_RESOURCE_TYPE = "urn:dcfbapi:resources:item";
+
+  private static final String RESOURCE_VISIBILITY_ATTR = "visibility";
+
+  private static final String RESOURCE_VISIBILITY_USERS_ATTR = "visibleTo";
+
+  private static final String RESOURCE_VISIBILITY_PUBLIC = "public";
+
+  private static final String RESOURCE_VISIBILITY_PRIVATE = "private";
+
   @Inject
   private CategoryController categoryController;
 
@@ -47,6 +71,9 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
   @Inject
   private ItemTranslator itemTranslator;
+
+  @Inject
+  private Logger logger;
 
   @Override
   public Response createItem(Item payload) throws Exception {
@@ -76,6 +103,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     try {
       priceCurrency = Currency.getInstance(payload.getUnitPrice().getCurrency());
     } catch (IllegalArgumentException e) {
+      logger.warn("Failed to parse currency", e);
       return createBadRequest(String.format("Invalid currency %s", e.getMessage()));
     }
     
@@ -87,6 +115,11 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     Long amount = payload.getAmount();
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
+    Boolean visibilityLimited = Boolean.FALSE;
+    
+    if (payload.isVisibilityLimited() != null) {
+      visibilityLimited = payload.isVisibilityLimited();
+    } 
     
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.createItem(
         title, 
@@ -98,10 +131,17 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         unitPrice, 
         priceCurrency, 
         amount, 
-        unit, 
+        unit,
+        visibilityLimited,
+        null,
         modifier);
 
     createImages(payload, item);
+    List<ItemUser> itemUsers = createItemUsers(payload, item);
+    ResourceRepresentation resource = createProtectedResource(item, itemUsers);
+    if (resource != null) {
+      itemController.setResourceId(item, UUID.fromString(resource.getId()), modifier);
+    }
     setItemMetas(item, payload.getMeta());
     
     return createOk(itemTranslator.translateItem(item));
@@ -109,7 +149,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
   @Override
   public Response deleteItem(UUID itemId) throws Exception {
-    // TODO: Add resource based permission check
 
     if (!isRealmUser()) {
       return createForbidden("Anonymous users can not delete items");
@@ -121,13 +160,13 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     }
     
     itemController.deleteItem(item);
+    deleteProtectedResource(item);
 
     return createNoContent();
   }
 
   @Override
   public Response findItem(UUID itemId) throws Exception {
-    // TODO: Add resource based permission check
 
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
     if (item == null) {
@@ -139,7 +178,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
   @Override
   public Response listItems(String categoryIdsParam, String locationIdsParam, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
-    // TODO: Add resource based permission check
 
     List<Category> categories = null;
     List<Location> locations = null;
@@ -166,6 +204,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       });
 
     } catch (IllegalArgumentException e) {
+      logger.warn("Failed to parse list parameters", e);
       return createBadRequest(e.getMessage());
     }
     
@@ -173,17 +212,17 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     try {
       sorts = getEnumListParameter(ItemListSort.class, sort);
     } catch (IllegalArgumentException e) {
+      logger.warn("Failed to parse enum parameters", e);
       return createBadRequest(e.getMessage());
     }
 
-    SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(categories, locations, search, firstResult, maxResults, sorts);
+    SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(categories, locations, search, getLoggerUserId(), firstResult, maxResults, sorts);
 
     return createOk(itemTranslator.translateItems(searchResult.getResult()), searchResult.getTotalHits());
   }
 
   @Override
   public Response updateItem(UUID itemId, Item payload) throws Exception {
-    // TODO: Add resource based permission check
 
     if (!isRealmUser()) {
       return createForbidden("Anonymous users can not update items");
@@ -202,6 +241,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     Long amount = payload.getAmount();
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
+    boolean visibilityLimited = payload.isVisibilityLimited();
 
     Category category = categoryController.findCategory(payload.getCategoryId());
     if (category == null) {
@@ -217,6 +257,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     try {
       priceCurrency = Currency.getInstance(payload.getUnitPrice().getCurrency());
     } catch (IllegalArgumentException e) {
+      logger.warn("Failed to parse list parameters", e);
       return createBadRequest(String.format("Invalid currency %s", e.getMessage()));
     }
     
@@ -230,10 +271,14 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         unitPrice, 
         priceCurrency, 
         amount, 
-        unit, 
+        unit,
+        visibilityLimited, 
         modifier);
     
     itemController.deleteItemImages(item);
+    itemController.deleteItemUsers(item);
+    List<ItemUser> itemUsers = createItemUsers(payload, item);
+    updateProtectedResource(item, itemUsers);
     createImages(payload, item);
     setItemMetas(item, payload.getMeta());
     
@@ -263,6 +308,20 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   }
 
   /**
+   * Creates item users
+   * 
+   * @param payload REST object
+   * @param item item
+   */
+  private List<ItemUser> createItemUsers(Item payload, fi.metatavu.dcfb.server.persistence.model.Item item) {
+    if (payload.getVisibleToUsers() == null) {
+      return Collections.emptyList();
+    }
+
+    return payload.getVisibleToUsers().stream().map(userId -> itemController.createItemUser(item, userId)).collect(Collectors.toList());
+  }
+
+  /**
    * Sets meta values for a item
    * 
    * @param item
@@ -285,6 +344,86 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     itemController.deleteMetasNotIn(item, usedKeys);
 
     return item;
+  }
+
+  /**
+   * Creates protected resource to keycloak
+   * 
+   * @param item Item to create the resource for
+   * @param visibleToUsers list of users resource is visible to
+   * 
+   * @return create resource
+   */
+  private ResourceRepresentation createProtectedResource(fi.metatavu.dcfb.server.persistence.model.Item item, List<ItemUser> visibleToUsers) {
+    HashSet<ScopeRepresentation> scopes = new HashSet<>();
+    scopes.add(new ScopeRepresentation(SCOPE_ITEM_MANAGE));
+    scopes.add(new ScopeRepresentation(SCOPE_ITEM_VIEW));
+
+    ResourceRepresentation itemResource = new ResourceRepresentation(item.getSlug(), scopes, String.format("/v1/items/%s", item.getId()), ITEM_RESOURCE_TYPE);
+    itemResource.setOwner(getLoggerUserId().toString());
+    itemResource.setOwnerManagedAccess(true);
+
+    itemResource.setAttributes(createResourceAttributes(item.getVisibilityLimited(), visibleToUsers.stream().map(ItemUser::getUserId).collect(Collectors.toList())));
+
+    AuthzClient client = getAuthzClient();
+    if (client == null) {
+      logger.warn("Error getting authorization client, cannot create resource");
+      return null;
+    }
+
+    return getAuthzClient().protection().resource().create(itemResource);
+  }
+
+  /**
+   * Updates protected resource to keycloak
+   * 
+   * @param item Item to create the resource for
+   * @param visibleToUsers list of users resource is visible to
+   */
+  private void updateProtectedResource(fi.metatavu.dcfb.server.persistence.model.Item item, List<ItemUser> visibleToUsers) {
+    UUID resourceId = item.getResourceId();
+    if (resourceId == null) {
+      return;
+    }
+    
+    AuthzClient client = getAuthzClient();
+    ResourceRepresentation resource = client.protection().resource().findById(resourceId.toString());
+    if (resource == null) {
+      return;
+    }
+
+    resource.setAttributes(createResourceAttributes(item.getVisibilityLimited(), visibleToUsers.stream().map(ItemUser::getUserId).collect(Collectors.toList())));
+    client.protection().resource().update(resource);
+  }
+
+  /**
+   * Deletes protected resource
+   * 
+   * @param item Item the resource is connected to
+   */
+  private void deleteProtectedResource(fi.metatavu.dcfb.server.persistence.model.Item item) {
+    UUID resourceId = item.getResourceId();
+    if (resourceId == null) {
+      return;
+    }
+
+    getAuthzClient().protection().resource().delete(resourceId.toString());
+  }
+
+  /**
+   * Creates attributes for protected resource
+   * 
+   * @param visibilityLimited is item visibility limited
+   * @param visibleToUsers list of users resource is visible to
+   * 
+   * @return resource attributes
+   */
+  private Map<String, List<String>> createResourceAttributes(boolean visibilityLimited, List<UUID> visibleToUsers) {
+    HashMap<String, List<String>> attributes = new HashMap<>();
+    String visibility = visibilityLimited ? RESOURCE_VISIBILITY_PRIVATE : RESOURCE_VISIBILITY_PUBLIC;
+    attributes.put(RESOURCE_VISIBILITY_ATTR, Arrays.asList(visibility));
+    attributes.put(RESOURCE_VISIBILITY_USERS_ATTR, visibleToUsers.stream().map(UUID::toString).collect(Collectors.toList()));
+    return attributes;
   }
 
 }

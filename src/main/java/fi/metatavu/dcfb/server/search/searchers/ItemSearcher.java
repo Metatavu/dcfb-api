@@ -1,9 +1,10 @@
 package fi.metatavu.dcfb.server.search.searchers;
 
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
+import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
-import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.ConstantScoreQueryBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -38,13 +40,16 @@ public class ItemSearcher extends AbstractSearcher {
    * @param maxResults max results. Defaults to 20
    * @return search result 
    */
-  public SearchResult<UUID> searchItems(List<UUID> categoryIds, List<UUID> locationIds, String search, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
+  public SearchResult<UUID> searchItems(List<UUID> categoryIds, List<UUID> locationIds, String search, UUID currentUserId, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
     boolean matchAll = categoryIds == null && locationIds == null && search == null;
     if (matchAll) {
-      return executeSearch(matchAllQuery(), createSorts(sorts), firstResult, maxResults);
-    } else {    
+      ConstantScoreQueryBuilder query = constantScoreQuery(createPublicOrInAllowedIdsQuery(currentUserId.toString()));
+      query.boost(1.0f);
+      return executeSearch(query, createSorts(sorts), firstResult, maxResults);
+    } else {
       BoolQueryBuilder query = boolQuery();
-      
+      query.must(createPublicOrInAllowedIdsQuery(currentUserId.toString()));
+
       if (categoryIds != null) {
         query.must(createOrMatchQuery(IndexableItem.CATEGORY_ID_FIELD, categoryIds));
       }
@@ -73,6 +78,16 @@ public class ItemSearcher extends AbstractSearcher {
     BoolQueryBuilder matchOrQuery = boolQuery();
     ids.forEach(id -> matchOrQuery.should(matchQuery(field, id.toString())));
     return matchOrQuery;
+  }
+
+  private BoolQueryBuilder createPublicOrInAllowedIdsQuery(String currentUserId) {
+    BoolQueryBuilder publicOrInAllowedIdsQuery = boolQuery();
+    publicOrInAllowedIdsQuery.should(termQuery(IndexableItem.VISIBILITY_LIMITED_FIELD, Boolean.FALSE));
+    if (currentUserId != null) {
+      publicOrInAllowedIdsQuery.should(termQuery(IndexableItem.ALLOWED_USER_IDS_FIELD, currentUserId));
+    }
+
+    return publicOrInAllowedIdsQuery;
   }
 
   @Override
@@ -115,5 +130,4 @@ public class ItemSearcher extends AbstractSearcher {
 
     return result;  
   }
-   
 }
