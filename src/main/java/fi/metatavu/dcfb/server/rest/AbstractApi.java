@@ -2,6 +2,7 @@ package fi.metatavu.dcfb.server.rest;
 
 import java.security.Principal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,11 +12,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
+
+import com.github.slugify.Slugify;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.LocaleUtils;
@@ -23,13 +27,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.authorization.client.AuthzClient;
+import org.keycloak.authorization.client.ClientAuthorizationContext;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.AccessToken.Access;
 import org.slf4j.Logger;
 
-import com.github.slugify.Slugify;
-
-import fi.metatavu.dcfb.server.items.LocalizedValueController;
+import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedType;
 import fi.metatavu.dcfb.server.rest.model.BadRequest;
@@ -48,6 +52,9 @@ public abstract class AbstractApi {
 
   protected static final String NOT_FOUND_MESSAGE = "Not found";
   protected static final String UNAUTHORIZED = "Unauthorized";
+
+  private static final String REALM_ADMIN = "admin";
+  private static final String REALM_USER = "user";
 
   @Inject
   private Logger logger;
@@ -83,6 +90,10 @@ public abstract class AbstractApi {
    * @return whether the values in list are vaild or nor
    */
   protected boolean isValidLocalizedList(List<LocalizedValue> localizedValues) {
+    if (localizedValues == null) {
+      return true;
+    }
+
     try {
       for (int i = 0; i < localizedValues.size(); i++) {
         LocalizedValue localizedValue = localizedValues.get(i);
@@ -91,6 +102,7 @@ public abstract class AbstractApi {
         }
       }
     } catch (IllegalArgumentException e) {
+      logger.warn("Error parsing localized value list", e);
       return false;
     }
     
@@ -120,6 +132,59 @@ public abstract class AbstractApi {
     
     Slugify slugify = new Slugify();
     return slugify.slugify(text);
+  }
+
+  /**
+   * Returns list parameter as <E> translated by given translate function.
+   * 
+   * @param parameter list parameter as string list
+   * @param translate translate function
+   * @return list of <E>
+   */
+  @SuppressWarnings ("squid:S1168")
+  protected <E> List<E> getListParameter(List<String> parameter, Function<String, E> translate) {
+    if (parameter == null) {
+      return null;
+    }
+
+    List<String> merged = new ArrayList<>();
+    
+    parameter.stream()
+      .filter(StringUtils::isNoneEmpty)
+      .forEach(filter -> merged.addAll(Arrays.asList(StringUtils.split(filter, ','))));
+
+    return merged.stream()
+      .map(translate::apply)
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Returns list parameter as <E> translated by given translate function.
+   * 
+   * @param parameter list parameter as string
+   * @param translate translate function
+   * @return list of <E>
+   */
+  @SuppressWarnings ("squid:S1168")
+  protected <E> List<E> getListParameter(String parameter, Function<String, E> translate) {
+    if (parameter == null) {
+      return null;
+    }
+
+    return getListParameter(Arrays.asList(StringUtils.split(parameter, ',')), translate);
+  }
+
+  /**
+   * Parses CSV enum parameter from string list into enum list
+   * 
+   * @param enumType target enum class
+   * @param parameters string values
+   * @return list of enums
+   * @throws IllegalArgumentException if parameters contain invalid values
+   */
+  @SuppressWarnings ("squid:S1168")
+  protected <T extends Enum<T>> List<T> getEnumListParameter(Class<T> enumType, List<String> parameter) {
+    return getListParameter(parameter, name -> Enum.valueOf(enumType, name));
   }
 
   /**
@@ -158,7 +223,22 @@ public abstract class AbstractApi {
       .entity(entity)
       .build();
   }
-
+  
+  /**
+   * Constructs ok response
+   * 
+   * @param entity payload
+   * @param totalHits total hits
+   * @return response
+   */
+  protected Response createOk(Object entity, Long totalHits) {
+    return Response
+      .status(Response.Status.OK)
+      .entity(entity)
+      .header("Total-Results", totalHits)
+      .build();
+  }
+  
   /**
    * Constructs no content response
    * 
@@ -251,24 +331,35 @@ public abstract class AbstractApi {
   }
 
   /**
+   * Returns whether logged user is in realm admin role
+   * 
+   * @return whether logged user is in realm admin role
+   */
+  protected boolean isRealmAdmin() {
+    return hasRealmRole(REALM_ADMIN);
+  }
+
+  /**
+   * Returns whether logged user is in realm user role
+   * 
+   * @return whether logged user is in realm user role
+   */
+  protected boolean isRealmUser() {
+    return hasRealmRole(REALM_USER);
+  }
+
+  /**
    * Returns whether logged user has at least one of specified realm roles
    * 
    * @param role role
    * @return whether logged user has specified realm role or not
    */
   protected boolean hasRealmRole(String... roles) {
-    HttpServletRequest request = getHttpServletRequest();
-    Principal userPrincipal = request.getUserPrincipal();
-    KeycloakPrincipal<?> kcPrincipal = (KeycloakPrincipal<?>) userPrincipal;
-    if (kcPrincipal == null) {
-      return false;
-    }
-    
-    KeycloakSecurityContext keycloakSecurityContext = kcPrincipal.getKeycloakSecurityContext();
+    KeycloakSecurityContext keycloakSecurityContext = getKeycloakSecurityContext();
     if (keycloakSecurityContext == null) {
       return false;
     }
-    
+
     AccessToken token = keycloakSecurityContext.getToken();
     if (token == null) {
       return false;
@@ -278,7 +369,7 @@ public abstract class AbstractApi {
     if (realmAccess == null) {
       return false;
     }
-    
+
     for (int i = 0; i < roles.length; i++) {
       if (realmAccess.isUserInRole(roles[i])) {
         return true;
@@ -287,6 +378,20 @@ public abstract class AbstractApi {
     
     return false;
   }
+
+  /**
+   * Return keycloak authorization client
+   */
+  protected AuthzClient getAuthzClient() {
+    ClientAuthorizationContext clientAuthorizationContext = getAuthorizationContext();
+    if (clientAuthorizationContext == null) {
+      return null;
+    }
+
+    return clientAuthorizationContext.getClient();
+  }
+
+
 
   /**
    * Parses date time from string
@@ -311,27 +416,29 @@ public abstract class AbstractApi {
   private Map<Locale, Map<LocalizedType, String>> getValues(List<LocalizedValue> localizedValues) {
     Map<Locale, Map<LocalizedType, String>> result = new HashMap<>();
     
-    localizedValues.stream().forEach((localizedValue) -> {
-      Locale locale = LocaleUtils.toLocale(localizedValue.getLanguage());
-      if (locale == null) {
-        logger.error("Invalid locale {}, dropped", localizedValue.getLanguage());
-        return;
-      }
-      
-      LocalizedType type = EnumUtils.getEnum(LocalizedType.class, localizedValue.getType());
-      if (type == null) {
-        logger.error("Invalid type {}, dropped", localizedValue.getType());
-        return;
-      }
-      
-      if (!result.containsKey(locale)) {
-        result.put(locale, new HashMap<>());
-      }
-      
-      Map<LocalizedType, String> localeMap = result.get(locale);
-      localeMap.put(type, localizedValue.getValue());
-    });
-    
+    if (localizedValues != null) {
+      localizedValues.stream().forEach(localizedValue -> {
+        Locale locale = LocaleUtils.toLocale(localizedValue.getLanguage());
+        if (locale == null) {
+          logger.error("Invalid locale {}, dropped", localizedValue.getLanguage());
+          return;
+        }
+        
+        LocalizedType type = EnumUtils.getEnum(LocalizedType.class, localizedValue.getType());
+        if (type == null) {
+          logger.error("Invalid type {}, dropped", localizedValue.getType());
+          return;
+        }
+        
+        if (!result.containsKey(locale)) {
+          result.put(locale, new HashMap<>());
+        }
+        
+        Map<LocalizedType, String> localeMap = result.get(locale);
+        localeMap.put(type, localizedValue.getValue());
+      });
+    }
+
     return result;
   }
   
@@ -372,5 +479,31 @@ public abstract class AbstractApi {
     
     return null;
   }
-}
 
+  /**
+   * Returns keycloak security context from request or null if not available
+   */
+  private KeycloakSecurityContext getKeycloakSecurityContext() {
+    HttpServletRequest request = getHttpServletRequest();
+    Principal userPrincipal = request.getUserPrincipal();
+    KeycloakPrincipal<?> kcPrincipal = (KeycloakPrincipal<?>) userPrincipal;
+    if (kcPrincipal == null) {
+      return null;
+    }
+    
+    return kcPrincipal.getKeycloakSecurityContext();
+  }
+
+  /**
+   * Return keycloak authorization client context or null if not available 
+   */
+  private ClientAuthorizationContext getAuthorizationContext() {
+    KeycloakSecurityContext keycloakSecurityContext = getKeycloakSecurityContext();
+    if (keycloakSecurityContext == null) {
+      return null;
+    }
+
+    return (ClientAuthorizationContext) keycloakSecurityContext.getAuthorizationContext();
+  }
+
+}

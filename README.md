@@ -1,3 +1,4 @@
+[![Coverage Status](https://coveralls.io/repos/github/Metatavu/dcfb-api/badge.svg?branch=develop)](https://coveralls.io/github/Metatavu/dcfb-api?branch=develop)
 # DCFB API
 
 API Service for DCFBs.
@@ -49,24 +50,37 @@ Add desired hostname into hosts file and change it to point to 127.0.0.1. In thi
 ### Install Wildfly Keycloak Adapter
 
     cd $INSTALL_DIR/wildfly-13.0.0.Final
-    wget https://downloads.jboss.org/keycloak/4.0.0.Beta3/adapters/keycloak-oidc/keycloak-wildfly-adapter-dist-4.0.0.Beta3.zip
-    unzip keycloak-wildfly-adapter-dist-4.0.0.Beta3.zip
+    wget https://downloads.jboss.org/keycloak/4.1.0.Final/adapters/keycloak-oidc/keycloak-wildfly-adapter-dist-4.1.0.Final.zip
+    unzip keycloak-wildfly-adapter-dist-4.1.0.Final.zip
     sh bin/jboss-cli.sh --file=bin/adapter-elytron-install-offline.cli
-    rm keycloak-wildfly-adapter-dist-4.0.0.Beta3.zip
+    rm keycloak-wildfly-adapter-dist-4.1.0.Final.zip
     
 ### Install Keycloak
 
      cd $INSTALL_DIR
-     wget https://downloads.jboss.org/keycloak/3.4.3.Final/keycloak-3.4.3.Final.zip
-     unzip keycloak-3.4.3.Final.zip
+     wget https://downloads.jboss.org/keycloak/4.1.0.Final/keycloak-4.1.0.Final.zip
+     unzip keycloak-4.1.0.Final.zip
+     
+### Install Elastic Search
+
+     cd $INSTALL_DIR
+     wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.3.zip
+     unzip elasticsearch-5.6.3.zip
      
 ### Start Keycloak
 
 In order to use the API, Keycloak must be running, so starting it in another console would be a good idea.
 
-     cd $INSTALL_DIR/keycloak-3.4.3.Final/bin/
+     cd $INSTALL_DIR/keycloak-4.1.0.Final/bin/
      sh standalone.sh -Djboss.socket.binding.port-offset=200
      
+### Start Elastic Search
+
+In order to use the API, Elastic Search must be running, so starting it in another console would be a good idea.
+
+     cd $INSTALL_DIR/elasticsearch-5.6.3/bin
+     ./elasticsearch
+
 ### Configure Wildfly
 
 Start Wildfly in background by running following script:
@@ -87,7 +101,7 @@ Start Wildfly in background by running following script:
 
 If you have an export file, you can configure your Keycloak from it by starting the Keycloak one time with following command:
 
-     sh $INSTALL_DIR/keycloak-3.4.3.Final/bin/standalone.sh -Djboss.socket.binding.port-offset=200 -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.file=yourmigrationfile.json
+     sh $INSTALL_DIR/keycloak-4.1.0.Final/bin/standalone.sh -Djboss.socket.binding.port-offset=200 -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.file=yourmigrationfile.json
      
 If you don't have an export file, you need to do following steps to create new realm and client: 
 

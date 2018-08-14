@@ -1,13 +1,10 @@
 package fi.metatavu.dcfb.server.persistence.model;
 
-import java.util.Locale;
 import java.util.UUID;
 
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -19,30 +16,26 @@ import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
- * JPA entity for storing localized items
+ * JPA entity for item meta
  * 
  * @author Antti Leppä
  */
 @Entity
 @Cacheable(true)
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-public class LocalizedValue {
+public class ItemMeta {
 
   @Id
   @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID id;
 
-  @ManyToOne (optional = false)
-  private LocalizedEntry entry;
-  
-  @Column(nullable = false)
-  @NotNull
-  @Enumerated (EnumType.STRING)
-  private LocalizedType type;
+  @ManyToOne
+  private Item item;
 
   @Column(nullable = false)
   @NotNull
-  private Locale locale;
+  @NotEmpty
+  private String key;
 
   @Column(nullable = false)
   @NotNull
@@ -50,45 +43,61 @@ public class LocalizedValue {
   @Lob
   @Type(type = "org.hibernate.type.TextType")
   private String value;
-  
-  public void setId(UUID id) {
-    this.id = id;
-  }
-  
+
+  /**
+   * @return the id
+   */
   public UUID getId() {
     return id;
   }
-  
-  public LocalizedEntry getEntry() {
-    return entry;
+
+  /**
+   * @param id the id to set
+   */
+  public void setId(UUID id) {
+    this.id = id;
   }
-  
-  public void setEntry(LocalizedEntry entry) {
-    this.entry = entry;
+
+  /**
+   * @return the item
+   */
+  public Item getItem() {
+    return item;
   }
-  
-  public LocalizedType getType() {
-    return type;
+
+  /**
+   * @param item the item to set
+   */
+  public void setItem(Item item) {
+    this.item = item;
   }
-  
-  public void setType(LocalizedType type) {
-    this.type = type;
+
+  /**
+   * @return the key
+   */
+  public String getKey() {
+    return key;
   }
-  
-  public Locale getLocale() {
-    return locale;
+
+  /**
+   * @param key the key to set
+   */
+  public void setKey(String key) {
+    this.key = key;
   }
-  
-  public void setLocale(Locale locale) {
-    this.locale = locale;
-  }
-  
+
+  /**
+   * @return the value
+   */
   public String getValue() {
     return value;
   }
-  
+
+  /**
+   * @param value the value to set
+   */
   public void setValue(String value) {
     this.value = value;
   }
-  
+
 }

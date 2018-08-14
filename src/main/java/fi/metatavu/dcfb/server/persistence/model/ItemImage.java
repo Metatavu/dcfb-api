@@ -6,9 +6,7 @@ import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
@@ -17,54 +15,60 @@ import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
- * JPA entity for storing system wide settings
+ * JPA entity for storing images
  * 
  * @author Antti Leppä
  */
 @Entity
 @Cacheable(true)
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "settingKey" }) })
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-public class SystemSetting {
+public class ItemImage {
 
   @Id
   @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID id;
 
-  @Column(nullable = false, name = "settingKey")
-  @NotNull
-  @NotEmpty
-  private String key;
+  @Column(nullable = false)
+  private String url;
 
   @Column(nullable = false)
   @NotNull
   @NotEmpty
-  @Lob
-  @Type(type = "org.hibernate.type.TextType")
-  private String value;
+  private String contentType;
   
-  public void setId(UUID id) {
-    this.id = id;
-  }
-  
+  @ManyToOne (optional = false)
+  private Item item;
+
   public UUID getId() {
     return id;
   }
-  
-  public String getKey() {
-    return key;
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
+  public String getUrl() {
+    return url;
   }
   
-  public void setKey(String key) {
-    this.key = key;
+  public void setUrl(String url) {
+    this.url = url;
+  }
+
+  public String getContentType() {
+    return contentType;
+  }
+
+  public void setContentType(String contentType) {
+    this.contentType = contentType;
   }
   
-  public String getValue() {
-    return value;
+  public Item getItem() {
+    return item;
   }
   
-  public void setValue(String value) {
-    this.value = value;
+  public void setItem(Item item) {
+    this.item = item;
   }
-  
+
 }
