@@ -27,7 +27,8 @@ Add desired hostname into hosts file and change it to point to 127.0.0.1. In thi
     sudo -u postgres createuser -R -S dcfbapi
     sudo -u postgres createdb -Odcfbapi -Ttemplate0 dcfbapi
     sudo -u postgres psql 
-    alter user dcfbapi with password 'password';    
+    alter user dcfbapi with password 'password';
+    alter role dcfbapi with login;
     
 ### Install Java
 
