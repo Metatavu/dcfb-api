@@ -120,7 +120,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
         return itemsApi.listItems(Collections.emptyMap()).size() == 1;
       });
       
-      List<Item> items = itemsApi.listItems(null, null, "simple", null, null, null);
+      List<Item> items = itemsApi.listItems(null, null, null, "simple", null, null, null);
       assertEquals(1, items.size());
       assertEquals(simpleItem.toString(), items.get(0).toString());
     } finally {
@@ -141,26 +141,26 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
 
       waitItemCount(itemsApi, 1);
       
-      List<Item> items1Items = itemsApi.listItems(simpleCategory1.getId().toString(), null, null, null, null, null);
+      List<Item> items1Items = itemsApi.listItems(simpleCategory1.getId().toString(), null, null, null, null, null, null);
       assertEquals(1, items1Items.size());
       assertEquals(simpleItem.toString(), items1Items.get(0).toString());
 
-      List<Item> items2Items = itemsApi.listItems(simpleCategory2.getId().toString(), null, null, null, null, null);
+      List<Item> items2Items = itemsApi.listItems(simpleCategory2.getId().toString(), null, null, null, null, null, null);
       assertEquals(0, items2Items.size());
       
-      List<Item> items3Items = itemsApi.listItems(simpleCategory1.getId().toString() + "," + simpleCategory2.getId().toString(), null, null, null, null, null); 
+      List<Item> items3Items = itemsApi.listItems(simpleCategory1.getId().toString() + "," + simpleCategory2.getId().toString(), null, null, null, null, null, null); 
       assertEquals(1, items3Items.size());
       assertEquals(simpleItem.toString(), items1Items.get(0).toString());
 
       try {
-        itemsApi.listItems("not-uuid", null, null, null, null, null); 
+        itemsApi.listItems("not-uuid", null, null, null, null, null, null); 
         fail("List with invalid uuid should return bad request");
       } catch (FeignException e) {
         assertEquals(400, e.status());
       }
 
       try {
-        itemsApi.listItems(UUID.randomUUID().toString(), null, null, null, null, null);
+        itemsApi.listItems(UUID.randomUUID().toString(), null, null, null, null, null, null);
         fail("List with incorrect uuid should return bad request");
       } catch (FeignException e) {
         assertEquals(400, e.status());
@@ -184,26 +184,26 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       
       waitItemCount(itemsApi, 1);
       
-      List<Item> items1Items = itemsApi.listItems(null, simpleLocation1.getId().toString(), null, null, null, null);
+      List<Item> items1Items = itemsApi.listItems(null, simpleLocation1.getId().toString(), null, null, null, null, null);
       assertEquals(1, items1Items.size());
       assertEquals(simpleItem.toString(), items1Items.get(0).toString());
 
-      List<Item> items2Items = itemsApi.listItems(null, simpleLocation2.getId().toString(), null, null, null, null);
+      List<Item> items2Items = itemsApi.listItems(null, simpleLocation2.getId().toString(), null, null, null, null, null);
       assertEquals(0, items2Items.size());
       
-      List<Item> items3Items = itemsApi.listItems(null, simpleLocation1.getId().toString() + "," + simpleLocation2.getId().toString(), null, null, null, null); 
+      List<Item> items3Items = itemsApi.listItems(null, simpleLocation1.getId().toString() + "," + simpleLocation2.getId().toString(), null, null, null, null, null); 
       assertEquals(1, items3Items.size());
       assertEquals(simpleItem.toString(), items1Items.get(0).toString());
 
       try {
-        itemsApi.listItems(null, "not-uuid", null, null, null, null); 
+        itemsApi.listItems(null, "not-uuid", null, null, null, null, null); 
         fail("List with invalid uuid should return bad request");
       } catch (FeignException e) {
         assertEquals(400, e.status());
       }
 
       try {
-        itemsApi.listItems(null, UUID.randomUUID().toString(), null, null, null, null);
+        itemsApi.listItems(null, UUID.randomUUID().toString(), null, null, null, null, null);
         fail("List with incorrect uuid should return bad request");
       } catch (FeignException e) {
         assertEquals(400, e.status());
@@ -227,11 +227,11 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       dataBuilder.createSimpleItem(simpleCategory.getId(), null);
       waitItemCount(itemsApi, 5);
       
-      assertEquals(3, itemsApi.listItems(null, null, null, null, 2l, null).size());
-      assertEquals(2, itemsApi.listItems(null, null, null, null, 3l, 60l).size());
-      assertEquals(2, itemsApi.listItems(null, null, null, null, 1l, 2l).size());
-      assertEquals(2, itemsApi.listItems(null, null, null, null, 0l, 2l).size());
-      assertEquals(3, itemsApi.listItems(null, null, null, null, null, 3l).size());
+      assertEquals(3, itemsApi.listItems(null, null, null, null, null, 2l, null).size());
+      assertEquals(2, itemsApi.listItems(null, null, null, null, null, 3l, 60l).size());
+      assertEquals(2, itemsApi.listItems(null, null, null, null, null, 1l, 2l).size());
+      assertEquals(2, itemsApi.listItems(null, null, null, null, null, 0l, 2l).size());
+      assertEquals(3, itemsApi.listItems(null, null, null, null, null, null, 3l).size());
     } finally {
       dataBuilder.clean();
     }
@@ -255,10 +255,10 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       Item item5 = dataBuilder.createSimpleItem(simpleCategory.getId(), null);
       waitItemCount(itemsApi, 5);
 
-      List<Item> itemsCreatedAsc = itemsApi.listItems(null, null, null, Arrays.asList(ItemListSort.CREATED_AT_ASC.toString()), null, null);
-      List<Item> itemsCreatedDesc = itemsApi.listItems(null, null, null, Arrays.asList(ItemListSort.CREATED_AT_DESC.toString()), null, null);
-      List<Item> itemsModifiedAsc = itemsApi.listItems(null, null, null, Arrays.asList(ItemListSort.MODIFIED_AT_ASC.toString()), null, null);
-      List<Item> itemsModifiedDesc = itemsApi.listItems(null, null, null, Arrays.asList(ItemListSort.MODIFIED_AT_DESC.toString()), null, null);
+      List<Item> itemsCreatedAsc = itemsApi.listItems(null, null, null, null, Arrays.asList(ItemListSort.CREATED_AT_ASC.toString()), null, null);
+      List<Item> itemsCreatedDesc = itemsApi.listItems(null, null, null, null, Arrays.asList(ItemListSort.CREATED_AT_DESC.toString()), null, null);
+      List<Item> itemsModifiedAsc = itemsApi.listItems(null, null, null, null, Arrays.asList(ItemListSort.MODIFIED_AT_ASC.toString()), null, null);
+      List<Item> itemsModifiedDesc = itemsApi.listItems(null, null, null, null, Arrays.asList(ItemListSort.MODIFIED_AT_DESC.toString()), null, null);
       
       assertEquals(item1.getId(), itemsCreatedAsc.get(0).getId());
       assertEquals(item5.getId(), itemsCreatedAsc.get(4).getId());
@@ -304,8 +304,8 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       
       waitItemCount(itemsApi, 2);
 
-      List<Item> itemsScoreAsc = itemsApi.listItems(null, null, "test", Arrays.asList(ItemListSort.SCORE_ASC.toString()), null, null);
-      List<Item> itemsScoreDesc = itemsApi.listItems(null, null, "test", Arrays.asList(ItemListSort.SCORE_DESC.toString()), null, null);
+      List<Item> itemsScoreAsc = itemsApi.listItems(null, null, null, "test", Arrays.asList(ItemListSort.SCORE_ASC.toString()), null, null);
+      List<Item> itemsScoreDesc = itemsApi.listItems(null, null, null, "test", Arrays.asList(ItemListSort.SCORE_DESC.toString()), null, null);
       
       assertEquals(item1.getId(), itemsScoreAsc.get(0).getId());
       assertEquals(item2.getId(), itemsScoreAsc.get(1).getId());

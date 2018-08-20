@@ -77,6 +77,9 @@ public class Item {
   @Column (nullable = false)
   private Long amount;
 
+  @Column (nullable = false)
+  private Long soldAmount;
+
   @Column(nullable = false)
   @NotNull
   @NotEmpty
@@ -88,6 +91,13 @@ public class Item {
   @Column (nullable = true)
   @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID resourceId;
+
+  @Column (nullable = true)
+  @Type(type="org.hibernate.type.PostgresUUIDType")
+  private UUID sellerId;
+
+  @Column
+  private String stripeProductId;
 
   public UUID getId() {
     return id;
@@ -221,12 +231,54 @@ public class Item {
     this.resourceId = resourceId;
   }
 
+  /**
+   * @return the sellerId
+   */
+  public UUID getSellerId() {
+    return sellerId;
+  }
+
+  /**
+   * @param sellerId the sellerId to set
+   */
+  public void setSellerId(UUID sellerId) {
+    this.sellerId = sellerId;
+  }
+
   public UUID getLastModifier() {
     return lastModifier;
   }
   
   public void setLastModifier(UUID lastModifier) {
     this.lastModifier = lastModifier;
+  }
+
+  /**
+   * @return the stripeProductId
+   */
+  public String getStripeProductId() {
+    return stripeProductId;
+  }
+
+  /**
+   * @param stripeProductId the stripeProductId to set
+   */
+  public void setStripeProductId(String stripeProductId) {
+    this.stripeProductId = stripeProductId;
+  }
+
+  /**
+   * @return the soldAmount
+   */
+  public Long getSoldAmount() {
+    return soldAmount;
+  }
+
+  /**
+   * @param soldAmount the soldAmount to set
+   */
+  public void setSoldAmount(Long soldAmount) {
+    this.soldAmount = soldAmount;
   }
 
   @PrePersist

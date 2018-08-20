@@ -23,8 +23,12 @@ import org.keycloak.representations.idm.authorization.ResourceRepresentation;
 import org.keycloak.representations.idm.authorization.ScopeRepresentation;
 import org.slf4j.Logger;
 
+import com.stripe.model.Product;
+
 import fi.metatavu.dcfb.server.categories.CategoryController;
 import fi.metatavu.dcfb.server.items.ItemController;
+import fi.metatavu.dcfb.server.keycloak.KeycloakAdminController;
+import fi.metatavu.dcfb.server.keycloak.KeycloakConsts;
 import fi.metatavu.dcfb.server.locations.LocationController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.ItemUser;
@@ -36,6 +40,7 @@ import fi.metatavu.dcfb.server.rest.model.ItemListSort;
 import fi.metatavu.dcfb.server.rest.model.Meta;
 import fi.metatavu.dcfb.server.rest.translate.ItemTranslator;
 import fi.metatavu.dcfb.server.search.searchers.SearchResult;
+import fi.metatavu.dcfb.server.stripe.StripeController;
 
 /**
  * Items REST Service implementation
@@ -61,6 +66,12 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   private static final String RESOURCE_VISIBILITY_PRIVATE = "private";
 
   @Inject
+  private StripeController stripeController;
+  
+  @Inject
+  private KeycloakAdminController keycloakAdminController;
+
+  @Inject
   private CategoryController categoryController;
 
   @Inject
@@ -81,6 +92,15 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createForbidden("Anonymous users can not create items");
     }
 
+    UUID sellerId = payload.getSellerId();
+    if (!isRealmAdmin() && !sellerId.equals(getLoggerUserId())) {
+      return createForbidden(UNAUTHORIZED);
+    }
+    
+    if (!keycloakAdminController.userHasAttribute(sellerId, KeycloakConsts.KEYCLOAK_STRIPE_ACCOUNT_ATTRIBUTE)) {
+      return createBadRequest("Users without stripe account id cannot create items");
+    }
+    
     if (!isValidLocalizedList(payload.getTitle())) {
       return createBadRequest("Invalid title");
     }
@@ -106,7 +126,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       logger.warn("Failed to parse currency", e);
       return createBadRequest(String.format("Invalid currency %s", e.getMessage()));
     }
-    
+
     LocalizedEntry title = createLocalizedEntry(payload.getTitle());
     LocalizedEntry description = createLocalizedEntry(payload.getDescription());
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
@@ -116,6 +136,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
     Boolean visibilityLimited = Boolean.FALSE;
+    Long soldAmount = payload.getSoldAmount();
     
     if (payload.isVisibilityLimited() != null) {
       visibilityLimited = payload.isVisibilityLimited();
@@ -134,7 +155,16 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         unit,
         visibilityLimited,
         null,
+        sellerId,
+        soldAmount,
         modifier);
+    
+    Product stripeProduct = stripeController.createItemProduct(item);
+    if (stripeProduct == null) {
+      return createInternalServerError("Failed to create Stripe product");
+    }
+    
+    itemController.updateItemStripeProductId(item, stripeProduct.getId(), modifier);
 
     createImages(payload, item);
     List<ItemUser> itemUsers = createItemUsers(payload, item);
@@ -175,10 +205,12 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
     return createOk(itemTranslator.translateItem(item));
   }
-
+  
   @Override
-  public Response listItems(String categoryIdsParam, String locationIdsParam, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
+  public Response listItems(String categoryIdsParam, String locationIdsParam, String userIds, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
 
+    // TODO: userIds
+    
     List<Category> categories = null;
     List<Location> locations = null;
 
@@ -242,6 +274,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
     boolean visibilityLimited = payload.isVisibilityLimited();
+    UUID sellerId = payload.getSellerId();
+    Long soldAmount = payload.getSoldAmount();
 
     Category category = categoryController.findCategory(payload.getCategoryId());
     if (category == null) {
@@ -273,6 +307,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         amount, 
         unit,
         visibilityLimited, 
+        sellerId,
+        soldAmount,
         modifier);
     
     itemController.deleteItemImages(item);
@@ -281,6 +317,11 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     updateProtectedResource(item, itemUsers);
     createImages(payload, item);
     setItemMetas(item, payload.getMeta());
+    
+    Product stripeProduct = stripeController.updateItemProduct(item);
+    if (stripeProduct == null) {
+      return createInternalServerError("Failed to update Stripe product");
+    }
     
     return createOk(itemTranslator.translateItem(item));
   }

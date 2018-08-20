@@ -91,6 +91,26 @@ public class LocalizedValueController {
       .collect(Collectors.toList());
   }
   
+  /**
+   * Returns any value for entry and type
+   * 
+   * @param entry entry
+   * @param type type
+   * @return value
+   */
+  public String getAnyValue(LocalizedEntry entry, String type) {
+    if (entry == null) {
+      return null;
+    }
+    
+    List<LocalizedValue> result = localizedValueDAO.listByEntryAndType(entry, type, 0, 1);
+    if (result.isEmpty()) {
+      return null;
+    }
+    
+    return result.get(0).getValue();
+  }
+  
   public List<LocalizedValue> listLocalizedValues(LocalizedEntry entry) {
     return localizedValueDAO.listByEntry(entry);
   }
