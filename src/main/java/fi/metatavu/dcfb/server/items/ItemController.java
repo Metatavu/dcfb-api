@@ -133,6 +133,20 @@ public class ItemController {
     itemDAO.updateStripeProductId(item, stripeProductId, modifier);
     return item;
   }
+
+  /**
+   * Update item sold amount value
+   *
+   * @param item item
+   * @param soldAmount sold amount
+   * @param modifier modifier
+   * 
+   * @return updated item
+   */
+  public Item updateItemSoldAmount(Item item, Long soldAmount, UUID modifier) {
+    itemDAO.updateSoldAmount(item, soldAmount, modifier);
+    return item;
+  }
   
   /**
    * Deletes an item

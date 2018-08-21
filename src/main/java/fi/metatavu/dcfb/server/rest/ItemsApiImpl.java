@@ -158,13 +158,13 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         sellerId,
         soldAmount,
         modifier);
-    
-    Product stripeProduct = stripeController.createItemProduct(item);
-    if (stripeProduct == null) {
-      return createInternalServerError("Failed to create Stripe product");
-    }
-    
-    itemController.updateItemStripeProductId(item, stripeProduct.getId(), modifier);
+//    
+//    Product stripeProduct = stripeController.createItemProduct(item);
+//    if (stripeProduct == null) {
+//      return createInternalServerError("Failed to create Stripe product");
+//    }
+//    
+//    itemController.updateItemStripeProductId(item, stripeProduct.getId(), modifier);
 
     createImages(payload, item);
     List<ItemUser> itemUsers = createItemUsers(payload, item);

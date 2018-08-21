@@ -20,5 +20,9 @@ public class StripeConsts {
   public static final String STRIPE_WEBHOOK_TYPE = "stripe";
 
   public static final String STRIPE_SIGNATURE_HEADER = "Stripe-Signature";
+  
+  public static final String STRIPE_CHARGE_ITEM_ID = "item-id";
+  
+  public static final String STRIPE_CHARGE_ITEM_QUANTITY = "item-quantity";
 
 }

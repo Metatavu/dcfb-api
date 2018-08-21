@@ -26,3 +26,6 @@ public class KeycloakConsts {
   
   public static final String KEYCLOAK_ADMIN_PASSWORD_SETTING = "keycloak-admin-password";
 }
+
+
+

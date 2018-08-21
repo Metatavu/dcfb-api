@@ -1,5 +1,7 @@
 package fi.metatavu.dcfb.server.keycloak;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -39,7 +41,12 @@ public class KeycloakAdminController {
       return false;
     }
     
-    return userRepresentation.getAttributes().containsKey(attributeName);
+    Map<String, List<String>> attributes = userRepresentation.getAttributes();
+    if (attributes == null) {
+      return false;
+    }
+    
+    return attributes.containsKey(attributeName);
    }
   
   /**
@@ -69,7 +76,8 @@ public class KeycloakAdminController {
       .realm(systemSettingController.getSettingValue(KeycloakConsts.KEYCLOAK_ADMIN_REALM_SETTING))
       .grantType(OAuth2Constants.PASSWORD)
       .clientId(systemSettingController.getSettingValue(KeycloakConsts.KEYCLOAK_ADMIN_CLIENT_ID_SETTING))
-      .clientSecret(systemSettingController.getSettingValue(KeycloakConsts.KEYCLOAK_ADMIN_USERNAME_SETTING))
+      .clientSecret(systemSettingController.getSettingValue(KeycloakConsts.KEYCLOAK_ADMIN_CLIENT_SECRET_SETTING))
+      .username(systemSettingController.getSettingValue(KeycloakConsts.KEYCLOAK_ADMIN_USERNAME_SETTING))
       .password(systemSettingController.getSettingValue(KeycloakConsts.KEYCLOAK_ADMIN_PASSWORD_SETTING))
       .build();
   }

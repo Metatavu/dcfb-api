@@ -60,6 +60,9 @@ public class ItemTranslator extends AbstractTranslator {
     result.setUnitPrice(unitPrice);
     result.setVisibilityLimited(item.getVisibilityLimited());
     result.setVisibleToUsers(itemController.listItemUsers(item).stream().map(ItemUser::getUserId).collect(Collectors.toList()));
+    result.setSellerId(item.getSellerId());
+    result.setSoldAmount(item.getSoldAmount());
+    
     result.setMeta(itemController.listMetas(item).stream().map(itemMeta -> {
       Meta meta = new Meta();
       meta.setKey(itemMeta.getKey());
