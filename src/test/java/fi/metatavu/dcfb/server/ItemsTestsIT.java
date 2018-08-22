@@ -290,6 +290,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload1.setUnitPrice(dataBuilder.createSimplePrice());
       payload1.setAmount(1l);
       payload1.setUnit("unit");
+      payload1.setSellerId(REALM1_USER_1_ID);
       Item item1 = dataBuilder.createItem(payload1);
 
       waitItemCount(itemsApi, 1);
@@ -301,6 +302,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload2.setUnitPrice(dataBuilder.createSimplePrice());
       payload2.setAmount(2l);
       payload2.setUnit("unit");
+      payload2.setSellerId(REALM1_USER_1_ID);
       Item item2 = dataBuilder.createItem(payload2);
       
       waitItemCount(itemsApi, 2);
@@ -342,6 +344,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload.setTitle(dataBuilder.createLocalized("simple item"));
       payload.setUnit("Fake");
       payload.setUnitPrice(price);
+      payload.setSellerId(REALM1_USER_1_ID);
       payload.setMeta(Arrays.asList(
         dataBuilder.createMeta("test-1", "test value 1"),
         dataBuilder.createMeta("test-2", "test value 2")
