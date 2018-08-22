@@ -42,7 +42,7 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
   @Before
   public void setupKeycloakSettings() {
     insertSystemSetting("keycloak-admin-realm", KEYCLOAK_REALM);
-    insertSystemSetting("keycloak-admin-server-url" , String.format("%s/auth"));
+    insertSystemSetting("keycloak-admin-server-url" , String.format("%s/auth", AUTH_SERVER_URL));
     insertSystemSetting("keycloak-admin-client-secret", "0e0facfe-8922-48d3-b3d3-8cbc50bd2ada");
     insertSystemSetting("keycloak-admin-client-id", "api");
     insertSystemSetting("keycloak-admin-username", ADMIN_USERNAME);
