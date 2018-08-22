@@ -23,8 +23,6 @@ import org.keycloak.representations.idm.authorization.ResourceRepresentation;
 import org.keycloak.representations.idm.authorization.ScopeRepresentation;
 import org.slf4j.Logger;
 
-import com.stripe.model.Product;
-
 import fi.metatavu.dcfb.server.categories.CategoryController;
 import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.keycloak.KeycloakAdminController;
