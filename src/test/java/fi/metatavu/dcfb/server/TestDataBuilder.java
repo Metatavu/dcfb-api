@@ -142,7 +142,8 @@ public class TestDataBuilder {
     payload.setUnit("Fake");
     payload.setUnitPrice(price);
     payload.setLocationId(locationId);
-
+    payload.setSellerId(AbstractIntegrationTest.REALM1_USER_1_ID);
+    
     return createItem(payload);
   }
 

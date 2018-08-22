@@ -34,11 +34,13 @@ public class ItemDAO extends AbstractDAO<Item> {
   * @param priceCurrency priceCurrency
   * @param amount amount
   * @param unit unit
-  * @return created item
   * @param lastModifier modifier
+  * @param soldAmount amount of items sold
+  * @param sellerId sellerId
+  * @return created item
   */
   @SuppressWarnings ("squid:S00107")
-  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, UUID lastModifier) {
+  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, UUID sellerId, UUID lastModifier) {
     Item item = new Item();
     item.setId(id);
     item.setTitle(title);
@@ -53,6 +55,8 @@ public class ItemDAO extends AbstractDAO<Item> {
     item.setUnit(unit);
     item.setVisibilityLimited(visibilityLimited);
     item.setResourceId(resourceId);
+    item.setSoldAmount(soldAmount);
+    item.setSellerId(sellerId);
     item.setLastModifier(lastModifier);
     return persist(item);
   }
@@ -226,6 +230,44 @@ public class ItemDAO extends AbstractDAO<Item> {
    */
   public Item updateResourceId(Item item, UUID resourceId, UUID lastModifier) {
     item.setResourceId(resourceId);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+
+  /**
+   * Updates reservedAmount
+   * 
+   * @param item item to update  
+   * @param reservedAmount reserved amount
+   * @param lastModifier modifier
+   */
+  public Item updateReservedAmount(Item item, Long reservedAmount, UUID lastModifier) {
+    item.setSoldAmount(reservedAmount);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+
+  /**
+   * Updates soldAmount
+   * 
+   * @param item item to update  
+   * @param soldAmount sold amount
+   * @param lastModifier modifier
+   */
+  public Item updateSoldAmount(Item item, Long soldAmount, UUID lastModifier) {
+    item.setSoldAmount(soldAmount);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+
+  /**
+   * Updates sellerId
+   * @param item item to update  
+   * @param sellerId seller id
+   * @param lastModifier modifier
+   */
+  public Item updateSellerId(Item item, UUID sellerId, UUID lastModifier) {
+    item.setSellerId(sellerId);
     item.setLastModifier(lastModifier);
     return persist(item);
   }

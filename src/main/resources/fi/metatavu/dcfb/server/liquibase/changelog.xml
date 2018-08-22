@@ -222,4 +222,39 @@
     </createTable>
   </changeSet>
 
+  <changeSet id="item-sellerandsold" author="antti.leppa">
+    <addColumn tableName="item">
+      <column name="soldamount" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+
+    <addColumn tableName="item">
+      <column name="sellerid" type="uuid">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="item-reservation" author="antti.leppa">
+    <createTable tableName="itemreservation">
+      <column name="id" type="uuid">
+        <constraints unique="true" nullable="false" primaryKey="true"/>
+      </column>
+      <column name="item_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEMRESERVARITION_ITEM_ID" referencedTableName="item" referencedColumnNames="id"/>
+      </column>   
+      <column name="createdat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="modifiedat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expiresat" type="timestamp"/>
+      <column name="amount" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
 </databaseChangeLog>

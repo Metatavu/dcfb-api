@@ -4,11 +4,15 @@ import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.junit.After;
+import org.junit.Before;
 
 import fi.metatavu.dcfb.ApiClient;
 import fi.metatavu.dcfb.client.CategoriesApi;
@@ -36,6 +40,21 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
   protected static final String KEYCLOAK_CLIENT_ID = "ui";
   protected static final String KEYCLOAK_CLIENT_SECRET = "71926dcf-e676-4a3b-babc-a3900d92492e";
   protected static final UUID REALM1_USER_1_ID = UUID.fromString("c72e219c-71a0-4f5e-9b06-5dafe5394e27");
+
+  @Before
+  public void setupKeycloakSettings() {
+    insertSystemSetting("keycloak-admin-realm", KEYCLOAK_REALM);
+    insertSystemSetting("keycloak-admin-server-url" , String.format("%s/auth", AUTH_SERVER_URL));
+    insertSystemSetting("keycloak-admin-client-secret", "0e0facfe-8922-48d3-b3d3-8cbc50bd2ada");
+    insertSystemSetting("keycloak-admin-client-id", "api");
+    insertSystemSetting("keycloak-admin-username", ADMIN_USERNAME);
+    insertSystemSetting("keycloak-admin-password", ADMIN_PASSWORD);
+  }
+  
+  @After
+  public void teardownKeycloakSettings() {
+    deleteSystemSettings("keycloak-admin-realm", "keycloak-admin-server-url", "keycloak-admin-client-secret", "keycloak-admin-client-id", "keycloak-admin-username", "keycloak-admin-password", "test");
+  }
   
   /**
    * Returns API base path
@@ -233,4 +252,15 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
     executeDelete("DELETE FROM SystemSetting WHERE settingKey in ('mailgun-apiurl', 'mailgun-domain', 'mailgun-apikey', 'mailgun-sender-email', 'mailgun-sender-name')");
   }
   
+  private void insertSystemSetting(String key, String value) {
+    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID().toString(), key, value);    
+  }
+  
+  private void deleteSystemSettings(String... keys) {
+    String keysParam = Arrays.stream(keys).map((key) -> {
+      return String.format("'%s'", key);
+    }).collect(Collectors.joining(", "));
+    
+    executeDelete(String.format("DELETE FROM SystemSetting WHERE settingKey in (%s)", keysParam));    
+  }
 }
