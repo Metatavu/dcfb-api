@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -255,6 +256,6 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
   }
   
   private void deleteSystemSettings(String... keys) {
-    executeDelete("DELETE FROM SystemSetting WHERE settingKey in (?)", (Object[]) keys);    
+    executeDelete(String.format("DELETE FROM SystemSetting WHERE settingKey in (%s)", StringUtils.join(keys, ",")));    
   }
 }
