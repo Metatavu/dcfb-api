@@ -1,7 +1,6 @@
 package fi.metatavu.dcfb.server.stripe;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -10,18 +9,16 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import com.stripe.exception.SignatureVerificationException;
-import com.stripe.model.Charge;
-import com.stripe.model.Event;
-import com.stripe.model.Order;
-import com.stripe.model.OrderItem;
-import com.stripe.model.StripeObject;
-import com.stripe.net.ApiResource;
-import com.stripe.net.Webhook;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
+
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.Charge;
+import com.stripe.model.Event;
+import com.stripe.model.StripeObject;
+import com.stripe.net.ApiResource;
+import com.stripe.net.Webhook;
 
 import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.persistence.model.Item;
@@ -73,9 +70,6 @@ public class StripeWebhookHandler implements WebhookHandler {
     }
 
     switch(event.getType()) {
-      case "order.payment_succeeded":
-        handleOrderPaymentSucceeded(event);
-        return;
       case "charge.succeeded":
         handleChargeSucceeded(event);
         return;
@@ -109,25 +103,6 @@ public class StripeWebhookHandler implements WebhookHandler {
     } else {
       throw new WebhookException("Received charge without item details");
     }
-  }
-
-  /**
-   * Handles webhook with type charge.succeeded
-   * 
-   * @param event webhook event
-   */
-  private void handleOrderPaymentSucceeded(Event event) {
-    StripeObject data = event.getData().getObject();
-    Order order = ApiResource.GSON.fromJson(data.toJson(), Order.class);
-    List<OrderItem> orderItems = order.getItems();
-    if (orderItems == null) {
-      logger.warn("Received order.payment_succeeded webhook without items");
-      return;
-    }
-    
-    orderItems.stream().forEach((item) -> {
-      // TODO: Handle
-    });
   }
 
   /**
