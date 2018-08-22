@@ -251,17 +251,10 @@
         <constraints nullable="false"/>
       </column>
       <column name="expiresat" type="timestamp"/>
-      <column name="lastmodifier" type="uuid">
-        <constraints nullable="false" primaryKey="true"/>
-      </column>
       <column name="amount" type="bigint">
         <constraints nullable="false"/>
       </column>
     </createTable>
-  </changeSet>
-
-  <changeSet id="item-reservation-last-modifier" author="antti.leppa">
-    <dropColumn tableName="itemreservation" columnName="lastmodifier"/>
   </changeSet>
 
 </databaseChangeLog>
