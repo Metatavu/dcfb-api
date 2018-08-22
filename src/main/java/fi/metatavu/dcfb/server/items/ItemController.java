@@ -68,7 +68,7 @@ public class ItemController {
    */
   @SuppressWarnings ("squid:S00107")
   public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, UUID sellerId, Long soldAmount, UUID modifier) {
-    return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, priceCurrency, amount, unit, visibilityLimited, resourceId, soldAmount, sellerId, null, modifier);
+    return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, priceCurrency, amount, unit, visibilityLimited, resourceId, soldAmount, sellerId, modifier);
   }
 
   /**
@@ -117,20 +117,6 @@ public class ItemController {
     itemDAO.updateSellerId(item, sellerId, modifier);
     itemDAO.updateSoldAmount(item, soldAmount, modifier);
     
-    return item;
-  }
-
-  /**
-   * Update item stripe product id
-   *
-   * @param item item
-   * @param stripeProductId stripeProductId
-   * @param modifier modifier
-   * 
-   * @return updated item
-   */
-  public Item updateItemStripeProductId(Item item, String stripeProductId, UUID modifier) {
-    itemDAO.updateStripeProductId(item, stripeProductId, modifier);
     return item;
   }
 

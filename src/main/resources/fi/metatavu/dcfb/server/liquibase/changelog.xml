@@ -222,7 +222,7 @@
     </createTable>
   </changeSet>
 
-  <changeSet id="item-stripe" author="antti.leppa">
+  <changeSet id="item-sellerandsold" author="antti.leppa">
     <addColumn tableName="item">
       <column name="soldamount" type="bigint">
         <constraints nullable="false"/>
@@ -232,12 +232,6 @@
     <addColumn tableName="item">
       <column name="sellerid" type="uuid">
         <constraints nullable="false"/>
-      </column>
-    </addColumn>
-
-    <addColumn tableName="item">
-      <column name="stripeproductid" type="varchar(255)">
-        <constraints unique="true"/>
       </column>
     </addColumn>
   </changeSet>

@@ -96,9 +96,6 @@ public class Item {
   @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID sellerId;
 
-  @Column
-  private String stripeProductId;
-
   public UUID getId() {
     return id;
   }
@@ -251,20 +248,6 @@ public class Item {
   
   public void setLastModifier(UUID lastModifier) {
     this.lastModifier = lastModifier;
-  }
-
-  /**
-   * @return the stripeProductId
-   */
-  public String getStripeProductId() {
-    return stripeProductId;
-  }
-
-  /**
-   * @param stripeProductId the stripeProductId to set
-   */
-  public void setStripeProductId(String stripeProductId) {
-    this.stripeProductId = stripeProductId;
   }
 
   /**

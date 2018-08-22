@@ -40,7 +40,6 @@ import fi.metatavu.dcfb.server.rest.model.ItemListSort;
 import fi.metatavu.dcfb.server.rest.model.Meta;
 import fi.metatavu.dcfb.server.rest.translate.ItemTranslator;
 import fi.metatavu.dcfb.server.search.searchers.SearchResult;
-import fi.metatavu.dcfb.server.stripe.StripeController;
 
 /**
  * Items REST Service implementation
@@ -64,9 +63,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   private static final String RESOURCE_VISIBILITY_PUBLIC = "public";
 
   private static final String RESOURCE_VISIBILITY_PRIVATE = "private";
-
-  @Inject
-  private StripeController stripeController;
   
   @Inject
   private KeycloakAdminController keycloakAdminController;
@@ -158,13 +154,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         sellerId,
         soldAmount,
         modifier);
-//    
-//    Product stripeProduct = stripeController.createItemProduct(item);
-//    if (stripeProduct == null) {
-//      return createInternalServerError("Failed to create Stripe product");
-//    }
-//    
-//    itemController.updateItemStripeProductId(item, stripeProduct.getId(), modifier);
 
     createImages(payload, item);
     List<ItemUser> itemUsers = createItemUsers(payload, item);
@@ -317,11 +306,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     updateProtectedResource(item, itemUsers);
     createImages(payload, item);
     setItemMetas(item, payload.getMeta());
-    
-    Product stripeProduct = stripeController.updateItemProduct(item);
-    if (stripeProduct == null) {
-      return createInternalServerError("Failed to update Stripe product");
-    }
     
     return createOk(itemTranslator.translateItem(item));
   }
