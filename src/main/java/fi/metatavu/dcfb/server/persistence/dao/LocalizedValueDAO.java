@@ -89,7 +89,7 @@ public class LocalizedValueDAO extends AbstractDAO<LocalizedValue> {
   }
 
   /**
-   * Listvalue by entry and locale
+   * LocalizedValue by entry and locale
    * 
    * @param entry entry
    * @param locale locale
@@ -110,6 +110,42 @@ public class LocalizedValueDAO extends AbstractDAO<LocalizedValue> {
     );
     
     TypedQuery<LocalizedValue> query = entityManager.createQuery(criteria);
+    
+    return query.getResultList();
+  }
+
+  /**
+   * LocalizedValue by entry and type
+   * 
+   * @param entry entry
+   * @param type type
+   * @param firstResult 
+   * @param maxResults 
+   * @return value
+   */
+  public List<LocalizedValue> listByEntryAndType(LocalizedEntry entry, String type, Integer firstResult, Integer maxResults) {
+    EntityManager entityManager = getEntityManager();
+
+    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<LocalizedValue> criteria = criteriaBuilder.createQuery(LocalizedValue.class);
+    Root<LocalizedValue> root = criteria.from(LocalizedValue.class);
+    criteria.select(root);
+    criteria.where(
+      criteriaBuilder.and(
+        criteriaBuilder.equal(root.get(LocalizedValue_.entry), entry),
+        criteriaBuilder.equal(root.get(LocalizedValue_.type), type)    
+      )    
+    );
+    
+    TypedQuery<LocalizedValue> query = entityManager.createQuery(criteria);
+    
+    if (firstResult != null) {
+      query.setFirstResult(firstResult);
+    }
+    
+    if (maxResults != null) {
+      query.setMaxResults(maxResults);
+    }
     
     return query.getResultList();
   }

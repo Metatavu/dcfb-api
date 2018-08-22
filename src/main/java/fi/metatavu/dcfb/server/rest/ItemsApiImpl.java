@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 
 import fi.metatavu.dcfb.server.categories.CategoryController;
 import fi.metatavu.dcfb.server.items.ItemController;
+import fi.metatavu.dcfb.server.keycloak.KeycloakAdminController;
+import fi.metatavu.dcfb.server.keycloak.KeycloakConsts;
 import fi.metatavu.dcfb.server.locations.LocationController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.ItemUser;
@@ -33,6 +35,7 @@ import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
+import fi.metatavu.dcfb.server.rest.model.ItemReservation;
 import fi.metatavu.dcfb.server.rest.model.Meta;
 import fi.metatavu.dcfb.server.rest.translate.ItemTranslator;
 import fi.metatavu.dcfb.server.search.searchers.SearchResult;
@@ -59,6 +62,9 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   private static final String RESOURCE_VISIBILITY_PUBLIC = "public";
 
   private static final String RESOURCE_VISIBILITY_PRIVATE = "private";
+  
+  @Inject
+  private KeycloakAdminController keycloakAdminController;
 
   @Inject
   private CategoryController categoryController;
@@ -81,6 +87,19 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createForbidden("Anonymous users can not create items");
     }
 
+    UUID sellerId = payload.getSellerId();
+    if (!isRealmAdmin() && !sellerId.equals(getLoggerUserId())) {
+      return createForbidden(UNAUTHORIZED);
+    }
+    
+    if (sellerId == null) {
+      return createBadRequest("Seller is required");
+    }
+    
+    if (!keycloakAdminController.userHasAttribute(sellerId, KeycloakConsts.KEYCLOAK_STRIPE_ACCOUNT_ATTRIBUTE)) {
+      return createBadRequest("Users without stripe account id cannot create items");
+    }
+    
     if (!isValidLocalizedList(payload.getTitle())) {
       return createBadRequest("Invalid title");
     }
@@ -106,7 +125,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       logger.warn("Failed to parse currency", e);
       return createBadRequest(String.format("Invalid currency %s", e.getMessage()));
     }
-    
+
     LocalizedEntry title = createLocalizedEntry(payload.getTitle());
     LocalizedEntry description = createLocalizedEntry(payload.getDescription());
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
@@ -116,6 +135,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
     Boolean visibilityLimited = Boolean.FALSE;
+    Long soldAmount = payload.getSoldAmount();
+    if (soldAmount == null) {
+      soldAmount = 0l;
+    }
     
     if (payload.isVisibilityLimited() != null) {
       visibilityLimited = payload.isVisibilityLimited();
@@ -134,6 +157,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         unit,
         visibilityLimited,
         null,
+        sellerId,
+        soldAmount,
         modifier);
 
     createImages(payload, item);
@@ -145,6 +170,27 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     setItemMetas(item, payload.getMeta());
     
     return createOk(itemTranslator.translateItem(item));
+  }
+
+  @Override
+  public Response createItemReservation(UUID itemId, ItemReservation payload) throws Exception {
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not create item reservations");
+    }
+    
+    fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
+    if (item == null) {
+      return createNotFound(NOT_FOUND_MESSAGE);
+    }
+    
+    long itemsLeft = item.getAmount() - (item.getSoldAmount() + itemController.countReservedAmountByItem(item));
+    if (itemsLeft < payload.getAmount()) {
+      return createBadRequest("Not enough items left in the stock");
+    }
+    
+    fi.metatavu.dcfb.server.persistence.model.ItemReservation itemReservation = itemController.createResevation(item, payload.getAmount());
+    
+    return createOk(itemTranslator.translateItemReservation(itemReservation));
   }
 
   @Override
@@ -175,10 +221,12 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
 
     return createOk(itemTranslator.translateItem(item));
   }
-
+  
   @Override
-  public Response listItems(String categoryIdsParam, String locationIdsParam, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
+  public Response listItems(String categoryIdsParam, String locationIdsParam, String userIds, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
 
+    // TODO: userIds
+    
     List<Category> categories = null;
     List<Location> locations = null;
 
@@ -242,6 +290,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
     boolean visibilityLimited = payload.isVisibilityLimited();
+    UUID sellerId = payload.getSellerId();
+    Long soldAmount = payload.getSoldAmount();
 
     Category category = categoryController.findCategory(payload.getCategoryId());
     if (category == null) {
@@ -273,6 +323,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         amount, 
         unit,
         visibilityLimited, 
+        sellerId,
+        soldAmount,
         modifier);
     
     itemController.deleteItemImages(item);
