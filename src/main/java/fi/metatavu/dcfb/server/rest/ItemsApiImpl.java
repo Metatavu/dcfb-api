@@ -92,6 +92,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createForbidden(UNAUTHORIZED);
     }
     
+    if (sellerId == null) {
+      return createBadRequest("Seller is required");
+    }
+    
     if (!keycloakAdminController.userHasAttribute(sellerId, KeycloakConsts.KEYCLOAK_STRIPE_ACCOUNT_ATTRIBUTE)) {
       return createBadRequest("Users without stripe account id cannot create items");
     }
