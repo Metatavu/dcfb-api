@@ -35,6 +35,7 @@ import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
+import fi.metatavu.dcfb.server.rest.model.ItemReservation;
 import fi.metatavu.dcfb.server.rest.model.Meta;
 import fi.metatavu.dcfb.server.rest.translate.ItemTranslator;
 import fi.metatavu.dcfb.server.search.searchers.SearchResult;
@@ -162,6 +163,27 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     setItemMetas(item, payload.getMeta());
     
     return createOk(itemTranslator.translateItem(item));
+  }
+
+  @Override
+  public Response createItemReservation(UUID itemId, ItemReservation payload) throws Exception {
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not create item reservations");
+    }
+    
+    fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
+    if (item == null) {
+      return createNotFound(NOT_FOUND_MESSAGE);
+    }
+    
+    long itemsLeft = item.getAmount() - (item.getSoldAmount() + itemController.countReservedAmountByItem(item));
+    if (itemsLeft < payload.getAmount()) {
+      return createBadRequest("Not enough items left in the stock");
+    }
+    
+    fi.metatavu.dcfb.server.persistence.model.ItemReservation itemReservation = itemController.createResevation(item, payload.getAmount());
+    
+    return createOk(itemTranslator.translateItemReservation(itemReservation));
   }
 
   @Override

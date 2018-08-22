@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
+import fi.metatavu.dcfb.server.persistence.model.ItemReservation;
 import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.Image;
@@ -62,6 +63,7 @@ public class ItemTranslator extends AbstractTranslator {
     result.setVisibleToUsers(itemController.listItemUsers(item).stream().map(ItemUser::getUserId).collect(Collectors.toList()));
     result.setSellerId(item.getSellerId());
     result.setSoldAmount(item.getSoldAmount());
+    result.setReservedAmount(itemController.countReservedAmountByItem(item));
     
     result.setMeta(itemController.listMetas(item).stream().map(itemMeta -> {
       Meta meta = new Meta();
@@ -70,6 +72,24 @@ public class ItemTranslator extends AbstractTranslator {
       return meta;
     }).collect(Collectors.toList()));
 
+    return result;
+  }
+  
+  /**
+   * Translates JPA item reservation object into REST item reservation object
+   * 
+   * @param item JPA item reservation object
+   * @return REST item reservation
+   */
+  public fi.metatavu.dcfb.server.rest.model.ItemReservation translateItemReservation(ItemReservation itemReservation) {
+    if (itemReservation == null) {
+      return null;
+    }
+    
+    fi.metatavu.dcfb.server.rest.model.ItemReservation result = new fi.metatavu.dcfb.server.rest.model.ItemReservation();
+    result.setAmount(itemReservation.getAmount());
+    result.setId(itemReservation.getId());
+    
     return result;
   }
   

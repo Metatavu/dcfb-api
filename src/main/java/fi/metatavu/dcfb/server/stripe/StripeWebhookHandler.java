@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 
 import com.stripe.exception.SignatureVerificationException;
@@ -22,6 +21,7 @@ import com.stripe.net.Webhook;
 
 import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.persistence.model.Item;
+import fi.metatavu.dcfb.server.persistence.model.ItemReservation;
 import fi.metatavu.dcfb.server.settings.SystemSettingController;
 import fi.metatavu.dcfb.server.webhooks.WebhookException;
 import fi.metatavu.dcfb.server.webhooks.WebhookHandler;
@@ -83,23 +83,28 @@ public class StripeWebhookHandler implements WebhookHandler {
     Charge charge = ApiResource.GSON.fromJson(data.toJson(), Charge.class);
     Map<String, String> metadata = charge.getMetadata();
     
-    String itemIdStr = metadata.get(StripeConsts.STRIPE_CHARGE_ITEM_ID);
-    Long itemQuantity = NumberUtils.createLong(metadata.get(StripeConsts.STRIPE_CHARGE_ITEM_QUANTITY));
+    String itemReservationIdStr = metadata.get(StripeConsts.STRIPE_CHARGE_ITEM_RESERVATION_ID);
     
-    if (StringUtils.isNotBlank(itemIdStr) && (itemQuantity != null)) {
-      UUID itemId = null;
+    if (StringUtils.isNotBlank(itemReservationIdStr)) {
+      UUID itemReservationId = null;
       try {
-        itemId = UUID.fromString(itemIdStr);
+        itemReservationId = UUID.fromString(itemReservationIdStr);
       } catch (IllegalArgumentException e) {
         throw new WebhookException("Received charge with invalid itemId", e);
       }
       
-      Item item = itemController.findItem(itemId);
+      ItemReservation itemReservation = itemController.findItemReservation(itemReservationId);
+      if (itemReservation == null) {
+        throw new WebhookException("Received charge with non existing item reservation");
+      }
+      
+      Item item = itemReservation.getItem();
       if (item == null) {
         throw new WebhookException("Received charge with non existing item");
       }
       
-      itemController.updateItemSoldAmount(item, item.getSoldAmount() + itemQuantity, item.getLastModifier());
+      itemController.updateItemSoldAmount(item, item.getSoldAmount() + itemReservation.getAmount(), item.getLastModifier());
+      itemController.deleteItemReservation(itemReservation);
     } else {
       throw new WebhookException("Received charge without item details");
     }

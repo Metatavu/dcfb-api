@@ -236,4 +236,32 @@
     </addColumn>
   </changeSet>
 
+  <changeSet id="item-reservation" author="antti.leppa">
+    <createTable tableName="itemreservation">
+      <column name="id" type="uuid">
+        <constraints unique="true" nullable="false" primaryKey="true"/>
+      </column>
+      <column name="item_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEMRESERVARITION_ITEM_ID" referencedTableName="item" referencedColumnNames="id"/>
+      </column>   
+      <column name="createdat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="modifiedat" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expiresat" type="timestamp"/>
+      <column name="lastmodifier" type="uuid">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+      <column name="amount" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="item-reservation-last-modifier" author="antti.leppa">
+    <dropColumn tableName="itemreservation" columnName="lastmodifier"/>
+  </changeSet>
+
 </databaseChangeLog>

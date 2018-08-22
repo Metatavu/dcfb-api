@@ -1,14 +1,13 @@
 package fi.metatavu.dcfb.server;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import static org.awaitility.Awaitility.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +26,6 @@ import fi.metatavu.dcfb.client.LocationsApi;
 @SuppressWarnings ("squid:S1192")
 public class LocationsTestsIT extends AbstractIntegrationTest {
   
-  private static final ZoneId TIMEZONE = ZoneId.of("Europe/Helsinki");
-
   @Test
   public void testCreateLocation() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);

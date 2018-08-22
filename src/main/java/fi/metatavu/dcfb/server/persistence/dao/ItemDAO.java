@@ -235,6 +235,19 @@ public class ItemDAO extends AbstractDAO<Item> {
   }
 
   /**
+   * Updates reservedAmount
+   * 
+   * @param item item to update  
+   * @param reservedAmount reserved amount
+   * @param lastModifier modifier
+   */
+  public Item updateReservedAmount(Item item, Long reservedAmount, UUID lastModifier) {
+    item.setSoldAmount(reservedAmount);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+
+  /**
    * Updates soldAmount
    * 
    * @param item item to update  

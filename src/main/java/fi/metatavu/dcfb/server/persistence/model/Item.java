@@ -79,7 +79,7 @@ public class Item {
 
   @Column (nullable = false)
   private Long soldAmount;
-
+  
   @Column(nullable = false)
   @NotNull
   @NotEmpty

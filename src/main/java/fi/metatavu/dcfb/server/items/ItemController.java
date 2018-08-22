@@ -1,6 +1,7 @@
 package fi.metatavu.dcfb.server.items;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Currency;
 import java.util.List;
 import java.util.Objects;
@@ -11,15 +12,17 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import fi.metatavu.dcfb.server.persistence.dao.ItemMetaDAO;
-import fi.metatavu.dcfb.server.persistence.dao.ItemUserDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemImageDAO;
+import fi.metatavu.dcfb.server.persistence.dao.ItemMetaDAO;
+import fi.metatavu.dcfb.server.persistence.dao.ItemReservationDAO;
+import fi.metatavu.dcfb.server.persistence.dao.ItemUserDAO;
 import fi.metatavu.dcfb.server.persistence.model.Category;
-import fi.metatavu.dcfb.server.persistence.model.ItemMeta;
-import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.Item;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
+import fi.metatavu.dcfb.server.persistence.model.ItemMeta;
+import fi.metatavu.dcfb.server.persistence.model.ItemReservation;
+import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
@@ -29,6 +32,8 @@ import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 
 @ApplicationScoped
 public class ItemController {
+  
+  private static long RESERVATION_EXPIRE_MINUTES = 5l;
 
   @Inject
   private ItemSearcher itemSearcher;
@@ -47,6 +52,9 @@ public class ItemController {
   
   @Inject
   private ItemUserDAO itemUserDAO;
+
+  @Inject
+  private ItemReservationDAO itemReservationDAO;
 
   /**
    * Create item
@@ -131,6 +139,20 @@ public class ItemController {
    */
   public Item updateItemSoldAmount(Item item, Long soldAmount, UUID modifier) {
     itemDAO.updateSoldAmount(item, soldAmount, modifier);
+    return item;
+  }
+
+  /**
+   * Update item reserved amount value
+   *
+   * @param item item
+   * @param reservedAmount reserved amount
+   * @param modifier modifier
+   * 
+   * @return updated item
+   */
+  public Item updateItemReservedAmount(Item item, Long reservedAmount, UUID modifier) {
+    itemDAO.updateReservedAmount(item, reservedAmount, modifier);
     return item;
   }
   
@@ -296,6 +318,53 @@ public class ItemController {
   public void deleteMetasNotIn(Item item, Set<String> keys) {
     itemMetaDAO.listByKeyNotIn(item, keys).stream().forEach(itemMetaDAO::delete);
   }
+
+  /**
+   * Create new ItemReservation 
+   * 
+   * @param item item
+   * @param amount amount
+   * @return
+   */
+  public ItemReservation createResevation(Item item, Long amount) {
+    return itemReservationDAO.create(UUID.randomUUID(), item, OffsetDateTime.now().plus(RESERVATION_EXPIRE_MINUTES, ChronoUnit.MINUTES), amount);    
+  }
+
+  /**
+   * Finds an item reservation
+   * 
+   * @param itemId item reservation id
+   * @return item reservation or null if not found
+   */
+  public ItemReservation findItemReservation(UUID itemReservationId) {
+    return itemReservationDAO.findById(itemReservationId);
+  }
+  
+  /**
+   * Returns total amount of reservations for an item
+   * 
+   * @param item item
+   * @return total amount of reservations for an item
+   */
+  public long countReservedAmountByItem(Item item) {
+    return itemReservationDAO.listByItem(item).stream().mapToLong(ItemReservation::getAmount).sum();
+  }
+  
+  /**
+   * Deletes expired reservations
+   */
+  public void deleteExpiredReservations() {
+    itemReservationDAO.listExpired().stream().forEach(itemReservationDAO::delete);
+  } 
+
+  /**
+   * Deletes an item reservation
+   * 
+   * @param itemReservation item reservation
+   */
+  public void deleteItemReservation(ItemReservation itemReservation) {
+    itemReservationDAO.delete(itemReservation);
+  }
   
   /**
    * Generates an unique slug
@@ -314,4 +383,5 @@ public class ItemController {
 
 	  return result;
   }
+
 }
