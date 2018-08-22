@@ -57,6 +57,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       item.setUnit("Unit of Fake");
       item.setUnitPrice(price);
       item.setImages(Arrays.asList(image));
+      item.setSellerId(REALM1_USER_1_ID);
       item.setMeta(Arrays.asList(
         dataBuilder.createMeta("test-1", "test value 1"),
         dataBuilder.createMeta("test-2", "test value 2")
