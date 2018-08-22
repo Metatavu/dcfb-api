@@ -56,6 +56,10 @@ public class KeycloakAdminController {
    * @return user representation or null if not found
    */
   public UserRepresentation getUser(UUID userId) {
+    if (userId == null) {
+      return null;
+    }
+    
     Keycloak client = getClient();
     String realm = systemSettingController.getSettingValue(KeycloakConsts.KEYCLOAK_ADMIN_REALM_SETTING);
     RealmResource realmResource = client.realm(realm);

@@ -4,11 +4,12 @@ import static io.restassured.RestAssured.given;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -256,6 +257,10 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
   }
   
   private void deleteSystemSettings(String... keys) {
-    executeDelete(String.format("DELETE FROM SystemSetting WHERE settingKey in (%s)", StringUtils.join(keys, ",")));    
+    String keysParam = Arrays.stream(keys).map((key) -> {
+      return String.format("'%s'", key);
+    }).collect(Collectors.joining(", "));
+    
+    executeDelete(String.format("DELETE FROM SystemSetting WHERE settingKey in (%s)", keysParam));    
   }
 }
