@@ -136,6 +136,9 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     UUID modifier = getLoggerUserId();
     Boolean visibilityLimited = Boolean.FALSE;
     Long soldAmount = payload.getSoldAmount();
+    if (soldAmount == null) {
+      soldAmount = 0l;
+    }
     
     if (payload.isVisibilityLimited() != null) {
       visibilityLimited = payload.isVisibilityLimited();
