@@ -48,6 +48,7 @@ public class IndexableItem extends AbstractIndexable {
   private String slug;
   
   @Field(type="geo_point")
+  @SuppressWarnings("squid:S1845")
   private GeoPoint geoPoint;
 
   @Field(type="keyword", store = true)

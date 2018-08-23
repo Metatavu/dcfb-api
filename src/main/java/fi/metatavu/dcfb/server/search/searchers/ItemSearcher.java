@@ -43,6 +43,7 @@ public class ItemSearcher extends AbstractSearcher {
    * @param maxResults max results. Defaults to 20
    * @return search result 
    */
+  @SuppressWarnings ("squid:S00107")
   public SearchResult<UUID> searchItems(Double nearLat, Double nearLon, List<UUID> categoryIds, List<UUID> locationIds, String search, UUID currentUserId, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
     boolean matchAll = categoryIds == null && locationIds == null && search == null;
     if (matchAll) {

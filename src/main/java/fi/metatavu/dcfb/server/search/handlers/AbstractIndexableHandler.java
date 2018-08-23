@@ -79,7 +79,7 @@ public abstract class AbstractIndexableHandler<T, I extends Indexable> {
     BigDecimal latitude = location.getLatitude();
     BigDecimal longitude = location.getLongitude();
     
-    if (longitude == null || longitude == null) {
+    if (latitude == null || longitude == null) {
       return null;
     }
     

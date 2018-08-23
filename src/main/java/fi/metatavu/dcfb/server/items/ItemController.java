@@ -243,6 +243,7 @@ public class ItemController {
    * @param maxResults maximum number of results returned
    * @return search result
    */
+  @SuppressWarnings ("squid:S00107")
   public SearchResult<Item> searchItems(Double nearLat, Double nearLon, List<Category> categories, List<Location> locations, String search, UUID currentUserId, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
     List<UUID> categoryIds = categories == null ? null : categories.stream()
       .map(Category::getId)
