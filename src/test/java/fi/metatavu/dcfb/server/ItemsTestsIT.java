@@ -359,9 +359,12 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       
       List<Item> items1 = itemsApi.listItems(null, null, null, null, 61.6887d, 27.2721d, null, null, null);
       List<Item> items2 = itemsApi.listItems(null, null, null, null, 60.1699d, 24.9384d, null, null, null);
+      
+      assertEquals(2, items1.size());
+      assertEquals(2, items2.size());
 
-      assertEquals(item1.getId(), items1.get(0));
-      assertEquals(item2.getId(), items2.get(0));
+      assertEquals(item1.getId(), items1.get(0).getId());
+      assertEquals(item2.getId(), items2.get(0).getId());
       
       
     } finally {
