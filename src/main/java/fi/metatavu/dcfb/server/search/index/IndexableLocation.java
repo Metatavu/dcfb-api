@@ -34,16 +34,16 @@ public class IndexableLocation extends AbstractIndexable {
   @Field(analyzer = "english")
   private List<String> additionalInformationsEn;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private String slug;
   
   @Field(type="geo_point")
   private GeoPoint geoPoint;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime createdAt;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime modifiedAt;
 
   public IndexableLocation() {

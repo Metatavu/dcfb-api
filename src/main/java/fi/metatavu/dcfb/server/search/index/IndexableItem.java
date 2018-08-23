@@ -38,31 +38,31 @@ public class IndexableItem extends AbstractIndexable {
   @Field(analyzer = "english")
   private List<String> descriptionEn;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private UUID categoryId;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private UUID locationId;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private String slug;
   
   @Field(type="geo_point")
   private GeoPoint geoPoint;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private List<String> allowedUserIds;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private boolean visibilityLimited;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime createdAt;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime modifiedAt;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime expiresAt;
 
   public IndexableItem() {
