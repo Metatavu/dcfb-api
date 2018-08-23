@@ -34,13 +34,16 @@ public class IndexableLocation extends AbstractIndexable {
   @Field(analyzer = "english")
   private List<String> additionalInformationsEn;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private String slug;
+  
+  @Field(type="geo_point")
+  private GeoPoint geoPoint;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime createdAt;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime modifiedAt;
 
   public IndexableLocation() {
@@ -59,10 +62,11 @@ public class IndexableLocation extends AbstractIndexable {
    * @param modifiedAt modified at
    */
   @SuppressWarnings ("squid:S00107")
-  public IndexableLocation(UUID id, List<String> nameFi, List<String> nameSv, List<String> nameEn, 
+  public IndexableLocation(UUID id, GeoPoint geoPoint, List<String> nameFi, List<String> nameSv, List<String> nameEn, 
     List<String> additionalInformationsFi, List<String> additionalInformationsSv, List<String> additionalInformationsEn,
     String slug, OffsetDateTime createdAt, OffsetDateTime modifiedAt) {
     super(id);
+    this.geoPoint = geoPoint;
     this.nameFi = nameFi;
     this.nameSv = nameSv;
     this.nameEn = nameEn;
@@ -77,6 +81,14 @@ public class IndexableLocation extends AbstractIndexable {
   @Override
   public String getType() {
     return TYPE;
+  }
+  
+  public GeoPoint getGeoPoint() {
+    return geoPoint;
+  }
+  
+  public void setGeoPoint(GeoPoint geoPoint) {
+    this.geoPoint = geoPoint;
   }
 
   /**

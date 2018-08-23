@@ -2,6 +2,7 @@ package fi.metatavu.dcfb.server.search.handlers;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import javax.enterprise.event.Observes;
@@ -9,6 +10,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+import fi.metatavu.dcfb.server.persistence.model.Location;
+import fi.metatavu.dcfb.server.search.index.GeoPoint;
 import fi.metatavu.dcfb.server.search.index.Indexable;
 import fi.metatavu.dcfb.server.search.io.IndexUpdater;
 
@@ -47,7 +50,6 @@ public abstract class AbstractIndexableHandler<T, I extends Indexable> {
     indexUpdater.remove(getType(), id.toString());
   }
   
-  
   /**
    * Creates an indexable from entity
    * 
@@ -62,6 +64,27 @@ public abstract class AbstractIndexableHandler<T, I extends Indexable> {
    * @return elastic search type
    */
   protected abstract String getType();
+
+  /**
+   * Creates GeoPoint for a Location object
+   * 
+   * @param location location
+   * @return GeoPoint
+   */
+  protected GeoPoint createGeoPoint(Location location) {
+    if (location == null) {
+      return null;
+    }
+    
+    BigDecimal latitude = location.getLatitude();
+    BigDecimal longitude = location.getLongitude();
+    
+    if (latitude == null || longitude == null) {
+      return null;
+    }
+    
+    return new GeoPoint(latitude, longitude);
+  }
 
   /**
    * Resolves indexable class from generic type arguments

@@ -26,16 +26,16 @@ public class IndexableCategory extends AbstractIndexable {
   @Field(analyzer = "english")
   private List<String> titleEn;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private UUID parentId;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private String slug;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime createdAt;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime modifiedAt;
 
   public IndexableCategory() {

@@ -17,12 +17,12 @@ public @interface Field {
   /**
    * Type. Defaults to sring
    */
-  String type() default "string";
+  String type() default "text";
 
   /**
    * Index. Defaults to analyzed
    */
-  String index() default "analyzed";
+  boolean index() default true;
   
   /**
    * Store. Defaults to false
