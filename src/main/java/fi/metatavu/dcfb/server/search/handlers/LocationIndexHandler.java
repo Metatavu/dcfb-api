@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.locations.LocationController;
 import fi.metatavu.dcfb.server.persistence.model.Location;
+import fi.metatavu.dcfb.server.search.index.GeoPoint;
 import fi.metatavu.dcfb.server.search.index.IndexableLocation;
 
 /**
@@ -96,7 +97,10 @@ public class LocationIndexHandler extends AbstractIndexableHandler<Location, Ind
     OffsetDateTime createdAt = location.getCreatedAt();
     OffsetDateTime modifiedAt = location.getModifiedAt();
     
-    return new IndexableLocation(id, 
+    GeoPoint geoPoint = createGeoPoint(location);
+    
+    return new IndexableLocation(id,
+      geoPoint,
       nameFi, 
       nameSv, 
       nameEn, 

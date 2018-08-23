@@ -121,7 +121,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
         return itemsApi.listItems(Collections.emptyMap()).size() == 1;
       });
       
-      List<Item> items = itemsApi.listItems(null, null, null, "simple", null, null, null);
+      List<Item> items = itemsApi.listItems(null, null, null, "simple", null, null, null, null, null);
       assertEquals(1, items.size());
       assertEquals(simpleItem.toString(), items.get(0).toString());
     } finally {
@@ -142,26 +142,26 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
 
       waitItemCount(itemsApi, 1);
       
-      List<Item> items1Items = itemsApi.listItems(simpleCategory1.getId().toString(), null, null, null, null, null, null);
+      List<Item> items1Items = itemsApi.listItems(simpleCategory1.getId().toString(), null, null, null, null, null, null, null, null);
       assertEquals(1, items1Items.size());
       assertEquals(simpleItem.toString(), items1Items.get(0).toString());
 
-      List<Item> items2Items = itemsApi.listItems(simpleCategory2.getId().toString(), null, null, null, null, null, null);
+      List<Item> items2Items = itemsApi.listItems(simpleCategory2.getId().toString(), null, null, null, null, null, null, null, null);
       assertEquals(0, items2Items.size());
       
-      List<Item> items3Items = itemsApi.listItems(simpleCategory1.getId().toString() + "," + simpleCategory2.getId().toString(), null, null, null, null, null, null); 
+      List<Item> items3Items = itemsApi.listItems(simpleCategory1.getId().toString() + "," + simpleCategory2.getId().toString(), null, null,  null, null, null, null, null, null); 
       assertEquals(1, items3Items.size());
       assertEquals(simpleItem.toString(), items1Items.get(0).toString());
 
       try {
-        itemsApi.listItems("not-uuid", null, null, null, null, null, null); 
+        itemsApi.listItems("not-uuid", null, null, null, null, null, null, null, null); 
         fail("List with invalid uuid should return bad request");
       } catch (FeignException e) {
         assertEquals(400, e.status());
       }
 
       try {
-        itemsApi.listItems(UUID.randomUUID().toString(), null, null, null, null, null, null);
+        itemsApi.listItems(UUID.randomUUID().toString(), null, null, null, null, null, null, null, null);
         fail("List with incorrect uuid should return bad request");
       } catch (FeignException e) {
         assertEquals(400, e.status());
@@ -185,26 +185,26 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       
       waitItemCount(itemsApi, 1);
       
-      List<Item> items1Items = itemsApi.listItems(null, simpleLocation1.getId().toString(), null, null, null, null, null);
+      List<Item> items1Items = itemsApi.listItems(null, simpleLocation1.getId().toString(), null, null, null, null, null, null, null);
       assertEquals(1, items1Items.size());
       assertEquals(simpleItem.toString(), items1Items.get(0).toString());
 
-      List<Item> items2Items = itemsApi.listItems(null, simpleLocation2.getId().toString(), null, null, null, null, null);
+      List<Item> items2Items = itemsApi.listItems(null, simpleLocation2.getId().toString(), null, null, null, null, null, null, null);
       assertEquals(0, items2Items.size());
       
-      List<Item> items3Items = itemsApi.listItems(null, simpleLocation1.getId().toString() + "," + simpleLocation2.getId().toString(), null, null, null, null, null); 
+      List<Item> items3Items = itemsApi.listItems(null, simpleLocation1.getId().toString() + "," + simpleLocation2.getId().toString(), null, null,  null, null, null, null, null); 
       assertEquals(1, items3Items.size());
       assertEquals(simpleItem.toString(), items1Items.get(0).toString());
 
       try {
-        itemsApi.listItems(null, "not-uuid", null, null, null, null, null); 
+        itemsApi.listItems(null, "not-uuid", null, null, null, null, null, null, null); 
         fail("List with invalid uuid should return bad request");
       } catch (FeignException e) {
         assertEquals(400, e.status());
       }
-
+      
       try {
-        itemsApi.listItems(null, UUID.randomUUID().toString(), null, null, null, null, null);
+        itemsApi.listItems(null, UUID.randomUUID().toString(), null, null, null, null, null, null, null);
         fail("List with incorrect uuid should return bad request");
       } catch (FeignException e) {
         assertEquals(400, e.status());
@@ -228,11 +228,11 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       dataBuilder.createSimpleItem(simpleCategory.getId(), null);
       waitItemCount(itemsApi, 5);
       
-      assertEquals(3, itemsApi.listItems(null, null, null, null, null, 2l, null).size());
-      assertEquals(2, itemsApi.listItems(null, null, null, null, null, 3l, 60l).size());
-      assertEquals(2, itemsApi.listItems(null, null, null, null, null, 1l, 2l).size());
-      assertEquals(2, itemsApi.listItems(null, null, null, null, null, 0l, 2l).size());
-      assertEquals(3, itemsApi.listItems(null, null, null, null, null, null, 3l).size());
+      assertEquals(3, itemsApi.listItems(null, null, null, null, null, null, null, 2l, null).size());
+      assertEquals(2, itemsApi.listItems(null, null, null, null, null, null, null, 3l, 60l).size());
+      assertEquals(2, itemsApi.listItems(null, null, null, null, null, null, null, 1l, 2l).size());
+      assertEquals(2, itemsApi.listItems(null, null, null, null, null, null, null, 0l, 2l).size());
+      assertEquals(3, itemsApi.listItems(null, null, null, null, null, null, null, null, 3l).size());
     } finally {
       dataBuilder.clean();
     }
@@ -256,10 +256,10 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       Item item5 = dataBuilder.createSimpleItem(simpleCategory.getId(), null);
       waitItemCount(itemsApi, 5);
 
-      List<Item> itemsCreatedAsc = itemsApi.listItems(null, null, null, null, Arrays.asList(ItemListSort.CREATED_AT_ASC.toString()), null, null);
-      List<Item> itemsCreatedDesc = itemsApi.listItems(null, null, null, null, Arrays.asList(ItemListSort.CREATED_AT_DESC.toString()), null, null);
-      List<Item> itemsModifiedAsc = itemsApi.listItems(null, null, null, null, Arrays.asList(ItemListSort.MODIFIED_AT_ASC.toString()), null, null);
-      List<Item> itemsModifiedDesc = itemsApi.listItems(null, null, null, null, Arrays.asList(ItemListSort.MODIFIED_AT_DESC.toString()), null, null);
+      List<Item> itemsCreatedAsc = itemsApi.listItems(null, null, null, null, null, null, Arrays.asList(ItemListSort.CREATED_AT_ASC.toString()), null, null);
+      List<Item> itemsCreatedDesc = itemsApi.listItems(null, null, null, null, null, null, Arrays.asList(ItemListSort.CREATED_AT_DESC.toString()), null, null);
+      List<Item> itemsModifiedAsc = itemsApi.listItems(null, null, null, null, null, null, Arrays.asList(ItemListSort.MODIFIED_AT_ASC.toString()), null, null);
+      List<Item> itemsModifiedDesc = itemsApi.listItems(null, null, null, null, null, null, Arrays.asList(ItemListSort.MODIFIED_AT_DESC.toString()), null, null);
       
       assertEquals(item1.getId(), itemsCreatedAsc.get(0).getId());
       assertEquals(item5.getId(), itemsCreatedAsc.get(4).getId());
@@ -307,13 +307,63 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       
       waitItemCount(itemsApi, 2);
 
-      List<Item> itemsScoreAsc = itemsApi.listItems(null, null, null, "test", Arrays.asList(ItemListSort.SCORE_ASC.toString()), null, null);
-      List<Item> itemsScoreDesc = itemsApi.listItems(null, null, null, "test", Arrays.asList(ItemListSort.SCORE_DESC.toString()), null, null);
+      List<Item> itemsScoreAsc = itemsApi.listItems(null, null, null, "test", null, null, Arrays.asList(ItemListSort.SCORE_ASC.toString()), null, null);
+      List<Item> itemsScoreDesc = itemsApi.listItems(null, null, null, "test", null, null, Arrays.asList(ItemListSort.SCORE_DESC.toString()), null, null);
       
       assertEquals(item1.getId(), itemsScoreAsc.get(0).getId());
       assertEquals(item2.getId(), itemsScoreAsc.get(1).getId());
       assertEquals(item2.getId(), itemsScoreDesc.get(0).getId());
       assertEquals(item1.getId(), itemsScoreDesc.get(1).getId());
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+
+  @Test
+  public void testSearchItemsSortNear() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      ItemsApi itemsApi = dataBuilder.getItemApi();
+      
+      Category simpleCategory = dataBuilder.createSimpleCategory();
+
+      fi.metatavu.dcfb.client.Item payload1 = new fi.metatavu.dcfb.client.Item();
+      payload1.setTitle(dataBuilder.createLocalized("example title"));
+      payload1.setDescription(dataBuilder.createLocalized("test description"));
+      payload1.setCategoryId(simpleCategory.getId());
+      payload1.setUnit("mm");
+      payload1.setUnitPrice(dataBuilder.createSimplePrice());
+      payload1.setAmount(1l);
+      payload1.setUnit("unit");
+      payload1.setSellerId(REALM1_USER_1_ID);
+      payload1.setLocationId(dataBuilder.createSimpleLocation("61.6887", "27.2721").getId());
+      
+      Item item1 = dataBuilder.createItem(payload1);
+
+      waitItemCount(itemsApi, 1);
+
+      fi.metatavu.dcfb.client.Item payload2 = new fi.metatavu.dcfb.client.Item();
+      payload2.setTitle(dataBuilder.createLocalized("test title"));
+      payload2.setDescription(dataBuilder.createLocalized("test description"));
+      payload2.setCategoryId(simpleCategory.getId());
+      payload2.setUnitPrice(dataBuilder.createSimplePrice());
+      payload2.setAmount(2l);
+      payload2.setUnit("unit");
+      payload2.setSellerId(REALM1_USER_1_ID);
+      payload2.setLocationId(dataBuilder.createSimpleLocation("60.1699", "24.9384").getId());
+      
+      Item item2 = dataBuilder.createItem(payload2);
+      
+      waitItemCount(itemsApi, 2);
+      
+      
+      List<Item> items1 = itemsApi.listItems(null, null, null, null, 61.6887d, 27.2721d, null, null, null);
+      List<Item> items2 = itemsApi.listItems(null, null, null, null, 60.1699d, 24.9384d, null, null, null);
+
+      assertEquals(item1.getId(), items1.get(0));
+      assertEquals(item2.getId(), items2.get(0));
+      
+      
     } finally {
       dataBuilder.clean();
     }

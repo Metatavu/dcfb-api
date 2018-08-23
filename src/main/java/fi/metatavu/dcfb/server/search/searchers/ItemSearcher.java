@@ -6,6 +6,7 @@ import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +34,8 @@ public class ItemSearcher extends AbstractSearcher {
   /**
    * Searches item and returns result as UUIDs
    * 
+   * @param nearLat prefer items near geo point
+   * @param nearLon prefer items near geo point
    * @param categoryIds category ids that must exist on the result. Omitted if null
    * @param locationId location id that must exist on the result. Omitted if null
    * @param search free text search that must match the result. Omitted if null
@@ -40,12 +43,12 @@ public class ItemSearcher extends AbstractSearcher {
    * @param maxResults max results. Defaults to 20
    * @return search result 
    */
-  public SearchResult<UUID> searchItems(List<UUID> categoryIds, List<UUID> locationIds, String search, UUID currentUserId, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
+  public SearchResult<UUID> searchItems(Double nearLat, Double nearLon, List<UUID> categoryIds, List<UUID> locationIds, String search, UUID currentUserId, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
     boolean matchAll = categoryIds == null && locationIds == null && search == null;
     if (matchAll) {
       ConstantScoreQueryBuilder query = constantScoreQuery(createPublicOrInAllowedIdsQuery(currentUserId.toString()));
       query.boost(1.0f);
-      return executeSearch(query, createSorts(sorts), firstResult, maxResults);
+      return executeSearch(query, createSorts(nearLat, nearLon, sorts), firstResult, maxResults);
     } else {
       BoolQueryBuilder query = boolQuery();
       query.must(createPublicOrInAllowedIdsQuery(currentUserId.toString()));
@@ -61,8 +64,8 @@ public class ItemSearcher extends AbstractSearcher {
       if (search != null) {
         query.must(queryStringQuery(search));
       }
-
-      return executeSearch(query, createSorts(sorts), firstResult, maxResults);
+      
+      return executeSearch(query, createSorts(nearLat, nearLon, sorts), firstResult, maxResults);
     }
   }
 
@@ -98,11 +101,19 @@ public class ItemSearcher extends AbstractSearcher {
   /**
    * Creates sorts. Defaults to created at ascending
    * 
+   * @param nearLat prefer items near geo point
+   * @param nearLon prefer items near geo point
    * @param sorts list of sorts
    * @return created sort builders
    */
-  private List<SortBuilder<?>> createSorts(List<ItemListSort> sorts) {
-    List<SortBuilder<?>> result = sorts == null ? Collections.emptyList() : sorts.stream().map(sort -> {
+  private List<SortBuilder<?>> createSorts(Double nearLat, Double nearLon, List<ItemListSort> sorts) {
+    List<SortBuilder<?>> result = new ArrayList<>();
+    
+    if (nearLat != null && nearLon != null) {
+      result.add(SortBuilders.geoDistanceSort(IndexableItem.GEOPOINT, nearLat, nearLon));
+    }    
+    
+    List<SortBuilder<?>> fieldSorts = sorts == null ? Collections.emptyList() : sorts.stream().map(sort -> {
       switch (sort) {
         case CREATED_AT_DESC:
           return SortBuilders.fieldSort(IndexableItem.CREATED_AT_FIELD).order(SortOrder.DESC);
@@ -123,7 +134,9 @@ public class ItemSearcher extends AbstractSearcher {
     })
     .filter(Objects::nonNull)
     .collect(Collectors.toList());
-
+    
+    result.addAll(fieldSorts);
+    
     if (result.isEmpty()) {
       return Collections.singletonList(SortBuilders.fieldSort(IndexableCategory.CREATED_AT_FIELD).order(SortOrder.ASC));      
     }
