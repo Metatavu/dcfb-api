@@ -63,7 +63,7 @@ public class IndexUpdater extends AbstractIndexHander {
       logger.warn("Indexable is null");
       return;
     }
-
+    
     getClient().prepareIndex(getIndex(), indexable.getType(), indexable.getId().toString())
       .setSource(serialize(indexable), XContentType.JSON)
       .execute()
@@ -152,13 +152,15 @@ public class IndexUpdater extends AbstractIndexHander {
         Map<String, Object> fieldProperties = new HashMap<>();
         fieldProperties.put("type", fieldAnnotation.type());
         
-        if (StringUtils.isNotBlank(fieldAnnotation.analyzer())) {
-          fieldProperties.put("analyzer", fieldAnnotation.analyzer());
-        }
-        
-        if (!"attachment".equals(fieldAnnotation.type())) {
-          fieldProperties.put("index", fieldAnnotation.index());
-          fieldProperties.put("store", fieldAnnotation.store());
+        if ("geo_point".equals(fieldAnnotation.type())) {
+          if (StringUtils.isNotBlank(fieldAnnotation.analyzer())) {
+            fieldProperties.put("analyzer", fieldAnnotation.analyzer());
+          }
+          
+          if (!"attachment".equals(fieldAnnotation.type())) {
+            fieldProperties.put("index", fieldAnnotation.index());
+            fieldProperties.put("store", fieldAnnotation.store());
+          }
         }
         
         properties.put(fieldName, fieldProperties);
@@ -183,7 +185,7 @@ public class IndexUpdater extends AbstractIndexHander {
       Map<String, Map<String, Map<String, Object>>> mapping = new HashMap<>();
       mapping.put("properties", properties);
       String source = objectMapper.writeValueAsString(mapping);
-
+      
       getClient()
         .admin()
         .indices()

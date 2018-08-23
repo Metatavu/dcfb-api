@@ -18,6 +18,7 @@ public class IndexableItem extends AbstractIndexable {
   public static final String LOCATION_ID_FIELD = "locationId";
   public static final String CREATED_AT_FIELD = "createdAt";
   public static final String MODIFIED_AT_FIELD = "modifiedAt";
+  public static final String GEOPOINT = "geoPoint";
   
   @Field(analyzer = "finnish")
   private List<String> titleFi;
@@ -37,28 +38,32 @@ public class IndexableItem extends AbstractIndexable {
   @Field(analyzer = "english")
   private List<String> descriptionEn;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private UUID categoryId;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private UUID locationId;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private String slug;
+  
+  @Field(type="geo_point")
+  @SuppressWarnings("squid:S1845")
+  private GeoPoint geoPoint;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private List<String> allowedUserIds;
 
-  @Field(index = "not_analyzed", store = true)
+  @Field(type="keyword", store = true)
   private boolean visibilityLimited;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime createdAt;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime modifiedAt;
 
-  @Field(index = "not_analyzed", store = true, type = "date")
+  @Field(store = true, type = "date")
   private OffsetDateTime expiresAt;
 
   public IndexableItem() {
@@ -66,11 +71,12 @@ public class IndexableItem extends AbstractIndexable {
   }
   
   @SuppressWarnings ("squid:S00107")
-  public IndexableItem(UUID id, List<String> titleFi, List<String> titleSv, List<String> titleEn, 
+  public IndexableItem(UUID id, GeoPoint geoPoint, List<String> titleFi, List<String> titleSv, List<String> titleEn, 
       List<String> descriptionFi, List<String> descriptionSv, List<String> descriptionEn, 
       UUID categoryId, UUID locationId, String slug, List<String> allowedUserIds, boolean visibilityLimited, OffsetDateTime createdAt, OffsetDateTime modifiedAt,
       OffsetDateTime expiresAt) {
     super(id);
+    this.geoPoint = geoPoint;
     this.titleFi = titleFi;
     this.titleSv = titleSv;
     this.titleEn = titleEn;
@@ -235,6 +241,14 @@ public class IndexableItem extends AbstractIndexable {
    */
   public void setExpiresAt(OffsetDateTime expiresAt) {
     this.expiresAt = expiresAt;
+  }
+  
+  public GeoPoint getGeoPoint() {
+    return geoPoint;
+  }
+  
+  public void setGeoPoint(GeoPoint geoPoint) {
+    this.geoPoint = geoPoint;
   }
 
 }

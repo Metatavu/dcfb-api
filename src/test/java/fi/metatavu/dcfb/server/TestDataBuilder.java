@@ -192,6 +192,10 @@ public class TestDataBuilder {
    * @throws IOException
    */
   public fi.metatavu.dcfb.client.Location createSimpleLocation() throws IOException {
+    return createSimpleLocation("61.685807", "27.273488");
+  }
+  
+  public fi.metatavu.dcfb.client.Location createSimpleLocation(String latitude, String longitude) throws IOException {
     Address address = new Address();
     address.setAdditionalInformations(createLocalized("simple test address"));
     address.setCountry("Finland");
@@ -201,8 +205,8 @@ public class TestDataBuilder {
 
     Coordinate coordinate = new Coordinate();
     coordinate.setCrs("epsg4326");
-    coordinate.setLongitude("27.273488");
-    coordinate.setLatitude("61.685807");
+    coordinate.setLongitude(longitude);
+    coordinate.setLatitude(latitude);
 
     fi.metatavu.dcfb.client.Location payload = new fi.metatavu.dcfb.client.Location();
     payload.setAddress(address);

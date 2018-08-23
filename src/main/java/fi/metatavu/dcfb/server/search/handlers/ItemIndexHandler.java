@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.persistence.model.Item;
+import fi.metatavu.dcfb.server.search.index.GeoPoint;
 import fi.metatavu.dcfb.server.search.index.IndexableItem;
 
 /**
@@ -101,8 +102,10 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
     OffsetDateTime createdAt = item.getCreatedAt();
     OffsetDateTime modifiedAt = item.getModifiedAt();
     OffsetDateTime expiresAt = item.getExpiresAt();
+    GeoPoint geoPoint = createGeoPoint(item.getLocation());
     
-    return new IndexableItem(item.getId(), 
+    return new IndexableItem(item.getId(),
+        geoPoint,
         titleFi, 
         titleSv, 
         titleEn, 

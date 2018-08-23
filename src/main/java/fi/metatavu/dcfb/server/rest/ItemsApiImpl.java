@@ -223,7 +223,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   }
   
   @Override
-  public Response listItems(String categoryIdsParam, String locationIdsParam, String userIds, String search, List<String> sort, Long firstResult, Long maxResults) throws Exception {
+  public Response listItems(String categoryIdsParam, String locationIdsParam, String userIds, String search, Double nearLat,
+      Double nearLon, List<String> sort, Long firstResult, Long maxResults) throws Exception {
 
     // TODO: userIds
     
@@ -264,7 +265,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createBadRequest(e.getMessage());
     }
 
-    SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(categories, locations, search, getLoggerUserId(), firstResult, maxResults, sorts);
+    SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(nearLat, nearLon, 
+        categories, locations, search, getLoggerUserId(), firstResult, maxResults, sorts);
 
     return createOk(itemTranslator.translateItems(searchResult.getResult()), searchResult.getTotalHits());
   }
