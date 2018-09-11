@@ -34,13 +34,15 @@ public class ItemDAO extends AbstractDAO<Item> {
   * @param priceCurrency priceCurrency
   * @param amount amount
   * @param unit unit
-  * @param lastModifier modifier
   * @param soldAmount amount of items sold
+  * @param allowPurchaseContactSeller whether item is allowed to purchase directly from the seller
+  * @param allowPurchaseCreditCard whether item is allowed to purchase directly with credit card
+  * @param lastModifier modifier
   * @param sellerId sellerId
   * @return created item
   */
   @SuppressWarnings ("squid:S00107")
-  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, UUID sellerId, UUID lastModifier) {
+  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, UUID sellerId, UUID lastModifier) {
     Item item = new Item();
     item.setId(id);
     item.setTitle(title);
@@ -57,6 +59,8 @@ public class ItemDAO extends AbstractDAO<Item> {
     item.setResourceId(resourceId);
     item.setSoldAmount(soldAmount);
     item.setSellerId(sellerId);
+    item.setAllowPurchaseContactSeller(allowPurchaseContactSeller);
+    item.setAllowPurchaseCreditCard(allowPurchaseCreditCard);
     item.setLastModifier(lastModifier);
     return persist(item);
   }
@@ -272,4 +276,28 @@ public class ItemDAO extends AbstractDAO<Item> {
     return persist(item);
   }
 
+  /**
+   * Updates allowPurchaseContactSeller
+   * @param item item to update  
+   * @param allowPurchaseContactSeller whether item is allowed to purchase directly from the seller
+   * @param lastModifier modifier
+   */
+  public Item updateAllowPurchaseContactSellerId(Item item, Boolean allowPurchaseContactSeller, UUID lastModifier) {
+    item.setAllowPurchaseContactSeller(allowPurchaseContactSeller);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+
+  /**
+   * Updates allowPurchaseContactSeller
+   * @param item item to update  
+   * @param allowPurchaseContactSeller whether item is allowed to purchase directly with credit card
+   * @param lastModifier modifier
+   */
+  public Item updateAllowPurchaseCreditCard(Item item, Boolean allowPurchaseCreditCard, UUID lastModifier) {
+    item.setAllowPurchaseContactSeller(allowPurchaseCreditCard);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+  
 }

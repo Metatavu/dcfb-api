@@ -95,6 +95,13 @@ public class Item {
   @Column (nullable = true)
   @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID sellerId;
+  
+  @Column (nullable = false)
+  private Boolean allowPurchaseCreditCard;
+  
+  @Column (nullable = false)
+  private Boolean allowPurchaseContactSeller;
+
 
   public UUID getId() {
     return id;
@@ -262,6 +269,22 @@ public class Item {
    */
   public void setSoldAmount(Long soldAmount) {
     this.soldAmount = soldAmount;
+  }
+  
+  public Boolean getAllowPurchaseContactSeller() {
+    return allowPurchaseContactSeller;
+  }
+  
+  public void setAllowPurchaseContactSeller(Boolean allowPurchaseContactSeller) {
+    this.allowPurchaseContactSeller = allowPurchaseContactSeller;
+  }
+  
+  public Boolean getAllowPurchaseCreditCard() {
+    return allowPurchaseCreditCard;
+  }
+  
+  public void setAllowPurchaseCreditCard(Boolean allowPurchaseCreditCard) {
+    this.allowPurchaseCreditCard = allowPurchaseCreditCard;
   }
 
   @PrePersist

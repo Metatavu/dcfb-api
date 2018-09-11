@@ -71,12 +71,14 @@ public class ItemController {
    * @param unit unit
    * @param visibilityLimited is items visibility limited to only specific users
    * @param soldAmount sold amount
+   * @param allowPurchaseContactSeller whether item is allowed to purchase directly from the seller
+   * @param allowPurchaseCreditCard whether item is allowed to purchase directly with credit card
    * @param modifier modifier
    * @return created item
    */
   @SuppressWarnings ("squid:S00107")
-  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, UUID sellerId, Long soldAmount, UUID modifier) {
-    return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, priceCurrency, amount, unit, visibilityLimited, resourceId, soldAmount, sellerId, modifier);
+  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, UUID modifier, UUID sellerId) {
+    return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, priceCurrency, amount, unit, visibilityLimited, resourceId, soldAmount, allowPurchaseContactSeller, allowPurchaseCreditCard, sellerId, modifier);
   }
 
   /**
