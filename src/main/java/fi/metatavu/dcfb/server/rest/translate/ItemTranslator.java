@@ -14,6 +14,7 @@ import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
+import fi.metatavu.dcfb.server.rest.model.ItemPaymentMethods;
 import fi.metatavu.dcfb.server.rest.model.Meta;
 import fi.metatavu.dcfb.server.rest.model.Price;
 
@@ -45,6 +46,10 @@ public class ItemTranslator extends AbstractTranslator {
     unitPrice.setCurrency(item.getPriceCurrency() != null ? item.getPriceCurrency().getCurrencyCode() : null);
     unitPrice.setPrice(item.getUnitPrice());
     
+    ItemPaymentMethods paymentMethods = new ItemPaymentMethods();
+    paymentMethods.setAllowContactSeller(item.getAllowPurchaseContactSeller());
+    paymentMethods.setAllowCreditCard(item.getAllowPurchaseCreditCard());
+    
     Item result = new Item();
     result.setAmount(item.getAmount());
     result.setCategoryId(category != null ? category.getId() : null);
@@ -65,6 +70,7 @@ public class ItemTranslator extends AbstractTranslator {
     result.setSoldAmount(item.getSoldAmount());
     result.setReservedAmount(itemController.countReservedAmountByItem(item));
     
+    result.setPaymentMethods(paymentMethods);
     result.setMeta(itemController.listMetas(item).stream().map(itemMeta -> {
       Meta meta = new Meta();
       meta.setKey(itemMeta.getKey());

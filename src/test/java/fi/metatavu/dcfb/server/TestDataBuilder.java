@@ -14,6 +14,7 @@ import fi.metatavu.dcfb.client.CategoriesApi;
 import fi.metatavu.dcfb.client.Category;
 import fi.metatavu.dcfb.client.Coordinate;
 import fi.metatavu.dcfb.client.Item;
+import fi.metatavu.dcfb.client.ItemPaymentMethods;
 import fi.metatavu.dcfb.client.ItemsApi;
 import fi.metatavu.dcfb.client.LocalizedValue;
 import fi.metatavu.dcfb.client.Location;
@@ -143,7 +144,8 @@ public class TestDataBuilder {
     payload.setUnitPrice(price);
     payload.setLocationId(locationId);
     payload.setSellerId(AbstractIntegrationTest.REALM1_USER_1_ID);
-    
+    payload.setPaymentMethods(createDefaultPaymentMethods());
+
     return createItem(payload);
   }
 
@@ -334,6 +336,18 @@ public class TestDataBuilder {
     result.setKey(key);
     result.setValue(value);
     return result;
+  }
+
+  /**
+   * Creates default payment methods object
+   * 
+   * @return default payment methods object
+   */
+  public ItemPaymentMethods createDefaultPaymentMethods() {
+    ItemPaymentMethods paymentMethods = new ItemPaymentMethods();
+    paymentMethods.setAllowContactSeller(true);
+    paymentMethods.setAllowCreditCard(false);
+    return paymentMethods;
   }
   
   /**
