@@ -86,6 +86,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     if (!isRealmUser()) {
       return createForbidden("Anonymous users can not create items");
     }
+    
+    if (payload.getPaymentMethods() == null) {
+      return createBadRequest("PaymentMethods is required");
+    }
 
     UUID sellerId = payload.getSellerId();
     if (!isRealmAdmin() && !sellerId.equals(getLoggerUserId())) {
@@ -94,10 +98,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     
     if (sellerId == null) {
       return createBadRequest("Seller is required");
-    }
-    
-    if (!keycloakAdminController.userHasAttribute(sellerId, KeycloakConsts.KEYCLOAK_STRIPE_ACCOUNT_ATTRIBUTE)) {
-      return createBadRequest("Users without stripe account id cannot create items");
     }
     
     if (!isValidLocalizedList(payload.getTitle())) {
@@ -125,6 +125,14 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       logger.warn("Failed to parse currency", e);
       return createBadRequest(String.format("Invalid currency %s", e.getMessage()));
     }
+    
+    Boolean allowPurchaseContactSeller = payload.getPaymentMethods().isAllowContactSeller();
+    Boolean allowPurchaseCreditCard = payload.getPaymentMethods().isAllowCreditCard();
+    
+    if (allowPurchaseCreditCard && !keycloakAdminController.userHasAttribute(sellerId, KeycloakConsts.KEYCLOAK_STRIPE_ACCOUNT_ATTRIBUTE)) {
+      return createBadRequest("Users without stripe account id cannot create items with credit card payment");
+    }
+    
 
     LocalizedEntry title = createLocalizedEntry(payload.getTitle());
     LocalizedEntry description = createLocalizedEntry(payload.getDescription());
@@ -135,6 +143,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
     Boolean visibilityLimited = Boolean.FALSE;
+    
+    
     Long soldAmount = payload.getSoldAmount();
     if (soldAmount == null) {
       soldAmount = 0l;
@@ -142,7 +152,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     
     if (payload.isVisibilityLimited() != null) {
       visibilityLimited = payload.isVisibilityLimited();
-    } 
+    }
     
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.createItem(
         title, 
@@ -157,8 +167,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         unit,
         visibilityLimited,
         null,
-        sellerId,
         soldAmount,
+        allowPurchaseContactSeller,
+        allowPurchaseCreditCard,
+        sellerId,
         modifier);
 
     createImages(payload, item);

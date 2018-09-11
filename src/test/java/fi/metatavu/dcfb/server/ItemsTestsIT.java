@@ -24,6 +24,7 @@ import fi.metatavu.dcfb.client.Category;
 import fi.metatavu.dcfb.client.Image;
 import fi.metatavu.dcfb.client.Item;
 import fi.metatavu.dcfb.client.ItemListSort;
+import fi.metatavu.dcfb.client.ItemPaymentMethods;
 import fi.metatavu.dcfb.client.ItemsApi;
 import fi.metatavu.dcfb.client.Price;
 import fi.metatavu.dcfb.client.Location;
@@ -46,6 +47,10 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       Image image = new Image();
       image.setType("image/jpeg");
       image.setUrl("https://www.example.com/jpeg.jpg");
+
+      ItemPaymentMethods paymentMethods = new ItemPaymentMethods();
+      paymentMethods.setAllowContactSeller(false);
+      paymentMethods.setAllowCreditCard(true);
       
       fi.metatavu.dcfb.client.Item item = new fi.metatavu.dcfb.client.Item();
       item.setAmount(25l);
@@ -62,6 +67,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
         dataBuilder.createMeta("test-1", "test value 1"),
         dataBuilder.createMeta("test-2", "test value 2")
       ));
+      item.setPaymentMethods(paymentMethods);
 
       Item createdItem = dataBuilder.createItem(item);
       Map<String, String> metaMap = mapMetas(createdItem.getMeta());
@@ -89,6 +95,8 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(2, createdItem.getMeta().size());
       assertEquals("test value 1", metaMap.get("test-1"));
       assertEquals("test value 2", metaMap.get("test-2"));
+      assertEquals(false, createdItem.getPaymentMethods().isAllowContactSeller());
+      assertEquals(true, createdItem.getPaymentMethods().isAllowCreditCard());
       
     } finally {
       dataBuilder.clean();
@@ -103,6 +111,8 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       Item simpleItem = dataBuilder.createSimpleItem(simpleCategory.getId(), null);
       ItemsApi itemApi = dataBuilder.getItemApi();
       assertEquals(simpleItem.toString(), itemApi.findItem(simpleItem.getId()).toString());
+      assertEquals(true, simpleItem.getPaymentMethods().isAllowContactSeller());
+      assertEquals(false, simpleItem.getPaymentMethods().isAllowCreditCard());
     } finally {
       dataBuilder.clean();
     }
@@ -124,6 +134,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       List<Item> items = itemsApi.listItems(null, null, null, "simple", null, null, null, null, null);
       assertEquals(1, items.size());
       assertEquals(simpleItem.toString(), items.get(0).toString());
+      
     } finally {
       dataBuilder.clean();
     }
@@ -291,6 +302,8 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload1.setAmount(1l);
       payload1.setUnit("unit");
       payload1.setSellerId(REALM1_USER_1_ID);
+      payload1.setPaymentMethods(dataBuilder.createDefaultPaymentMethods());
+      
       Item item1 = dataBuilder.createItem(payload1);
 
       waitItemCount(itemsApi, 1);
@@ -303,6 +316,8 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload2.setAmount(2l);
       payload2.setUnit("unit");
       payload2.setSellerId(REALM1_USER_1_ID);
+      payload2.setPaymentMethods(dataBuilder.createDefaultPaymentMethods());
+      
       Item item2 = dataBuilder.createItem(payload2);
       
       waitItemCount(itemsApi, 2);
@@ -337,6 +352,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload1.setUnit("unit");
       payload1.setSellerId(REALM1_USER_1_ID);
       payload1.setLocationId(dataBuilder.createSimpleLocation("61.6887", "27.2721").getId());
+      payload1.setPaymentMethods(dataBuilder.createDefaultPaymentMethods());
       
       Item item1 = dataBuilder.createItem(payload1);
 
@@ -351,6 +367,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload2.setUnit("unit");
       payload2.setSellerId(REALM1_USER_1_ID);
       payload2.setLocationId(dataBuilder.createSimpleLocation("60.1699", "24.9384").getId());
+      payload2.setPaymentMethods(dataBuilder.createDefaultPaymentMethods());
       
       Item item2 = dataBuilder.createItem(payload2);
       
@@ -402,7 +419,8 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
         dataBuilder.createMeta("test-1", "test value 1"),
         dataBuilder.createMeta("test-2", "test value 2")
       ));
-
+      payload.setPaymentMethods(dataBuilder.createDefaultPaymentMethods());
+      
       Item item = dataBuilder.createItem(payload);
 
       Map<String, String> metaMap = mapMetas(item.getMeta());
