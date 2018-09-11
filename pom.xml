@@ -48,8 +48,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     
     <!-- Spec -->
-    
-    <dcfb-api-spec.version>0.0.28</dcfb-api-spec.version>
+
+    <dcfb-api-spec.version>0.0.30</dcfb-api-spec.version>
        
     <!-- Maven -->
 
@@ -91,7 +91,7 @@
     
     <rest-assured.version>3.0.3</rest-assured.version>
     <wiremock.version>2.18.0</wiremock.version>
-    <dcfb-api-client.version>0.0.22</dcfb-api-client.version>
+    <dcfb-api-client.version>0.0.24</dcfb-api-client.version>
     
   </properties>
 

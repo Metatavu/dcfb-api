@@ -133,7 +133,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createBadRequest("Users without stripe account id cannot create items with credit card payment");
     }
     
-
     LocalizedEntry title = createLocalizedEntry(payload.getTitle());
     LocalizedEntry description = createLocalizedEntry(payload.getDescription());
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
@@ -143,7 +142,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
     Boolean visibilityLimited = Boolean.FALSE;
-    
     
     Long soldAmount = payload.getSoldAmount();
     if (soldAmount == null) {
@@ -236,7 +234,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   
   @Override
   public Response listItems(String categoryIdsParam, String locationIdsParam, String userIds, String search, Double nearLat,
-      Double nearLon, List<String> sort, Long firstResult, Long maxResults) throws Exception {
+      Double nearLon, Boolean includeExhausted, List<String> sort, Long firstResult, Long maxResults) throws Exception {
 
     // TODO: userIds
     
@@ -278,7 +276,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     }
 
     SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(nearLat, nearLon, 
-        categories, locations, search, getLoggerUserId(), firstResult, maxResults, sorts);
+        categories, locations, search, getLoggerUserId(), includeExhausted != null ? includeExhausted.booleanValue() : false, firstResult, maxResults, sorts);
 
     return createOk(itemTranslator.translateItems(searchResult.getResult()), searchResult.getTotalHits());
   }

@@ -103,6 +103,8 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
     OffsetDateTime modifiedAt = item.getModifiedAt();
     OffsetDateTime expiresAt = item.getExpiresAt();
     GeoPoint geoPoint = createGeoPoint(item.getLocation());
+    Long reservedItemCount = itemController.countReservedAmountByItem(item);
+    Long itemsLeft = item.getAmount() - (reservedItemCount + item.getSoldAmount()); 
     
     return new IndexableItem(item.getId(),
         geoPoint,
@@ -117,6 +119,7 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
         slug,
         allowedUserIds,
         visibilityLimited,
+        itemsLeft,
         createdAt, 
         modifiedAt, 
         expiresAt);
