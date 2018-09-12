@@ -187,7 +187,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     if (!isRealmUser()) {
       return createForbidden("Anonymous users can not create item reservations");
     }
-    
+
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
     if (item == null) {
       return createNotFound(NOT_FOUND_MESSAGE);
@@ -199,6 +199,28 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     }
     
     fi.metatavu.dcfb.server.persistence.model.ItemReservation itemReservation = itemController.createResevation(item, payload.getAmount());
+    return createOk(itemTranslator.translateItemReservation(itemReservation));
+  }
+  
+  @Override
+  public Response findItemReservation(UUID itemId, UUID itemReservationId) throws Exception {
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not find item reservations");
+    }
+    
+    fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
+    if (item == null) {
+      return createNotFound(NOT_FOUND_MESSAGE);
+    }
+
+    fi.metatavu.dcfb.server.persistence.model.ItemReservation itemReservation = itemController.findItemReservation(itemReservationId);
+    if (itemReservation == null) {
+      return createNotFound(NOT_FOUND_MESSAGE);
+    }
+    
+    if (!itemReservation.getItem().getId().equals(item.getId())) {
+      return createNotFound(NOT_FOUND_MESSAGE);  
+    }
     
     return createOk(itemTranslator.translateItemReservation(itemReservation));
   }

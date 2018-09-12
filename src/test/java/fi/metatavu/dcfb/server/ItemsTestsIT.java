@@ -120,6 +120,40 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
   }
   
   @Test
+  public void testReserveItem() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      Category simpleCategory = dataBuilder.createSimpleCategory();
+      Item item = dataBuilder.createSimpleItem(simpleCategory.getId(), null);
+      ItemsApi adminItemApi = dataBuilder.getAdminItemApi();
+      
+      assertEquals(new Long(15l), item.getAmount());
+      assertEquals(new Long(0l), item.getReservedAmount());
+      assertEquals(new Long(0l), item.getSoldAmount());
+      
+      ItemReservation itemReservation = dataBuilder.createItemReservation(item.getId(), 10l);
+      assertNotNull(itemReservation);
+      assertNotNull(itemReservation.getId());
+      
+      ItemReservation foundItemReservation = adminItemApi.findItemReservation(item.getId(), itemReservation.getId());
+      
+      assertNotNull(foundItemReservation);
+      assertEquals(itemReservation.getId(), foundItemReservation.getId());
+      assertEquals(itemReservation.getAmount(), foundItemReservation.getAmount());
+      
+      Item foundItem = adminItemApi.findItem(item.getId());
+      assertNotNull(foundItem);
+
+      assertEquals(new Long(10l), foundItemReservation.getAmount());
+      assertEquals(new Long(15l), foundItem.getAmount());
+      assertEquals(new Long(10l), foundItem.getReservedAmount());
+      assertEquals(new Long(0l), foundItem.getSoldAmount());      
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+  
+  @Test
   public void testSearchItems() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
@@ -147,15 +181,13 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       
       Category simpleCategory = dataBuilder.createSimpleCategory();
       Item simpleItem = dataBuilder.createSimpleItem(simpleCategory.getId(), null);
-      
+
       waitItemCount(itemsApi, 1);
       
       assertEquals(1, itemsApi.listItems(null, null, null, "simple", null, null, null, null, null, null).size());
       
-      ItemReservation itemReservation = new ItemReservation();
-      itemReservation.setAmount(simpleItem.getAmount());
-      itemsApi.createItemReservation(simpleItem.getId(), itemReservation);
-
+      dataBuilder.createItemReservation(simpleItem.getId(), simpleItem.getAmount());
+      
       waitItemCount(itemsApi, 0);
       
       assertEquals(0, itemsApi.listItems(null, null, null, "simple", null, null, null, null, null, null).size());
