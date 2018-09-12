@@ -365,10 +365,7 @@ public class ItemController {
    * Deletes expired reservations
    */
   public void deleteExpiredReservations() {
-    List<ItemReservation> expired = itemReservationDAO.listExpired();
-    System.out.println("Removing expired " + expired.size());
-    
-    expired.stream().forEach(itemReservationDAO::delete);
+    itemReservationDAO.listExpired().stream().forEach(itemReservationDAO::delete);
   } 
 
   /**
