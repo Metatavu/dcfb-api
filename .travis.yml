@@ -16,6 +16,10 @@ install: true
   
 before_script:
   - scripts/start-keycloak.sh
+  - psql -c 'create database dcfbtest' -U postgres
+  - psql -c 'create user dcfbtest' -U postgres
+  - psql -c "alter user dcfbtest with password 'dcfbtest'"
+  - psql -c "alter role dcfbtest with login"
   
 script:
   - . travis.sh
