@@ -53,18 +53,6 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
     itemIndexEvent.fire(new ItemIndexEvent(persistedEntity.getId()));
   }
   
-  public void onItemIndexNotif(@Observes ItemIndexEvent event) {
-    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> and time for ItemUPDATE is in FUTURE" + event.getId());
-  }
-
-  public void onItemIndexNotifCompl(@Observes (during = TransactionPhase.AFTER_COMPLETION) ItemIndexEvent event) {
-    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> and time for ItemUPDATE has COMPLETED" + event.getId());
-  }
-
-  public void onItemIndexNotifFail(@Observes (during = TransactionPhase.AFTER_FAILURE) ItemIndexEvent event) {
-    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> and time for ItemUPDATE has FAILED" + event.getId());
-  }
-  
   /**
    * Item index event listener
    * 
@@ -72,8 +60,6 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
    */
   @Transactional (value = TxType.REQUIRES_NEW)
   public void onItemIndex(@Observes (during = TransactionPhase.AFTER_SUCCESS) ItemIndexEvent event) {
-    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> and time for ItemUPDATE " + event.getId());
-
     Item entity = itemController.findItem(event.getId());
     if (entity != null) {
       index(entity);
@@ -119,8 +105,6 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
     GeoPoint geoPoint = createGeoPoint(item.getLocation());
     Long reservedItemCount = itemController.countReservedAmountByItem(item);
     Long itemsLeft = item.getAmount() - (reservedItemCount + item.getSoldAmount());
-    
-    System.out.println("ITEMS LEFT + " + itemsLeft);
     
     return new IndexableItem(item.getId(),
         geoPoint,
