@@ -255,6 +255,8 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       Category childCategory = dataBuilder.createCategory(childCategoryPayload);
 
       Item simpleItem = dataBuilder.createSimpleItem(childCategory.getId(), null);
+      
+      waitItemCount(itemsApi, 1);
 
       List<Item> items1Items = itemsApi.listItems(childCategory.getId().toString(), null, null, null, null, null, null, null, null, null);
       assertEquals(1, items1Items.size());
