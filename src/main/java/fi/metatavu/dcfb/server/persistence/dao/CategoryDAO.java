@@ -1,5 +1,6 @@
 package fi.metatavu.dcfb.server.persistence.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -39,10 +40,10 @@ public class CategoryDAO extends AbstractDAO<Category> {
   }
 
   /**
-   * Finds location by slug
+   * Finds category by slug
    * 
    * @param slug
-   * @return location
+   * @return category
    */
   public Category findBySlug(String slug) {
     EntityManager entityManager = getEntityManager();
@@ -53,6 +54,23 @@ public class CategoryDAO extends AbstractDAO<Category> {
     criteria.select(root);
     criteria.where(criteriaBuilder.equal(root.get(Category_.slug), slug));
     return getSingleResult(entityManager.createQuery(criteria));
+  }
+
+  /**
+   * List categories by parent category
+   * 
+   * @param parent
+   * @return list of categories
+   */
+  public List<Category> listByParent(Category parent) {
+    EntityManager entityManager = getEntityManager();
+
+    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Category> criteria = criteriaBuilder.createQuery(Category.class);
+    Root<Category> root = criteria.from(Category.class);
+    criteria.select(root);
+    criteria.where(criteriaBuilder.equal(root.get(Category_.parent), parent));
+    return entityManager.createQuery(criteria).getResultList();
   }
 
   /**

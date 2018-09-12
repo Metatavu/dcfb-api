@@ -13,6 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import fi.metatavu.dcfb.server.categories.CategoryController;
 import fi.metatavu.dcfb.server.persistence.dao.ItemDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemImageDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemMetaDAO;
@@ -36,6 +37,9 @@ import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 public class ItemController {
   
   private static long RESERVATION_EXPIRE_MINUTES = 5l;
+
+  @Inject
+  private CategoryController categoryController;
 
   @Inject
   private ItemSearcher itemSearcher;
@@ -251,7 +255,8 @@ public class ItemController {
   @SuppressWarnings ("squid:S00107")
   public SearchResult<Item> searchItems(Double nearLat, Double nearLon, List<Category> categories, List<Location> locations, String search, 
       UUID currentUserId, boolean includeExhausted, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
-    List<UUID> categoryIds = categories == null ? null : categories.stream()
+    
+    List<UUID> categoryIds = categoryController.listTreeCategories(categories).stream()
       .map(Category::getId)
       .collect(Collectors.toList());
 
