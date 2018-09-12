@@ -184,9 +184,6 @@ public class TestDataBuilder {
     }
 
     fi.metatavu.dcfb.client.ItemReservation result = getAdminItemApi().createItemReservation(itemId, itemReservation);
-    System.out.println("id: " + result.getId());
-    System.out.println("amount: " + result.getAmount().toString());
-    
     this.itemReservations.get(itemId).add(result);
     
     return result;
