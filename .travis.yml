@@ -12,6 +12,9 @@ addons:
   sonarcloud:
     organization: "metatavu-oy"
           
+services:
+  - postgresql
+          
 install: true
   
 before_script:
