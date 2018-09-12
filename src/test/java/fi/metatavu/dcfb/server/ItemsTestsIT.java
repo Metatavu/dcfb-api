@@ -242,6 +242,36 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
   }
   
   @Test
+  public void testSearchItemsByParentCategory() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      ItemsApi itemsApi = dataBuilder.getItemApi();
+
+      Category parentCategory1 = dataBuilder.createSimpleCategory();
+      Category parentCategory2 = dataBuilder.createSimpleCategory();
+      
+      Category childCategoryPayload = new Category();
+      childCategoryPayload.setParentId(parentCategory1.getId());
+      Category childCategory = dataBuilder.createCategory(childCategoryPayload);
+
+      Item simpleItem = dataBuilder.createSimpleItem(childCategory.getId(), null);
+
+      List<Item> items1Items = itemsApi.listItems(childCategory.getId().toString(), null, null, null, null, null, null, null, null, null);
+      assertEquals(1, items1Items.size());
+      assertEquals(simpleItem.toString(), items1Items.get(0).toString());
+
+      List<Item> items2Items = itemsApi.listItems(parentCategory1.getId().toString(), null, null, null, null, null, null, null, null, null);
+      assertEquals(1, items2Items.size());
+      assertEquals(simpleItem.toString(), items2Items.get(0).toString());
+
+      List<Item> items3Items = itemsApi.listItems(parentCategory2.getId().toString(), null, null, null, null, null, null, null, null, null);
+      assertEquals(0, items3Items.size());
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+  
+  @Test
   public void testSearchItemsByLocation() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
