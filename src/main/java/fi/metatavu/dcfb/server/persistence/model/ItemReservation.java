@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 
@@ -27,15 +28,19 @@ public class ItemReservation {
   @ManyToOne (optional = false)
   private Item item;
   
+  @NotNull
   @Column (nullable = false)
   private OffsetDateTime createdAt;
 
+  @NotNull
   @Column (nullable = false)
   private OffsetDateTime modifiedAt;
 
+  @NotNull
   @Column (nullable = false)
   private OffsetDateTime expiresAt;
   
+  @NotNull
   @Column (nullable = false)
   private Long amount;
 

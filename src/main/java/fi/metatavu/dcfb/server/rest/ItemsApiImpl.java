@@ -133,7 +133,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createBadRequest("Users without stripe account id cannot create items with credit card payment");
     }
     
-
     LocalizedEntry title = createLocalizedEntry(payload.getTitle());
     LocalizedEntry description = createLocalizedEntry(payload.getDescription());
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
@@ -143,7 +142,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
     Boolean visibilityLimited = Boolean.FALSE;
-    
     
     Long soldAmount = payload.getSoldAmount();
     if (soldAmount == null) {
@@ -189,7 +187,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     if (!isRealmUser()) {
       return createForbidden("Anonymous users can not create item reservations");
     }
-    
+
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
     if (item == null) {
       return createNotFound(NOT_FOUND_MESSAGE);
@@ -201,6 +199,28 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     }
     
     fi.metatavu.dcfb.server.persistence.model.ItemReservation itemReservation = itemController.createResevation(item, payload.getAmount());
+    return createOk(itemTranslator.translateItemReservation(itemReservation));
+  }
+  
+  @Override
+  public Response findItemReservation(UUID itemId, UUID itemReservationId) throws Exception {
+    if (!isRealmUser()) {
+      return createForbidden("Anonymous users can not find item reservations");
+    }
+    
+    fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
+    if (item == null) {
+      return createNotFound(NOT_FOUND_MESSAGE);
+    }
+
+    fi.metatavu.dcfb.server.persistence.model.ItemReservation itemReservation = itemController.findItemReservation(itemReservationId);
+    if (itemReservation == null) {
+      return createNotFound(NOT_FOUND_MESSAGE);
+    }
+    
+    if (!itemReservation.getItem().getId().equals(item.getId())) {
+      return createNotFound(NOT_FOUND_MESSAGE);  
+    }
     
     return createOk(itemTranslator.translateItemReservation(itemReservation));
   }
@@ -236,7 +256,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   
   @Override
   public Response listItems(String categoryIdsParam, String locationIdsParam, String userIds, String search, Double nearLat,
-      Double nearLon, List<String> sort, Long firstResult, Long maxResults) throws Exception {
+      Double nearLon, Boolean includeExhausted, List<String> sort, Long firstResult, Long maxResults) throws Exception {
 
     // TODO: userIds
     
@@ -278,7 +298,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     }
 
     SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(nearLat, nearLon, 
-        categories, locations, search, getLoggerUserId(), firstResult, maxResults, sorts);
+        categories, locations, search, getLoggerUserId(), includeExhausted != null ? includeExhausted.booleanValue() : false, firstResult, maxResults, sorts);
 
     return createOk(itemTranslator.translateItems(searchResult.getResult()), searchResult.getTotalHits());
   }

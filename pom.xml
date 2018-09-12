@@ -48,8 +48,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     
     <!-- Spec -->
-    
-    <dcfb-api-spec.version>0.0.28</dcfb-api-spec.version>
+
+    <dcfb-api-spec.version>0.0.32</dcfb-api-spec.version>
        
     <!-- Maven -->
 
@@ -91,8 +91,8 @@
     
     <rest-assured.version>3.0.3</rest-assured.version>
     <wiremock.version>2.18.0</wiremock.version>
-    <dcfb-api-client.version>0.0.22</dcfb-api-client.version>
-    
+    <dcfb-api-client.version>0.0.26</dcfb-api-client.version>
+    <postgresql.version>42.2.5</postgresql.version>
   </properties>
 
   <dependencyManagement>
@@ -606,6 +606,14 @@
       </exclusions>
     </dependency>
     
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${postgresql.version}</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+    
   </dependencies>
   
   <profiles>
@@ -619,28 +627,18 @@
         <h2.version>1.4.193</h2.version>
         <it.port.http>58080</it.port.http>
         <it.host>api-itest.dcfb.fi</it.host>
-        <it.jdbc.driver>org.h2.jdbcx.JdbcDataSource</it.jdbc.driver>
-        <it.jdbc.url>jdbc:h2:file:${project.build.directory}/h2;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE</it.jdbc.url>
-        <it.jdbc.properties>URL=jdbc:h2:file:${project.build.directory}/h2\;AUTO_SERVER=TRUE\;DB_CLOSE_ON_EXIT=FALSE</it.jdbc.properties>
+        <it.jdbc.driver>org.postgresql.xa.PGXADataSource</it.jdbc.driver>
+        <it.jdbc.url>jdbc:postgresql://localhost:5432/dcfbtest</it.jdbc.url>
+        <it.jdbc.properties>DatabaseName=dcfbtest</it.jdbc.properties>
         <it.jdbc.jndi>java:jboss/datasources/dcfb-api</it.jdbc.jndi>
-        <it.jdbc.username>sa</it.jdbc.username>
-        <it.jdbc.password>sa</it.jdbc.password>
+        <it.jdbc.username>dcfbtest</it.jdbc.username>
+        <it.jdbc.password>dcfbtest</it.jdbc.password>
         <it.jdbc.type>javax.sql.XADataSource</it.jdbc.type>
         <it.jdbc.transactionsupport>XA_TRANSACTION</it.jdbc.transactionsupport>
         <it.skipdatabasedrop>true</it.skipdatabasedrop>
-        <it.hibernate.dialect>org.hibernate.dialect.H2Dialect</it.hibernate.dialect>
         <jacoco.reportPath>${project.basedir}/target/jacoco.exec</jacoco.reportPath>
       </properties>
       
-      <dependencies>
-        <dependency>
-          <groupId>com.h2database</groupId>
-          <artifactId>h2</artifactId>
-          <version>${h2.version}</version>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-    
       <build>
         <plugins>
           
@@ -760,16 +758,10 @@
                 <log>${project.basedir}/target/cargo.log</log>
                 <output>${project.basedir}/target/wildfly.log</output>
                 <zipUrlInstaller>
-                  <url>https://www.dropbox.com/s/03lvma0p0ixpbso/wildfly-13.0.0.Final-with-keycloak.zip?dl=1</url>
+                  <url>https://www.dropbox.com/s/ykhnwghf6zdcnvn/wildfly-13.0.0.Final-with-keycloak%2Bpg.zip?dl=1</url>
                   <downloadDir>${project.basedir}/.cargo/downloads</downloadDir>
                   <extractDir>${project.basedir}/.cargo/extracts</extractDir>
-                </zipUrlInstaller>
-                <dependencies>
-                  <dependency>
-                    <groupId>com.h2database</groupId>
-                    <artifactId>h2</artifactId>
-                  </dependency>
-                </dependencies>         
+                </zipUrlInstaller>         
               </container>
               <configuration>
                 <properties>
@@ -815,7 +807,7 @@
                 <configuration>
                   <batch>true</batch>
                   <commands>
-                    <command>xa-data-source add --name=ci --driver-name=h2 --jndi-name=${it.jdbc.jndi} --user-name=${it.jdbc.username} --password=${it.jdbc.password} --xa-datasource-properties=${it.jdbc.properties}</command>
+                    <command>xa-data-source add --name=ci --driver-name=postgres --jndi-name=${it.jdbc.jndi} --user-name=${it.jdbc.username} --password=${it.jdbc.password} --xa-datasource-properties=${it.jdbc.properties}</command>
                     <command>/subsystem=undertow/server=default-server/host=dcfb-api:add(alias=["${it.host}"],default-web-module="dcfb-api.war")</command>
                     <command>/system-property=it-test:add(value="true")</command>
                     <command>/system-property=dcfb-api.config-path:add(value="${project.basedir}/test-config")</command>

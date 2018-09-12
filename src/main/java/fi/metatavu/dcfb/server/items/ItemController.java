@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import fi.metatavu.dcfb.server.persistence.dao.ItemDAO;
@@ -26,6 +27,7 @@ import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
+import fi.metatavu.dcfb.server.search.handlers.ItemIndexEvent;
 import fi.metatavu.dcfb.server.search.handlers.ItemIndexHandler;
 import fi.metatavu.dcfb.server.search.searchers.ItemSearcher;
 import fi.metatavu.dcfb.server.search.searchers.SearchResult;
@@ -56,6 +58,9 @@ public class ItemController {
   @Inject
   private ItemReservationDAO itemReservationDAO;
 
+  @Inject
+  private Event<ItemIndexEvent> itemIndexEvent;
+  
   /**
    * Create item
    *
@@ -143,20 +148,6 @@ public class ItemController {
     itemDAO.updateSoldAmount(item, soldAmount, modifier);
     return item;
   }
-
-  /**
-   * Update item reserved amount value
-   *
-   * @param item item
-   * @param reservedAmount reserved amount
-   * @param modifier modifier
-   * 
-   * @return updated item
-   */
-  public Item updateItemReservedAmount(Item item, Long reservedAmount, UUID modifier) {
-    itemDAO.updateReservedAmount(item, reservedAmount, modifier);
-    return item;
-  }
   
   /**
    * Deletes an item
@@ -167,6 +158,7 @@ public class ItemController {
     itemMetaDAO.listByItem(item).stream().forEach(itemMetaDAO::delete);
     deleteItemImages(item);
     deleteItemUsers(item);
+    deleteItemReservations(item);
     itemDAO.delete(item);
     itemIndexHandler.deleteIndexable(item.getId());
   }
@@ -232,6 +224,16 @@ public class ItemController {
   public void deleteItemUsers(Item item) {
     listItemUsers(item).stream().forEach(itemUserDAO::delete);
   }
+  
+  /**
+   * Deletes all item reservations
+   * 
+   * @param item item
+   */
+  public void deleteItemReservations(Item item) {
+    itemReservationDAO.listByItem(item).stream()
+      .forEach(this::deleteItemReservation);
+  }
 
   /**
    * Searches items
@@ -241,12 +243,14 @@ public class ItemController {
    * @param categories filter by categories. Ignored if null
    * @param locations filter by locations. Ignored if null
    * @param search Search by free-text. Ignored if null
+   * @param includeExhausted whether to include items without any items left
    * @param firstResult result offset
    * @param maxResults maximum number of results returned
    * @return search result
    */
   @SuppressWarnings ("squid:S00107")
-  public SearchResult<Item> searchItems(Double nearLat, Double nearLon, List<Category> categories, List<Location> locations, String search, UUID currentUserId, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
+  public SearchResult<Item> searchItems(Double nearLat, Double nearLon, List<Category> categories, List<Location> locations, String search, 
+      UUID currentUserId, boolean includeExhausted, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
     List<UUID> categoryIds = categories == null ? null : categories.stream()
       .map(Category::getId)
       .collect(Collectors.toList());
@@ -255,7 +259,7 @@ public class ItemController {
       .map(Location::getId)
       .collect(Collectors.toList());
 
-    SearchResult<UUID> searchResult = itemSearcher.searchItems(nearLat, nearLon, categoryIds, locationIds, search, currentUserId, firstResult, maxResults, sorts);
+    SearchResult<UUID> searchResult = itemSearcher.searchItems(nearLat, nearLon, categoryIds, locationIds, search, currentUserId, includeExhausted, firstResult, maxResults, sorts);
 
     List<Item> items = searchResult.getResult().stream()
       .map(itemDAO::findById)
@@ -332,7 +336,9 @@ public class ItemController {
    * @return
    */
   public ItemReservation createResevation(Item item, Long amount) {
-    return itemReservationDAO.create(UUID.randomUUID(), item, OffsetDateTime.now().plus(RESERVATION_EXPIRE_MINUTES, ChronoUnit.MINUTES), amount);    
+    ItemReservation result = itemReservationDAO.create(UUID.randomUUID(), item, OffsetDateTime.now().plus(RESERVATION_EXPIRE_MINUTES, ChronoUnit.MINUTES), amount);
+    itemIndexEvent.fire(new ItemIndexEvent(item.getId()));
+    return result;
   }
 
   /**
