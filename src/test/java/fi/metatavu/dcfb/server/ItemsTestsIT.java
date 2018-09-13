@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import feign.FeignException;
@@ -148,6 +149,32 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(new Long(15l), foundItem.getAmount());
       assertEquals(new Long(10l), foundItem.getReservedAmount());
       assertEquals(new Long(0l), foundItem.getSoldAmount());      
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+  
+  @Test
+  public void testSearchItemsByUser() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      ItemsApi adminItemsApi = dataBuilder.getAdminItemApi();
+
+      Category simpleCategory = dataBuilder.createSimpleCategory();
+      Item simpleItem = dataBuilder.createSimpleItem(simpleCategory.getId(), null);
+      
+      List<String> user1Ids = Arrays.asList(REALM1_USER_1_ID.toString());
+      List<String> adminids = Arrays.asList(REALM1_ADMIN_ID.toString());
+      
+      waitItemCount(adminItemsApi, 1);
+      
+      List<Item> user1Items = adminItemsApi.listItems(null, null, StringUtils.join(user1Ids, ","), null, null, null, null, null, null, null);
+      assertEquals(0, user1Items.size());
+      
+      List<Item> adminItems = adminItemsApi.listItems(null, null, StringUtils.join(adminids, ","), null, null, null, null, null, null, null);
+      assertEquals(1, adminItems.size());
+      assertEquals(simpleItem.toString(), adminItems.get(0).toString());
+      
     } finally {
       dataBuilder.clean();
     }

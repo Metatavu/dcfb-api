@@ -244,6 +244,7 @@ public class ItemController {
    * 
    * @param nearLat prefer items near geo point
    * @param nearLon prefer items near geo point
+   * @param sellerIds seller ids. Ignored if null
    * @param categories filter by categories. Ignored if null
    * @param locations filter by locations. Ignored if null
    * @param search Search by free-text. Ignored if null
@@ -253,7 +254,7 @@ public class ItemController {
    * @return search result
    */
   @SuppressWarnings ("squid:S00107")
-  public SearchResult<Item> searchItems(Double nearLat, Double nearLon, List<Category> categories, List<Location> locations, String search, 
+  public SearchResult<Item> searchItems(Double nearLat, Double nearLon, List<UUID> sellerIds, List<Category> categories, List<Location> locations, String search, 
       UUID currentUserId, boolean includeExhausted, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
     
     List<UUID> categoryIds = categoryController.listTreeCategories(categories).stream()
@@ -264,7 +265,8 @@ public class ItemController {
       .map(Location::getId)
       .collect(Collectors.toList());
 
-    SearchResult<UUID> searchResult = itemSearcher.searchItems(nearLat, nearLon, categoryIds, locationIds, search, currentUserId, includeExhausted, firstResult, maxResults, sorts);
+    SearchResult<UUID> searchResult = itemSearcher.searchItems(nearLat, nearLon, sellerIds,categoryIds, locationIds, 
+        search,  currentUserId, includeExhausted, firstResult, maxResults, sorts);
 
     List<Item> items = searchResult.getResult().stream()
       .map(itemDAO::findById)

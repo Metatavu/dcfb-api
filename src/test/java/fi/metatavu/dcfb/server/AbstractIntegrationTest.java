@@ -40,6 +40,7 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
   protected static final String KEYCLOAK_CLIENT_ID = "ui";
   protected static final String KEYCLOAK_CLIENT_SECRET = "71926dcf-e676-4a3b-babc-a3900d92492e";
   protected static final UUID REALM1_USER_1_ID = UUID.fromString("c72e219c-71a0-4f5e-9b06-5dafe5394e27");
+  protected static final UUID REALM1_ADMIN_ID = UUID.fromString("78656720-f8cd-40ce-8f9a-5bef2673b32f");
 
   @Before
   public void setupKeycloakSettings() {

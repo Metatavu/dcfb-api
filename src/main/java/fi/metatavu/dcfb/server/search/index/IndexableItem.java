@@ -20,6 +20,7 @@ public class IndexableItem extends AbstractIndexable {
   public static final String MODIFIED_AT_FIELD = "modifiedAt";
   public static final String GEOPOINT = "geoPoint";
   public static final String ITEMS_LEFT = "itemsLeft";
+  public static final String SELLER_ID_FIELD = "sellerId";
   
   @Field(analyzer = "finnish")
   private List<String> titleFi;
@@ -58,6 +59,9 @@ public class IndexableItem extends AbstractIndexable {
   @Field(type="keyword", store = true)
   private boolean visibilityLimited;
 
+  @Field(type="keyword", store = true)
+  private String sellerId;
+
   @Field(store = true, type = "date")
   private OffsetDateTime createdAt;
 
@@ -75,11 +79,12 @@ public class IndexableItem extends AbstractIndexable {
   }
   
   @SuppressWarnings ("squid:S00107")
-  public IndexableItem(UUID id, GeoPoint geoPoint, List<String> titleFi, List<String> titleSv, List<String> titleEn, 
+  public IndexableItem(UUID id, String sellerId, GeoPoint geoPoint, List<String> titleFi, List<String> titleSv, List<String> titleEn, 
       List<String> descriptionFi, List<String> descriptionSv, List<String> descriptionEn,  UUID categoryId, UUID locationId, 
       String slug, List<String> allowedUserIds, boolean visibilityLimited, Long itemsLeft, 
       OffsetDateTime createdAt, OffsetDateTime modifiedAt, OffsetDateTime expiresAt) {
     super(id);
+    this.sellerId = sellerId;
     this.geoPoint = geoPoint;
     this.titleFi = titleFi;
     this.titleSv = titleSv;
@@ -264,4 +269,11 @@ public class IndexableItem extends AbstractIndexable {
     this.itemsLeft = itemsLeft;
   }
   
+  public String getSellerId() {
+    return sellerId;
+  }
+  
+  public void setSellerId(String sellerId) {
+    this.sellerId = sellerId;
+  }
 }
