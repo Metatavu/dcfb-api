@@ -258,11 +258,9 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   public Response listItems(String categoryIdsParam, String locationIdsParam, String userIdsParam, String search, Double nearLat,
       Double nearLon, Boolean includeExhausted, List<String> sort, Long firstResult, Long maxResults) throws Exception {
     
-    List<UUID> userIds = getListParameter(userIdsParam, param -> {
-      return UUID.fromString(param);
-    });
+    List<UUID> userIds = getListParameter(userIdsParam, UUID::fromString);
     
-    if (!isRealmAdmin() && (userIds != null && userIds.size() > 0)) {
+    if (!isRealmAdmin() && (userIds != null && !userIds.isEmpty())) {
       if (userIds.size() > 1) {
         return createForbidden("You don't have permission filter by this user id");
       }
