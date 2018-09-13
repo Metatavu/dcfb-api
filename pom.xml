@@ -50,7 +50,7 @@
     <!-- Spec -->
 
     <dcfb-api-spec.version>0.0.32</dcfb-api-spec.version>
-       
+    
     <!-- Maven -->
 
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -311,6 +311,22 @@
     </dependency>
     
     <!-- Keycloak -->
+
+  
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-adapter-spi</artifactId>
+      <version>${keycloak-adapter.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-adapter-core</artifactId>
+      <version>${keycloak-adapter.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
 
     <dependency>
       <groupId>org.keycloak</groupId>
@@ -810,8 +826,8 @@
                     <command>xa-data-source add --name=ci --driver-name=postgres --jndi-name=${it.jdbc.jndi} --user-name=${it.jdbc.username} --password=${it.jdbc.password} --xa-datasource-properties=${it.jdbc.properties}</command>
                     <command>/subsystem=undertow/server=default-server/host=dcfb-api:add(alias=["${it.host}"],default-web-module="dcfb-api.war")</command>
                     <command>/system-property=it-test:add(value="true")</command>
+                    <command>/system-property=keycloak.config-path:add(value="${project.basedir}/scripts/keycloak.json")</command>
                     <command>/system-property=dcfb-api.config-path:add(value="${project.basedir}/test-config")</command>
-                    <command>/subsystem=keycloak/secure-deployment=dcfb-api.war:add(realm=dcfb,resource=api,bearer-only=true,auth-server-url=http://localhost:8280/auth,ssl-required=EXTERNAL)</command>
                   </commands>
                 </configuration>
               </execution>
