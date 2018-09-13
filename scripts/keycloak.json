@@ -1,0 +1,10 @@
+{
+  "realm": "dcfb",
+  "auth-server-url": "http://localhost:8280/auth",
+  "ssl-required": "external",
+  "resource": "api",
+  "bearer-only" : true,
+  "credentials": {
+    "secret": "0e0facfe-8922-48d3-b3d3-8cbc50bd2ada"
+  }
+}
