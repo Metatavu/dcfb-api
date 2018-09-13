@@ -49,7 +49,7 @@
     
     <!-- Spec -->
 
-    <dcfb-api-spec.version>0.0.32</dcfb-api-spec.version>
+    <dcfb-api-spec.version>0.0.35</dcfb-api-spec.version>
     
     <!-- Maven -->
 
@@ -91,7 +91,7 @@
     
     <rest-assured.version>3.0.3</rest-assured.version>
     <wiremock.version>2.18.0</wiremock.version>
-    <dcfb-api-client.version>0.0.26</dcfb-api-client.version>
+    <dcfb-api-client.version>0.0.27</dcfb-api-client.version>
     <postgresql.version>42.2.5</postgresql.version>
   </properties>
 
