@@ -69,6 +69,7 @@ public class ItemTranslator extends AbstractTranslator {
     result.setSellerId(item.getSellerId());
     result.setSoldAmount(item.getSoldAmount());
     result.setReservedAmount(itemController.countReservedAmountByItem(item));
+    result.setResourceId(item.getResourceId());
     
     result.setPaymentMethods(paymentMethods);
     result.setMeta(itemController.listMetas(item).stream().map(itemMeta -> {
