@@ -828,7 +828,6 @@
                     <command>/system-property=it-test:add(value="true")</command>
                     <command>/system-property=keycloak.config-path:add(value="${project.basedir}/scripts/keycloak.json")</command>
                     <command>/system-property=dcfb-api.config-path:add(value="${project.basedir}/test-config")</command>
-                    <command>/subsystem=keycloak/secure-deployment=dcfb-api.war:add(realm=dcfb,resource=api,bearer-only=true,auth-server-url=http://localhost:8280/auth,ssl-required=EXTERNAL)</command>
                   </commands>
                 </configuration>
               </execution>
