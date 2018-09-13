@@ -255,10 +255,21 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   }
   
   @Override
-  public Response listItems(String categoryIdsParam, String locationIdsParam, String userIds, String search, Double nearLat,
+  public Response listItems(String categoryIdsParam, String locationIdsParam, String userIdsParam, String search, Double nearLat,
       Double nearLon, Boolean includeExhausted, List<String> sort, Long firstResult, Long maxResults) throws Exception {
-
-    // TODO: userIds
+    
+    List<UUID> userIds = getListParameter(userIdsParam, UUID::fromString);
+    
+    if (!isRealmAdmin() && (userIds != null && !userIds.isEmpty())) {
+      if (userIds.size() > 1) {
+        return createForbidden("You don't have permission filter by this user id");
+      }
+      
+      UUID userId = userIds.get(0);
+      if (!getLoggerUserId().equals(userId)) {
+        return createForbidden("You don't have permission filter by this user id");
+      }
+    }
     
     List<Category> categories = null;
     List<Location> locations = null;
@@ -298,7 +309,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     }
 
     SearchResult<fi.metatavu.dcfb.server.persistence.model.Item> searchResult = itemController.searchItems(nearLat, nearLon, 
-        categories, locations, search, getLoggerUserId(), includeExhausted != null ? includeExhausted.booleanValue() : false, firstResult, maxResults, sorts);
+      userIds, categories, locations, search, getLoggerUserId(), includeExhausted != null ? includeExhausted.booleanValue() : false, 
+      firstResult, maxResults, sorts);
 
     return createOk(itemTranslator.translateItems(searchResult.getResult()), searchResult.getTotalHits());
   }
