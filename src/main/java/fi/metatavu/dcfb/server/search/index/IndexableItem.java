@@ -19,6 +19,8 @@ public class IndexableItem extends AbstractIndexable {
   public static final String CREATED_AT_FIELD = "createdAt";
   public static final String MODIFIED_AT_FIELD = "modifiedAt";
   public static final String GEOPOINT = "geoPoint";
+  public static final String ITEMS_LEFT = "itemsLeft";
+  public static final String SELLER_ID_FIELD = "sellerId";
   
   @Field(analyzer = "finnish")
   private List<String> titleFi;
@@ -57,6 +59,9 @@ public class IndexableItem extends AbstractIndexable {
   @Field(type="keyword", store = true)
   private boolean visibilityLimited;
 
+  @Field(type="keyword", store = true)
+  private String sellerId;
+
   @Field(store = true, type = "date")
   private OffsetDateTime createdAt;
 
@@ -65,17 +70,21 @@ public class IndexableItem extends AbstractIndexable {
 
   @Field(store = true, type = "date")
   private OffsetDateTime expiresAt;
+  
+  @Field(store = true, type = "long")
+  private Long itemsLeft;
 
   public IndexableItem() {
     // Zero-argument constructor
   }
   
   @SuppressWarnings ("squid:S00107")
-  public IndexableItem(UUID id, GeoPoint geoPoint, List<String> titleFi, List<String> titleSv, List<String> titleEn, 
-      List<String> descriptionFi, List<String> descriptionSv, List<String> descriptionEn, 
-      UUID categoryId, UUID locationId, String slug, List<String> allowedUserIds, boolean visibilityLimited, OffsetDateTime createdAt, OffsetDateTime modifiedAt,
-      OffsetDateTime expiresAt) {
+  public IndexableItem(UUID id, String sellerId, GeoPoint geoPoint, List<String> titleFi, List<String> titleSv, List<String> titleEn, 
+      List<String> descriptionFi, List<String> descriptionSv, List<String> descriptionEn,  UUID categoryId, UUID locationId, 
+      String slug, List<String> allowedUserIds, boolean visibilityLimited, Long itemsLeft, 
+      OffsetDateTime createdAt, OffsetDateTime modifiedAt, OffsetDateTime expiresAt) {
     super(id);
+    this.sellerId = sellerId;
     this.geoPoint = geoPoint;
     this.titleFi = titleFi;
     this.titleSv = titleSv;
@@ -91,6 +100,7 @@ public class IndexableItem extends AbstractIndexable {
     this.expiresAt = expiresAt;
     this.allowedUserIds = allowedUserIds;
     this.visibilityLimited = visibilityLimited;
+    this.itemsLeft = itemsLeft;
   }
 
   @Override
@@ -250,5 +260,20 @@ public class IndexableItem extends AbstractIndexable {
   public void setGeoPoint(GeoPoint geoPoint) {
     this.geoPoint = geoPoint;
   }
-
+  
+  public Long getItemsLeft() {
+    return itemsLeft;
+  }
+  
+  public void setItemsLeft(Long itemsLeft) {
+    this.itemsLeft = itemsLeft;
+  }
+  
+  public String getSellerId() {
+    return sellerId;
+  }
+  
+  public void setSellerId(String sellerId) {
+    this.sellerId = sellerId;
+  }
 }

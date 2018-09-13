@@ -1,5 +1,7 @@
 package fi.metatavu.dcfb.server.categories;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -155,6 +157,42 @@ public class CategoryController {
   public void deleteMetasNotIn(Category category, Set<String> keys) {
     categoryMetaDAO.listByKeyNotIn(category, keys).stream().forEach(categoryMetaDAO::delete);
   }
+
+  /**
+   * Lists all categories including parent categories and all their subcategories
+   * 
+   * @param categories root categories. If null, empty list will be returned
+   * @return all categories including parent categories and all their subcategories
+   */
+  public List<Category> listTreeCategories(List<Category> categories) {
+    if (categories == null) {
+      return Collections.emptyList();
+    }
+    
+    List<Category> result = new ArrayList<>();
+    
+    result.addAll(categories);
+    
+    for (Category category : categories) {
+      appendSubcategories(category, result);
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Appends recursively all subcategories into result array
+   * 
+   * @param parentCategory parent category
+   * @param result result array
+   */
+  private void appendSubcategories(Category parentCategory, List<Category> result) {
+    List<Category> subcategories = categoryDAO.listByParent(parentCategory);
+    result.addAll(subcategories);
+    for (Category subcategory : subcategories) {
+      appendSubcategories(subcategory, result);
+    }
+  }
   
   /**
    * Generates an unique slug
@@ -173,4 +211,5 @@ public class CategoryController {
 
 	  return result;
   }
+
 }

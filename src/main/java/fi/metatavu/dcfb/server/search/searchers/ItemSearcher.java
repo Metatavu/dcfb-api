@@ -5,6 +5,7 @@ import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
+import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,16 +37,21 @@ public class ItemSearcher extends AbstractSearcher {
    * 
    * @param nearLat prefer items near geo point
    * @param nearLon prefer items near geo point
+   * @param sellerIds view only seller ids
    * @param categoryIds category ids that must exist on the result. Omitted if null
    * @param locationId location id that must exist on the result. Omitted if null
    * @param search free text search that must match the result. Omitted if null
+   * @param currentUserId currentUserId
+   * @param includeExhausted whether to include exhausted items
    * @param firstResult first result. Defaults to 0
    * @param maxResults max results. Defaults to 20
    * @return search result 
    */
   @SuppressWarnings ("squid:S00107")
-  public SearchResult<UUID> searchItems(Double nearLat, Double nearLon, List<UUID> categoryIds, List<UUID> locationIds, String search, UUID currentUserId, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
-    boolean matchAll = categoryIds == null && locationIds == null && search == null;
+  public SearchResult<UUID> searchItems(Double nearLat, Double nearLon, List<UUID> sellerIds, List<UUID> categoryIds, List<UUID> locationIds, 
+      String search, UUID currentUserId, boolean includeExhausted, Long firstResult, Long maxResults, List<ItemListSort> sorts) {
+    
+    boolean matchAll = categoryIds == null && locationIds == null && search == null && sellerIds == null && includeExhausted;
     if (matchAll) {
       ConstantScoreQueryBuilder query = constantScoreQuery(createPublicOrInAllowedIdsQuery(currentUserId.toString()));
       query.boost(1.0f);
@@ -64,6 +70,14 @@ public class ItemSearcher extends AbstractSearcher {
       
       if (search != null) {
         query.must(queryStringQuery(search));
+      }
+      
+      if (sellerIds != null) {
+        query.must(createOrMatchQuery(IndexableItem.SELLER_ID_FIELD, sellerIds));
+      }
+      
+      if (!includeExhausted) {
+        query.must(rangeQuery(IndexableItem.ITEMS_LEFT).gt(0));
       }
       
       return executeSearch(query, createSorts(nearLat, nearLon, sorts), firstResult, maxResults);

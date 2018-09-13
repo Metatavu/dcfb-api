@@ -5,7 +5,12 @@
   <display-name>DCFB API</display-name>
   <description>DCFB API Server</description>
   <module-name>dcfb-api</module-name>
-  
+
+  <context-param>
+    <param-name>keycloak.config.resolver</param-name>
+    <param-value>fi.metatavu.dcfb.server.keycloak.DcfbKeycloakConfigResolver</param-value>
+  </context-param>
+
   <login-config>
     <auth-method>KEYCLOAK</auth-method>
     <realm-name>dcfb</realm-name>
@@ -18,7 +23,7 @@
     </web-resource-collection>
   </security-constraint>
   
-   <security-constraint>
+  <security-constraint>
     <web-resource-collection>
       <web-resource-name>webhooks</web-resource-name>
       <url-pattern>/webhooks/*</url-pattern>

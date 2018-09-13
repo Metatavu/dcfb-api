@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,8 @@ import fi.metatavu.dcfb.client.CategoriesApi;
 import fi.metatavu.dcfb.client.Category;
 import fi.metatavu.dcfb.client.Coordinate;
 import fi.metatavu.dcfb.client.Item;
+import fi.metatavu.dcfb.client.ItemPaymentMethods;
+import fi.metatavu.dcfb.client.ItemReservation;
 import fi.metatavu.dcfb.client.ItemsApi;
 import fi.metatavu.dcfb.client.LocalizedValue;
 import fi.metatavu.dcfb.client.Location;
@@ -32,6 +36,7 @@ public class TestDataBuilder {
   private List<fi.metatavu.dcfb.client.Item> items;
   private List<fi.metatavu.dcfb.client.Category> categories;
   private List<fi.metatavu.dcfb.client.Location> locations;
+  private Map<UUID, List<fi.metatavu.dcfb.client.ItemReservation>> itemReservations;
   private String username;
   private String password;
   private String adminToken;
@@ -50,6 +55,7 @@ public class TestDataBuilder {
     this.items = new ArrayList<>();
     this.categories = new ArrayList<>();
     this.locations = new ArrayList<>();
+    this.itemReservations = new HashMap<>();
   }
   
   /**
@@ -143,7 +149,8 @@ public class TestDataBuilder {
     payload.setUnitPrice(price);
     payload.setLocationId(locationId);
     payload.setSellerId(AbstractIntegrationTest.REALM1_USER_1_ID);
-    
+    payload.setPaymentMethods(createDefaultPaymentMethods());
+
     return createItem(payload);
   }
 
@@ -157,6 +164,28 @@ public class TestDataBuilder {
   public fi.metatavu.dcfb.client.Item createItem(fi.metatavu.dcfb.client.Item payload) throws IOException {
     fi.metatavu.dcfb.client.Item result = getAdminItemApi().createItem(payload);
     this.items.add(0, result);
+    return result;
+  }
+
+  /**
+   * Creates an item reservation
+   * 
+   * @param itemId itemId
+   * @param amount amount
+   * @return created item reservation
+   * @throws IOException
+   */
+  public ItemReservation createItemReservation(UUID itemId, Long amount) throws IOException {
+    ItemReservation itemReservation = new ItemReservation();
+    itemReservation.setAmount(amount);
+    
+    if (!this.itemReservations.containsKey(itemId)) {
+      this.itemReservations.put(itemId, new ArrayList<>());
+    }
+
+    fi.metatavu.dcfb.client.ItemReservation result = getAdminItemApi().createItemReservation(itemId, itemReservation);
+    this.itemReservations.get(itemId).add(result);
+    
     return result;
   }
 
@@ -334,6 +363,18 @@ public class TestDataBuilder {
     result.setKey(key);
     result.setValue(value);
     return result;
+  }
+
+  /**
+   * Creates default payment methods object
+   * 
+   * @return default payment methods object
+   */
+  public ItemPaymentMethods createDefaultPaymentMethods() {
+    ItemPaymentMethods paymentMethods = new ItemPaymentMethods();
+    paymentMethods.setAllowContactSeller(true);
+    paymentMethods.setAllowCreditCard(false);
+    return paymentMethods;
   }
   
   /**

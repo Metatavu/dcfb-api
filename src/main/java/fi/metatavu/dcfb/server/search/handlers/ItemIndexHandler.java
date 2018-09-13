@@ -96,6 +96,7 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
     List<String> allowedUserIds = itemController.listItemUsers(item).stream().map(itemUser -> itemUser.getUserId().toString()).collect(Collectors.toList());
     boolean visibilityLimited = item.getVisibilityLimited();
 
+    String sellerId = item.getSellerId().toString();
     UUID categoryId = item.getCategory() != null ? item.getCategory().getId() : null;
     UUID locationId = item.getLocation() != null ? item.getLocation().getId() : null;
     String slug = item.getSlug();
@@ -103,8 +104,11 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
     OffsetDateTime modifiedAt = item.getModifiedAt();
     OffsetDateTime expiresAt = item.getExpiresAt();
     GeoPoint geoPoint = createGeoPoint(item.getLocation());
+    Long reservedItemCount = itemController.countReservedAmountByItem(item);
+    Long itemsLeft = item.getAmount() - (reservedItemCount + item.getSoldAmount());
     
     return new IndexableItem(item.getId(),
+        sellerId,
         geoPoint,
         titleFi, 
         titleSv, 
@@ -117,6 +121,7 @@ public class ItemIndexHandler extends AbstractIndexableHandler<Item, IndexableIt
         slug,
         allowedUserIds,
         visibilityLimited,
+        itemsLeft,
         createdAt, 
         modifiedAt, 
         expiresAt);

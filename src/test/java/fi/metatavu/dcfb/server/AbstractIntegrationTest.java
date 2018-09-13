@@ -40,6 +40,7 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
   protected static final String KEYCLOAK_CLIENT_ID = "ui";
   protected static final String KEYCLOAK_CLIENT_SECRET = "71926dcf-e676-4a3b-babc-a3900d92492e";
   protected static final UUID REALM1_USER_1_ID = UUID.fromString("c72e219c-71a0-4f5e-9b06-5dafe5394e27");
+  protected static final UUID REALM1_ADMIN_ID = UUID.fromString("78656720-f8cd-40ce-8f9a-5bef2673b32f");
 
   @Before
   public void setupKeycloakSettings() {
@@ -231,11 +232,11 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
     String senderEmail = "dcfb-test@example.com";
     String senderName = "DCFB Test";
 
-    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID().toString(), "mailgun-apiurl", String.format("%s/%s",getWireMockBasePath(), path));
-    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID().toString(), "mailgun-domain", domain);
-    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID().toString(), "mailgun-apikey", apiKey);
-    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID().toString(), "mailgun-sender-email", senderEmail);
-    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID().toString(), "mailgun-sender-name", senderName);
+    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID(), "mailgun-apiurl", String.format("%s/%s",getWireMockBasePath(), path));
+    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID(), "mailgun-domain", domain);
+    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID(), "mailgun-apikey", apiKey);
+    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID(), "mailgun-sender-email", senderEmail);
+    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID(), "mailgun-sender-name", senderName);
     
     MailgunMocker mailgunMocker = new MailgunMocker(String.format("/%s", path), domain, apiKey);
     mailgunMocker.startMock();
@@ -253,7 +254,7 @@ public abstract class AbstractIntegrationTest extends AbstractTest {
   }
   
   private void insertSystemSetting(String key, String value) {
-    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID().toString(), key, value);    
+    executeInsert("INSERT INTO SystemSetting (id, settingkey, value) VALUES (?, ?, ?)", UUID.randomUUID(), key, value);    
   }
   
   private void deleteSystemSettings(String... keys) {
