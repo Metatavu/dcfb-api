@@ -196,6 +196,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   }
 
   private Currency getPriceCurrency(Price price) {
+    if (price == null) {
+      return null;
+    }
+
     try {
       return Currency.getInstance(price.getCurrency());
     } catch (IllegalArgumentException e) {
