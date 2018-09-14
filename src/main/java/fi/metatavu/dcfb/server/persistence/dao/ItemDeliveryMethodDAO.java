@@ -2,6 +2,7 @@ package fi.metatavu.dcfb.server.persistence.dao;
 
 import java.util.Currency;
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -31,6 +32,7 @@ public class ItemDeliveryMethodDAO extends AbstractDAO<ItemDeliveryMethod> {
   */
   public ItemDeliveryMethod create(Item item, Currency currency, String price, LocalizedEntry title) {
     ItemDeliveryMethod itemDeliveryMethod = new ItemDeliveryMethod();
+    itemDeliveryMethod.setId(UUID.randomUUID());
     itemDeliveryMethod.setItem(item);
     itemDeliveryMethod.setCurrency(currency);
     itemDeliveryMethod.setPrice(price);
