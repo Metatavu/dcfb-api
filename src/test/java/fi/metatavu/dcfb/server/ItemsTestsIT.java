@@ -22,7 +22,6 @@ import org.junit.Test;
 
 import feign.FeignException;
 import fi.metatavu.dcfb.client.Category;
-import fi.metatavu.dcfb.client.DeliveryMethod;
 import fi.metatavu.dcfb.client.Image;
 import fi.metatavu.dcfb.client.Item;
 import fi.metatavu.dcfb.client.ItemListSort;
@@ -61,13 +60,10 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       
       fi.metatavu.dcfb.client.Item item = new fi.metatavu.dcfb.client.Item();
       
-      DeliveryMethod deliveryMethod = new DeliveryMethod();
-      deliveryMethod.setPrice(deliveryPrice);
-      deliveryMethod.setTitle(dataBuilder.createLocalized(Locale.ENGLISH, "PLURAL", "delivery title"));
+      item.setAllowDelivery(true);
+      item.setAllowPickup(false);
+      item.setDeliveryPrice(deliveryPrice);
       
-      List<DeliveryMethod> deliveryMethods = Arrays.asList(deliveryMethod);
-      
-      item.setDeliveryMethods(deliveryMethods);
       item.setTermsOfDelivery("tos");
       item.setDeliveryTime(12);
       item.setContactEmail("fake@example.com");
@@ -122,15 +118,10 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(new Integer(12), createdItem.getDeliveryTime());
       assertEquals("fake@example.com", createdItem.getContactEmail());
       assertEquals("+356 1234 567", createdItem.getContactPhone());
-      assertEquals(1, createdItem.getDeliveryMethods().size());
-
-      assertEquals(1, createdItem.getDeliveryMethods().size());
-      assertEquals("EUR", createdItem.getDeliveryMethods().get(0).getPrice().getCurrency());
-      assertEquals("10.00", createdItem.getDeliveryMethods().get(0).getPrice().getPrice());
-      
-      assertEquals(Locale.ENGLISH.getLanguage(), createdItem.getDeliveryMethods().get(0).getTitle().get(0).getLanguage());
-      assertEquals("delivery title", createdItem.getDeliveryMethods().get(0).getTitle().get(0).getValue());
-      assertEquals("PLURAL", createdItem.getDeliveryMethods().get(0).getTitle().get(0).getType());
+      assertEquals(true, createdItem.isAllowDelivery());
+      assertEquals(false, createdItem.isAllowPickup());
+      assertEquals("EUR", createdItem.getDeliveryPrice().getCurrency());
+      assertEquals("10.00", createdItem.getDeliveryPrice().getPrice());
     } finally {
       dataBuilder.clean();
     }
@@ -576,7 +567,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(2, item.getMeta().size());
       assertEquals("test value 1", metaMap.get("test-1"));
       assertEquals("test value 2", metaMap.get("test-2"));
-     
+
       item.setAmount(25l);
       item.setCategoryId(simpleCategory.getId());
       item.setDescription(dataBuilder.createLocalized(Locale.FRENCH, "PLURAL", "created description"));

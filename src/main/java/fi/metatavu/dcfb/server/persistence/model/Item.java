@@ -109,6 +109,14 @@ public class Item {
   
   private String contactPhone;
 
+  private String deliveryPrice;
+  
+  private Currency deliveryCurrency;
+
+  private Boolean allowDelivery;
+
+  private Boolean allowPickup;
+
   @Lob
   @Type(type = "org.hibernate.type.TextType")
   private String termsOfDelivery;
@@ -327,6 +335,62 @@ public class Item {
 
   public void setTermsOfDelivery(String termsOfDelivery) {
     this.termsOfDelivery = termsOfDelivery;
+  }
+
+  /**
+   * @return the deliveryCurrency
+   */
+  public Currency getDeliveryCurrency() {
+    return deliveryCurrency;
+  }
+
+  /**
+   * @param deliveryCurrency the deliveryCurrency to set
+   */
+  public void setDeliveryCurrency(Currency deliveryCurrency) {
+    this.deliveryCurrency = deliveryCurrency;
+  }
+
+  /**
+   * @return the deliveryPrice
+   */
+  public String getDeliveryPrice() {
+    return deliveryPrice;
+  }
+
+  /**
+   * @param deliveryPrice the deliveryPrice to set
+   */
+  public void setDeliveryPrice(String deliveryPrice) {
+    this.deliveryPrice = deliveryPrice;
+  }
+
+  /**
+   * @return the allowDelivery
+   */
+  public Boolean getAllowDelivery() {
+    return allowDelivery;
+  }
+
+  /**
+   * @param allowDelivery the allowDelivery to set
+   */
+  public void setAllowDelivery(Boolean allowDelivery) {
+    this.allowDelivery = allowDelivery;
+  }
+
+  /**
+   * @return the allowPickup
+   */
+  public Boolean getAllowPickup() {
+    return allowPickup;
+  }
+
+  /**
+   * @param allowPickup the allowPickup to set
+   */
+  public void setAllowPickup(Boolean allowPickup) {
+    this.allowPickup = allowPickup;
   }
 
   @PrePersist

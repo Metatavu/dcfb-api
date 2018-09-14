@@ -32,7 +32,6 @@ import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.Location;
-import fi.metatavu.dcfb.server.rest.model.DeliveryMethod;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
@@ -145,7 +144,11 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String contactEmail = payload.getContactEmail();
     String contactPhone = payload.getContactPhone();
     String termsOfDelivery = payload.getTermsOfDelivery();
-    
+    Boolean allowDelivery = payload.isAllowDelivery();
+    Boolean allowPickup = payload.isAllowPickup();
+    String deliveryPrice = payload.getDeliveryPrice() != null ? payload.getDeliveryPrice().getPrice() : null;
+    Currency deliveryCurrency = getPriceCurrency(payload.getDeliveryPrice());
+
     Long soldAmount = payload.getSoldAmount();
     if (soldAmount == null) {
       soldAmount = 0l;
@@ -175,6 +178,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         contactEmail,
         contactPhone,
         termsOfDelivery,
+        allowDelivery,
+        allowPickup,
+        deliveryPrice,
+        deliveryCurrency,
         sellerId,
         modifier);
 
@@ -185,8 +192,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       itemController.setResourceId(item, UUID.fromString(resource.getId()), modifier);
     }
     setItemMetas(item, payload.getMeta());
-    setItemDeliveryMethods(item, payload.getDeliveryMethods());
-    
     return createOk(itemTranslator.translateItem(item));
   }
 
@@ -362,6 +367,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String termsOfDelivery = payload.getTermsOfDelivery();
     Boolean allowPurchaseContactSeller = payload.getPaymentMethods().isAllowContactSeller();
     Boolean allowPurchaseCreditCard = payload.getPaymentMethods().isAllowCreditCard();
+    Boolean allowDelivery = payload.isAllowDelivery();
+    Boolean allowPickup = payload.isAllowPickup();
+    String deliveryPrice = payload.getDeliveryPrice() != null ? payload.getDeliveryPrice().getPrice() : null;
+    Currency deliveryCurrency = getPriceCurrency(payload.getDeliveryPrice());
 
     Category category = categoryController.findCategory(payload.getCategoryId());
     if (category == null) {
@@ -397,6 +406,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         contactEmail,
         contactPhone,
         termsOfDelivery,
+        allowDelivery,
+        allowPickup,
+        deliveryPrice,
+        deliveryCurrency,
         sellerId,
         modifier);
     
@@ -406,7 +419,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     updateProtectedResource(item, itemUsers);
     createImages(payload, item);
     setItemMetas(item, payload.getMeta());
-    setItemDeliveryMethods(item, payload.getDeliveryMethods());
     
     return createOk(itemTranslator.translateItem(item));
   }
@@ -472,30 +484,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     return item;
   }
 
-  /**
-   * Sets delivery methods for an item
-   * 
-   * @param item item
-   * @param deliveryMethods delivery methods
-   * @return item updated item
-   */
-  private fi.metatavu.dcfb.server.persistence.model.Item setItemDeliveryMethods(fi.metatavu.dcfb.server.persistence.model.Item item, List<DeliveryMethod> deliveryMethods) {
-    if (deliveryMethods == null) {
-      return item;
-    }
-    
-    itemController.deleteDeliveryMethods(item);
-
-    for (DeliveryMethod deliveryMethod : deliveryMethods) {
-      itemController.createDeliveryMethod(item, 
-          getPriceCurrency(deliveryMethod.getPrice()), 
-          deliveryMethod.getPrice().getPrice(), 
-          createLocalizedEntry(deliveryMethod.getTitle()));
-    }
-
-    return item;
-  }
-  
   /**
    * Creates protected resource to keycloak
    * 
