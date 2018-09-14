@@ -118,19 +118,19 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(false, createdItem.getPaymentMethods().isAllowContactSeller());
       assertEquals(true, createdItem.getPaymentMethods().isAllowCreditCard());
 
-      assertEquals("tos", item.getTermsOfDelivery());
-      assertEquals(new Integer(12), item.getDeliveryTime());
-      assertEquals("fake@example.com", item.getContactEmail());
-      assertEquals("+356 1234 567", item.getContactPhone());
-      assertEquals(1, item.getDeliveryMethods().size());
+      assertEquals("tos", createdItem.getTermsOfDelivery());
+      assertEquals(new Integer(12), createdItem.getDeliveryTime());
+      assertEquals("fake@example.com", createdItem.getContactEmail());
+      assertEquals("+356 1234 567", createdItem.getContactPhone());
+      assertEquals(1, createdItem.getDeliveryMethods().size());
 
-      assertEquals(1, item.getDeliveryMethods().size());
-      assertEquals("EUR", item.getDeliveryMethods().get(0).getPrice().getCurrency());
-      assertEquals("10.00", item.getDeliveryMethods().get(0).getPrice().getPrice());
+      assertEquals(1, createdItem.getDeliveryMethods().size());
+      assertEquals("EUR", createdItem.getDeliveryMethods().get(0).getPrice().getCurrency());
+      assertEquals("10.00", createdItem.getDeliveryMethods().get(0).getPrice().getPrice());
       
-      assertEquals(Locale.ENGLISH.getLanguage(), item.getDeliveryMethods().get(0).getTitle().get(0).getLanguage());
-      assertEquals("delivery title", item.getDeliveryMethods().get(0).getTitle().get(0).getValue());
-      assertEquals("PLURAL", item.getDeliveryMethods().get(0).getTitle().get(0).getType());
+      assertEquals(Locale.ENGLISH.getLanguage(), createdItem.getDeliveryMethods().get(0).getTitle().get(0).getLanguage());
+      assertEquals("delivery title", createdItem.getDeliveryMethods().get(0).getTitle().get(0).getValue());
+      assertEquals("PLURAL", createdItem.getDeliveryMethods().get(0).getTitle().get(0).getType());
     } finally {
       dataBuilder.clean();
     }
