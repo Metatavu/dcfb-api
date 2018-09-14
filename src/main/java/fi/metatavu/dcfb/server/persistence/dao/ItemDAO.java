@@ -23,33 +23,40 @@ import fi.metatavu.dcfb.server.persistence.model.Location;
 public class ItemDAO extends AbstractDAO<Item> {
 
   /**
-  * Creates new item
-  *
-  * @param title title
-  * @param description description
-  * @param category category
-  * @param slug slug
-  * @param expiresAt expiresAt
-  * @param unitPrice unitPrice
-  * @param priceCurrency priceCurrency
-  * @param amount amount
-  * @param unit unit
-  * @param soldAmount amount of items sold
-  * @param allowPurchaseContactSeller whether item is allowed to purchase directly from the seller
-  * @param allowPurchaseCreditCard whether item is allowed to purchase directly with credit card
-  * @param lastModifier modifier
-  * @param sellerId sellerId
-  * @param deliveryTime delivery time
-  * @param contactEmail contact email
-  * @param contactPhone contact phone
-  * @param termsOfDelivery terms of delivery
-  * @return created item
-  */
+   * Creates new item
+   *
+   * @param title                      title
+   * @param description                description
+   * @param category                   category
+   * @param slug                       slug
+   * @param expiresAt                  expiresAt
+   * @param unitPrice                  unitPrice
+   * @param priceCurrency              priceCurrency
+   * @param amount                     amount
+   * @param unit                       unit
+   * @param soldAmount                 amount of items sold
+   * @param allowPurchaseContactSeller whether item is allowed to purchase
+   *                                   directly from the seller
+   * @param allowPurchaseCreditCard    whether item is allowed to purchase
+   *                                   directly with credit card
+   * @param lastModifier               modifier
+   * @param sellerId                   sellerId
+   * @param deliveryTime               delivery time
+   * @param contactEmail               contact email
+   * @param contactPhone               contact phone
+   * @param termsOfDelivery            terms of delivery
+   * @param allowDelivery              allow delivery
+   * @param allowPickup                allow pick up
+   * @param deliveryPrice              delivery price
+   * @param deliveryCurrency           delivery currency
+   * @return created item
+   */
   @SuppressWarnings ("squid:S00107")
   public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, 
       OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, 
       UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, 
-      Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery, UUID sellerId, UUID lastModifier) {
+      Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,
+      Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, UUID sellerId, UUID lastModifier) {
     Item item = new Item();
     item.setId(id);
     item.setTitle(title);
@@ -73,6 +80,10 @@ public class ItemDAO extends AbstractDAO<Item> {
     item.setContactPhone(contactPhone);
     item.setTermsOfDelivery(termsOfDelivery);
     item.setLastModifier(lastModifier);
+    item.setAllowDelivery(allowDelivery);
+    item.setAllowPickup(allowPickup);
+    item.setDeliveryPrice(deliveryPrice);
+    item.setDeliveryCurrency(deliveryCurrency);
     return persist(item);
   }
 
@@ -293,11 +304,11 @@ public class ItemDAO extends AbstractDAO<Item> {
    * @param lastModifier modifier
    * @return updated item
    */
-   public Item updateAllowPurchaseContactSeller(Item item, Boolean allowPurchaseContactSeller, UUID lastModifier) {
-     item.setLastModifier(lastModifier);
-     item.setAllowPurchaseContactSeller(allowPurchaseContactSeller);
-     return persist(item);
-   }
+  public Item updateAllowPurchaseContactSeller(Item item, Boolean allowPurchaseContactSeller, UUID lastModifier) {
+    item.setLastModifier(lastModifier);
+    item.setAllowPurchaseContactSeller(allowPurchaseContactSeller);
+    return persist(item);
+  }
 
    /**
    * Updates allowPurchaseCreditCard
@@ -306,11 +317,11 @@ public class ItemDAO extends AbstractDAO<Item> {
    * @param lastModifier modifier
    * @return updated item
    */
-   public Item updateAllowPurchaseCreditCard(Item item, Boolean allowPurchaseCreditCard, UUID lastModifier) {
-     item.setLastModifier(lastModifier);
-     item.setAllowPurchaseCreditCard(allowPurchaseCreditCard);
-     return persist(item);
-   }
+  public Item updateAllowPurchaseCreditCard(Item item, Boolean allowPurchaseCreditCard, UUID lastModifier) {
+    item.setLastModifier(lastModifier);
+    item.setAllowPurchaseCreditCard(allowPurchaseCreditCard);
+    return persist(item);
+  }
 
   /**
   * Updates deliveryTime
@@ -363,5 +374,57 @@ public class ItemDAO extends AbstractDAO<Item> {
     item.setTermsOfDelivery(termsOfDelivery);
     return persist(item);
   }
+
+  /**
+  * Updates allow delivery
+  *
+  * @param allowDelivery allow delivery
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateAllowDelivery(Item item, Boolean allowDelivery, UUID lastModifier) {
+    item.setAllowDelivery(allowDelivery);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
   
+
+  /**
+  * Updates allow pickup
+  *
+  * @param allowPickup allow pickup
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateAllowPickup(Item item, Boolean allowPickup, UUID lastModifier) {
+    item.setAllowPickup(allowPickup);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+
+  /**
+  * Updates delivery price
+  *
+  * @param deliveryPrice delivery price
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateDeliveryPrice(Item item, String deliveryPrice, UUID lastModifier) {
+    item.setDeliveryPrice(deliveryPrice);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+
+  /**
+  * Updates delivery currency
+  *
+  * @param deliveryCurrency
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateDeliveryCurrency(Item item, Currency deliveryCurrency, UUID lastModifier) {
+    item.setDeliveryCurrency(deliveryCurrency);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
 }

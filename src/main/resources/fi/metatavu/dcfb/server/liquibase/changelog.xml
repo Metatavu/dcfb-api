@@ -308,4 +308,17 @@
     
   </changeSet>
 
+  <changeSet id="allow-pickup-allow-delivery" author="heikki.kurhinen">
+    <dropTable tableName="itemdeliverymethod" />
+    <addColumn tableName="item">
+      <column name="allowdelivery" type="boolean" defaultValue="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="allowpickup" type="boolean" defaultValue="false" >
+        <constraints nullable="false"/>
+      </column>
+      <column name="deliveryprice" type="varchar(255)" />
+      <column name="deliverycurrency" type="varchar(255)" />
+    </addColumn>
+  </changeSet>
 </databaseChangeLog>
