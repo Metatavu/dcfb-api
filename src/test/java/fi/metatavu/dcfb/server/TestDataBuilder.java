@@ -136,6 +136,17 @@ public class TestDataBuilder {
    * @throws IOException
    */
   public fi.metatavu.dcfb.client.Item createSimpleItem(UUID categoryId, UUID locationId) throws IOException {
+    return createSimpleItem(categoryId, locationId, AbstractIntegrationTest.REALM1_USER_1_ID);
+  }
+
+  /**
+   * Creates a simple item
+   * 
+   * @param categoryId category id
+   * @return created item
+   * @throws IOException
+   */
+  public fi.metatavu.dcfb.client.Item createSimpleItem(UUID categoryId, UUID locationId, UUID sellerId) throws IOException {
     Price price = createSimplePrice();
     
     fi.metatavu.dcfb.client.Item payload = new fi.metatavu.dcfb.client.Item();
@@ -148,7 +159,7 @@ public class TestDataBuilder {
     payload.setUnit("Fake");
     payload.setUnitPrice(price);
     payload.setLocationId(locationId);
-    payload.setSellerId(AbstractIntegrationTest.REALM1_USER_1_ID);
+    payload.setSellerId(sellerId);
     payload.setPaymentMethods(createDefaultPaymentMethods());
 
     return createItem(payload);

@@ -32,11 +32,13 @@ import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.Location;
+import fi.metatavu.dcfb.server.rest.model.DeliveryMethod;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
 import fi.metatavu.dcfb.server.rest.model.ItemReservation;
 import fi.metatavu.dcfb.server.rest.model.Meta;
+import fi.metatavu.dcfb.server.rest.model.Price;
 import fi.metatavu.dcfb.server.rest.translate.ItemTranslator;
 import fi.metatavu.dcfb.server.search.searchers.SearchResult;
 
@@ -118,12 +120,9 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createBadRequest(String.format("Invalid location %s", payload.getLocationId()));
     }
     
-    Currency priceCurrency = null;
-    try {
-      priceCurrency = Currency.getInstance(payload.getUnitPrice().getCurrency());
-    } catch (IllegalArgumentException e) {
-      logger.warn("Failed to parse currency", e);
-      return createBadRequest(String.format("Invalid currency %s", e.getMessage()));
+    Currency priceCurrency = getPriceCurrency(payload.getUnitPrice());
+    if (priceCurrency == null) {
+      return createBadRequest(String.format("Invalid currency %s", payload.getUnitPrice().getCurrency()));
     }
     
     Boolean allowPurchaseContactSeller = payload.getPaymentMethods().isAllowContactSeller();
@@ -142,6 +141,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
     Boolean visibilityLimited = Boolean.FALSE;
+    Integer deliveryTime = payload.getDeliveryTime();
+    String contactEmail = payload.getContactEmail();
+    String contactPhone = payload.getContactPhone();
+    String termsOfDelivery = payload.getTermsOfDelivery();
     
     Long soldAmount = payload.getSoldAmount();
     if (soldAmount == null) {
@@ -168,6 +171,10 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         soldAmount,
         allowPurchaseContactSeller,
         allowPurchaseCreditCard,
+        deliveryTime,
+        contactEmail,
+        contactPhone,
+        termsOfDelivery,
         sellerId,
         modifier);
 
@@ -178,8 +185,19 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       itemController.setResourceId(item, UUID.fromString(resource.getId()), modifier);
     }
     setItemMetas(item, payload.getMeta());
+    setItemDeliveryMethods(item, payload.getDeliveryMethods());
     
     return createOk(itemTranslator.translateItem(item));
+  }
+
+  private Currency getPriceCurrency(Price price) {
+    try {
+      return Currency.getInstance(price.getCurrency());
+    } catch (IllegalArgumentException e) {
+      logger.warn("Failed to parse currency", e);
+    }
+    
+    return null;
   }
 
   @Override
@@ -338,6 +356,12 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     boolean visibilityLimited = payload.isVisibilityLimited();
     UUID sellerId = payload.getSellerId();
     Long soldAmount = payload.getSoldAmount();
+    Integer deliveryTime = payload.getDeliveryTime();
+    String contactEmail = payload.getContactEmail();
+    String contactPhone = payload.getContactPhone();
+    String termsOfDelivery = payload.getTermsOfDelivery();
+    Boolean allowPurchaseContactSeller = payload.getPaymentMethods().isAllowContactSeller();
+    Boolean allowPurchaseCreditCard = payload.getPaymentMethods().isAllowCreditCard();
 
     Category category = categoryController.findCategory(payload.getCategoryId());
     if (category == null) {
@@ -349,18 +373,16 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createBadRequest(String.format("Invalid location %s", payload.getLocationId()));
     }
     
-    Currency priceCurrency = null;
-    try {
-      priceCurrency = Currency.getInstance(payload.getUnitPrice().getCurrency());
-    } catch (IllegalArgumentException e) {
-      logger.warn("Failed to parse list parameters", e);
-      return createBadRequest(String.format("Invalid currency %s", e.getMessage()));
+    Currency priceCurrency = getPriceCurrency(payload.getUnitPrice());
+    if (priceCurrency == null) {
+      return createBadRequest(String.format("Invalid currency %s", payload.getUnitPrice().getCurrency()));
     }
-    
+
     item = itemController.updateItem(item, 
         title, 
         description, 
         category,
+        visibilityLimited, 
         location,
         slug, 
         expiresAt, 
@@ -368,9 +390,14 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         priceCurrency, 
         amount, 
         unit,
-        visibilityLimited, 
-        sellerId,
         soldAmount,
+        allowPurchaseContactSeller,
+        allowPurchaseCreditCard,
+        deliveryTime,
+        contactEmail,
+        contactPhone,
+        termsOfDelivery,
+        sellerId,
         modifier);
     
     itemController.deleteItemImages(item);
@@ -379,6 +406,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     updateProtectedResource(item, itemUsers);
     createImages(payload, item);
     setItemMetas(item, payload.getMeta());
+    setItemDeliveryMethods(item, payload.getDeliveryMethods());
     
     return createOk(itemTranslator.translateItem(item));
   }
@@ -444,6 +472,30 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     return item;
   }
 
+  /**
+   * Sets delivery methods for an item
+   * 
+   * @param item item
+   * @param deliveryMethods delivery methods
+   * @return item updated item
+   */
+  private fi.metatavu.dcfb.server.persistence.model.Item setItemDeliveryMethods(fi.metatavu.dcfb.server.persistence.model.Item item, List<DeliveryMethod> deliveryMethods) {
+    if (deliveryMethods == null) {
+      return item;
+    }
+    
+    itemController.deleteDeliveryMethods(item);
+
+    for (DeliveryMethod deliveryMethod : deliveryMethods) {
+      itemController.createDeliveryMethod(item, 
+          getPriceCurrency(deliveryMethod.getPrice()), 
+          deliveryMethod.getPrice().getPrice(), 
+          createLocalizedEntry(deliveryMethod.getTitle()));
+    }
+
+    return item;
+  }
+  
   /**
    * Creates protected resource to keycloak
    * 

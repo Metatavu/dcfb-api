@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import feign.FeignException;
 import fi.metatavu.dcfb.client.Category;
+import fi.metatavu.dcfb.client.DeliveryMethod;
 import fi.metatavu.dcfb.client.Image;
 import fi.metatavu.dcfb.client.Item;
 import fi.metatavu.dcfb.client.ItemListSort;
@@ -46,6 +47,10 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       price.setCurrency("USD");
       price.setPrice("15.00");
       
+      Price deliveryPrice = new Price();
+      deliveryPrice.setCurrency("EUR");
+      deliveryPrice.setPrice("10.00");
+      
       Image image = new Image();
       image.setType("image/jpeg");
       image.setUrl("https://www.example.com/jpeg.jpg");
@@ -55,6 +60,19 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       paymentMethods.setAllowCreditCard(true);
       
       fi.metatavu.dcfb.client.Item item = new fi.metatavu.dcfb.client.Item();
+      
+      DeliveryMethod deliveryMethod = new DeliveryMethod();
+      deliveryMethod.setPrice(deliveryPrice);
+      deliveryMethod.setTitle(dataBuilder.createLocalized(Locale.ENGLISH, "PLURAL", "delivery title"));
+      
+      List<DeliveryMethod> deliveryMethods = Arrays.asList(deliveryMethod);
+      
+      item.setDeliveryMethods(deliveryMethods);
+      item.setTermsOfDelivery("tos");
+      item.setDeliveryTime(12);
+      item.setContactEmail("fake@example.com");
+      item.setContactPhone("+356 1234 567");
+      
       item.setAmount(25l);
       item.setCategoryId(simpleCategory.getId());
       item.setDescription(dataBuilder.createLocalized(Locale.FRENCH, "PLURAL", "created description"));
@@ -99,7 +117,20 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals("test value 2", metaMap.get("test-2"));
       assertEquals(false, createdItem.getPaymentMethods().isAllowContactSeller());
       assertEquals(true, createdItem.getPaymentMethods().isAllowCreditCard());
+
+      assertEquals("tos", createdItem.getTermsOfDelivery());
+      assertEquals(new Integer(12), createdItem.getDeliveryTime());
+      assertEquals("fake@example.com", createdItem.getContactEmail());
+      assertEquals("+356 1234 567", createdItem.getContactPhone());
+      assertEquals(1, createdItem.getDeliveryMethods().size());
+
+      assertEquals(1, createdItem.getDeliveryMethods().size());
+      assertEquals("EUR", createdItem.getDeliveryMethods().get(0).getPrice().getCurrency());
+      assertEquals("10.00", createdItem.getDeliveryMethods().get(0).getPrice().getPrice());
       
+      assertEquals(Locale.ENGLISH.getLanguage(), createdItem.getDeliveryMethods().get(0).getTitle().get(0).getLanguage());
+      assertEquals("delivery title", createdItem.getDeliveryMethods().get(0).getTitle().get(0).getValue());
+      assertEquals("PLURAL", createdItem.getDeliveryMethods().get(0).getTitle().get(0).getType());
     } finally {
       dataBuilder.clean();
     }
@@ -161,7 +192,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       ItemsApi adminItemsApi = dataBuilder.getAdminItemApi();
 
       Category simpleCategory = dataBuilder.createSimpleCategory();
-      Item simpleItem = dataBuilder.createSimpleItem(simpleCategory.getId(), null);
+      Item simpleItem = dataBuilder.createSimpleItem(simpleCategory.getId(), null, REALM1_ADMIN_ID);
       
       List<String> user1Ids = Arrays.asList(REALM1_USER_1_ID.toString());
       List<String> adminids = Arrays.asList(REALM1_ADMIN_ID.toString());
