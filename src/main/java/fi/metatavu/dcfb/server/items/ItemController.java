@@ -188,7 +188,7 @@ public class ItemController {
     deleteItemImages(item);
     deleteItemUsers(item);
     deleteItemReservations(item);
-    deleteItemDeliveryMethods(item);
+    deleteDeliveryMethods(item);
     itemDAO.delete(item);
     itemIndexHandler.deleteIndexable(item.getId());
   }
@@ -222,15 +222,6 @@ public class ItemController {
    */
   public void deleteItemImages(Item item) {
     listItemImages(item).stream().forEach(itemImageDAO::delete);
-  }
-  
-  /**
-   * Deletes all item delivery methods
-   * 
-   * @param item item
-   */
-  private void deleteItemDeliveryMethods(Item item) {
-    itemDeliveryMethodDAO.listByItem(item).stream().forEach(itemDeliveryMethodDAO::delete);
   }
 
     /**
