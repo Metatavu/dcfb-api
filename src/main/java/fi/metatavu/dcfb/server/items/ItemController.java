@@ -14,13 +14,13 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import fi.metatavu.dcfb.server.categories.CategoryController;
+import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.persistence.dao.ItemDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemDeliveryMethodDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemImageDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemMetaDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemReservationDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemUserDAO;
-import fi.metatavu.dcfb.server.persistence.dao.LocalizedEntryDAO;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.Item;
 import fi.metatavu.dcfb.server.persistence.model.ItemDeliveryMethod;
@@ -66,7 +66,7 @@ public class ItemController {
   private ItemReservationDAO itemReservationDAO;
 
   @Inject
-  private LocalizedEntryDAO localizedEntryDAO;
+  private LocalizedValueController localizedValueController;
 
   @Inject
   private ItemDeliveryMethodDAO itemDeliveryMethodDAO;
@@ -468,7 +468,7 @@ public class ItemController {
   private void deleteItemDeliveryMethod(ItemDeliveryMethod itemDeliveryMethod) {
     LocalizedEntry title = itemDeliveryMethod.getTitle();
     itemDeliveryMethodDAO.delete(itemDeliveryMethod);
-    localizedEntryDAO.delete(title);
+    localizedValueController.deleteEntry(title);
   }
 
 }

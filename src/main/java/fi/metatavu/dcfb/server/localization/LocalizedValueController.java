@@ -114,5 +114,15 @@ public class LocalizedValueController {
   public List<LocalizedValue> listLocalizedValues(LocalizedEntry entry) {
     return localizedValueDAO.listByEntry(entry);
   }
+
+  /**
+   * Deletes localized entry
+   * 
+   * @param entry entry
+   */
+  public void deleteEntry(LocalizedEntry entry) {
+    localizedValueDAO.listByEntry(entry).stream().forEach(localizedValueDAO::delete);
+    localizedEntryDAO.delete(entry);
+  }
   
 }
