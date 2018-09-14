@@ -144,8 +144,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String contactEmail = payload.getContactEmail();
     String contactPhone = payload.getContactPhone();
     String termsOfDelivery = payload.getTermsOfDelivery();
-    Boolean allowDelivery = payload.isAllowDelivery();
-    Boolean allowPickup = payload.isAllowPickup();
+    Boolean allowDelivery = payload.isAllowDelivery() != null ? payload.isAllowDelivery() : false;
+    Boolean allowPickup = payload.isAllowPickup() != null ? payload.isAllowPickup() : false;
     String deliveryPrice = payload.getDeliveryPrice() != null ? payload.getDeliveryPrice().getPrice() : null;
     Currency deliveryCurrency = getPriceCurrency(payload.getDeliveryPrice());
 
@@ -371,8 +371,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String termsOfDelivery = payload.getTermsOfDelivery();
     Boolean allowPurchaseContactSeller = payload.getPaymentMethods().isAllowContactSeller();
     Boolean allowPurchaseCreditCard = payload.getPaymentMethods().isAllowCreditCard();
-    Boolean allowDelivery = payload.isAllowDelivery();
-    Boolean allowPickup = payload.isAllowPickup();
+    Boolean allowDelivery = payload.isAllowDelivery() != null ? payload.isAllowDelivery() : false;
+    Boolean allowPickup = payload.isAllowPickup() != null ? payload.isAllowPickup() : false;
     String deliveryPrice = payload.getDeliveryPrice() != null ? payload.getDeliveryPrice().getPrice() : null;
     Currency deliveryCurrency = getPriceCurrency(payload.getDeliveryPrice());
 
