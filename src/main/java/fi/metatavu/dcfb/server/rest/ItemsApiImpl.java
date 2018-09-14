@@ -196,7 +196,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
   }
 
   private Currency getPriceCurrency(Price price) {
-    if (price == null) {
+    if (price == null || price.getCurrency() != null) {
       return null;
     }
 
