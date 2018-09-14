@@ -390,7 +390,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         priceCurrency, 
         amount, 
         unit,
-        sellerId,
         soldAmount,
         allowPurchaseContactSeller,
         allowPurchaseCreditCard,
@@ -398,6 +397,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         contactEmail,
         contactPhone,
         termsOfDelivery,
+        sellerId,
         modifier);
     
     itemController.deleteItemImages(item);

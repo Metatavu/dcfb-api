@@ -103,7 +103,7 @@ public class ItemController {
   public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery, UUID sellerId, UUID modifier) {
     return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, 
         priceCurrency, amount, unit, visibilityLimited, resourceId, soldAmount, allowPurchaseContactSeller, allowPurchaseCreditCard,
-        sellerId, deliveryTime, contactEmail, contactPhone, termsOfDelivery, modifier);
+        deliveryTime, contactEmail, contactPhone, termsOfDelivery, sellerId, modifier);
   }
 
   /**
@@ -130,7 +130,6 @@ public class ItemController {
    * @param priceCurrency priceCurrency
    * @param amount amount
    * @param unit unit
-   * @param sellerId sellerId
    * @param soldAmount soldAmount
    * @param allowPurchaseContactSeller allowPurchaseContactSeller
    * @param allowPurchaseCreditCard allowPurchaseCreditCard
@@ -138,10 +137,11 @@ public class ItemController {
    * @param contactEmail contactEmail
    * @param contactPhone contactPhone
    * @param termsOfDelivery termsOfDelivery
+   * @param sellerId sellerId
    * @param modifier modifier
    * @return updated item
    */
-  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, boolean visibilityLimited, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, UUID sellerId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery, UUID modifier) {
+  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, boolean visibilityLimited, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery, UUID sellerId, UUID modifier) {
     itemDAO.updateTitle(item, title, modifier);
     itemDAO.updateDescription(item, description, modifier);
     itemDAO.updateCategory(item, category, modifier);

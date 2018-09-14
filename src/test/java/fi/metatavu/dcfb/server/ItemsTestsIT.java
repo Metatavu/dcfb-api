@@ -192,7 +192,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       ItemsApi adminItemsApi = dataBuilder.getAdminItemApi();
 
       Category simpleCategory = dataBuilder.createSimpleCategory();
-      Item simpleItem = dataBuilder.createSimpleItem(simpleCategory.getId(), null);
+      Item simpleItem = dataBuilder.createSimpleItem(simpleCategory.getId(), null, REALM1_ADMIN_ID);
       
       List<String> user1Ids = Arrays.asList(REALM1_USER_1_ID.toString());
       List<String> adminids = Arrays.asList(REALM1_ADMIN_ID.toString());
