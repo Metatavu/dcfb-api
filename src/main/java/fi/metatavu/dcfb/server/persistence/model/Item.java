@@ -13,7 +13,6 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
@@ -104,17 +103,12 @@ public class Item {
   @Column (nullable = false)
   private Boolean allowPurchaseContactSeller;
 
-  @Column
   private Integer deliveryTime;
 
-  @Column
-  @Email
   private String contactEmail;
   
-  @Column
   private String contactPhone;
 
-  @Column
   @Lob
   @Type(type = "org.hibernate.type.TextType")
   private String termsOfDelivery;

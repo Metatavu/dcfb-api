@@ -3,15 +3,12 @@ package fi.metatavu.dcfb.server.persistence.model;
 import java.util.Currency;
 import java.util.UUID;
 
-import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -21,8 +18,6 @@ import org.hibernate.validator.constraints.NotEmpty;
  * @author Antti Leppä
  */
 @Entity
-@Cacheable(true)
-@Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 public class ItemDeliveryMethod {
 
   @Id
