@@ -16,14 +16,12 @@ import javax.inject.Inject;
 import fi.metatavu.dcfb.server.categories.CategoryController;
 import fi.metatavu.dcfb.server.localization.LocalizedValueController;
 import fi.metatavu.dcfb.server.persistence.dao.ItemDAO;
-import fi.metatavu.dcfb.server.persistence.dao.ItemDeliveryMethodDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemImageDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemMetaDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemReservationDAO;
 import fi.metatavu.dcfb.server.persistence.dao.ItemUserDAO;
 import fi.metatavu.dcfb.server.persistence.model.Category;
 import fi.metatavu.dcfb.server.persistence.model.Item;
-import fi.metatavu.dcfb.server.persistence.model.ItemDeliveryMethod;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
 import fi.metatavu.dcfb.server.persistence.model.ItemMeta;
 import fi.metatavu.dcfb.server.persistence.model.ItemReservation;
@@ -69,9 +67,6 @@ public class ItemController {
   private LocalizedValueController localizedValueController;
 
   @Inject
-  private ItemDeliveryMethodDAO itemDeliveryMethodDAO;
-
-  @Inject
   private Event<ItemIndexEvent> itemIndexEvent;
   
   /**
@@ -95,15 +90,19 @@ public class ItemController {
    * @param contactEmail contact email
    * @param contactPhone contact phone
    * @param termsOfDelivery terms of delivery
+   * @param allowDelivery allow delivery
+   * @param allowPickup allow pick up
+   * @param deliveryPrice delivery price
+   * @param deliveryCurrency  delivery currency
    * @param sellerId sellerId
    * @param modifiedId modifiedId
    * @return created item
    */
   @SuppressWarnings ("squid:S00107")
-  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery, UUID sellerId, UUID modifier) {
+  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, UUID sellerId, UUID modifier) {
     return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, 
         priceCurrency, amount, unit, visibilityLimited, resourceId, soldAmount, allowPurchaseContactSeller, allowPurchaseCreditCard,
-        deliveryTime, contactEmail, contactPhone, termsOfDelivery, sellerId, modifier);
+        deliveryTime, contactEmail, contactPhone, termsOfDelivery, allowDelivery, allowPickup, deliveryPrice, deliveryCurrency, sellerId, modifier);
   }
 
   /**
@@ -119,29 +118,34 @@ public class ItemController {
   /**
    * Update item
    *
-   * @param title title
-   * @param description description
-   * @param category category
-   * @param visibilityLimited visibilityLimited
-   * @param location location
-   * @param slug slug
-   * @param expiresAt expiresAt
-   * @param unitPrice unitPrice
-   * @param priceCurrency priceCurrency
-   * @param amount amount
-   * @param unit unit
-   * @param soldAmount soldAmount
+   * @param title                      title
+   * @param description                description
+   * @param category                   category
+   * @param visibilityLimited          visibilityLimited
+   * @param location                   location
+   * @param slug                       slug
+   * @param expiresAt                  expiresAt
+   * @param unitPrice                  unitPrice
+   * @param priceCurrency              priceCurrency
+   * @param amount                     amount
+   * @param unit                       unit
+   * @param soldAmount                 soldAmount
    * @param allowPurchaseContactSeller allowPurchaseContactSeller
-   * @param allowPurchaseCreditCard allowPurchaseCreditCard
-   * @param deliveryTime deliveryTime
-   * @param contactEmail contactEmail
-   * @param contactPhone contactPhone
-   * @param termsOfDelivery termsOfDelivery
-   * @param sellerId sellerId
-   * @param modifier modifier
+   * @param allowPurchaseCreditCard    allowPurchaseCreditCard
+   * @param deliveryTime               deliveryTime
+   * @param contactEmail               contactEmail
+   * @param contactPhone               contactPhone
+   * @param termsOfDelivery            termsOfDelivery
+   * @param allowDelivery              allow delivery
+   * @param allowPickup                allow pick up
+   * @param deliveryPrice              delivery price
+   * @param deliveryCurrency           delivery currency
+   * @param sellerId                   sellerId
+   * @param modifier                   modifier
+
    * @return updated item
    */
-  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, boolean visibilityLimited, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery, UUID sellerId, UUID modifier) {
+  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, boolean visibilityLimited, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, UUID sellerId, UUID modifier) {
     itemDAO.updateTitle(item, title, modifier);
     itemDAO.updateDescription(item, description, modifier);
     itemDAO.updateCategory(item, category, modifier);
@@ -161,6 +165,10 @@ public class ItemController {
     itemDAO.updateContactEmail(item, contactEmail, modifier);
     itemDAO.updateContactPhone(item, contactPhone, modifier);
     itemDAO.updateTermsOfDelivery(item, termsOfDelivery, modifier);
+    itemDAO.updateAllowDelivery(item, allowDelivery, modifier);
+    itemDAO.updateAllowPickup(item, allowPickup, modifier);
+    itemDAO.updateDeliveryPrice(item, deliveryPrice, modifier);
+    itemDAO.updateDeliveryCurrency(item, deliveryCurrency, modifier);
     return item;
   }
 
@@ -188,7 +196,6 @@ public class ItemController {
     deleteItemImages(item);
     deleteItemUsers(item);
     deleteItemReservations(item);
-    deleteDeliveryMethods(item);
     itemDAO.delete(item);
     itemIndexHandler.deleteIndexable(item.getId());
   }
@@ -352,38 +359,6 @@ public class ItemController {
   }
 
   /**
-   * Lists item's delivery methods
-   * 
-   * @param item item
-   * @return item's delivery methods
-   */
-  public List<ItemDeliveryMethod> listDeliveryMethods(Item item) {
-    return itemDeliveryMethodDAO.listByItem(item);
-  }
-  
-  /**
-   * Deletes all delivery methods from an item
-   * 
-   * @param item item
-   */
-  public void deleteDeliveryMethods(Item item) {
-    itemDeliveryMethodDAO.listByItem(item).stream().forEach(this::deleteItemDeliveryMethod);
-  }
-  
-  /**
-   * Creates new delivery method for an item
-   * 
-   * @param item item
-   * @param currency currency
-   * @param price price
-   * @param title title
-   * @return created delivery method
-   */
-  public ItemDeliveryMethod createDeliveryMethod(Item item, Currency currency, String price, LocalizedEntry title) {
-    return itemDeliveryMethodDAO.create(item, currency, price, title);
-  }  
-  
-  /**
    * Deletes category metas with keys not in set
    * 
    * @param category
@@ -459,16 +434,4 @@ public class ItemController {
 
 	  return result;
   }
-  
-  /**
-   * Removes item delivery method
-   * 
-   * @param itemDeliveryMethod item delivery method
-   */
-  private void deleteItemDeliveryMethod(ItemDeliveryMethod itemDeliveryMethod) {
-    LocalizedEntry title = itemDeliveryMethod.getTitle();
-    itemDeliveryMethodDAO.delete(itemDeliveryMethod);
-    localizedValueController.deleteEntry(title);
-  }
-
 }

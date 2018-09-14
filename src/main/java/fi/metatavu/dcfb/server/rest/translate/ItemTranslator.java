@@ -1,21 +1,15 @@
 package fi.metatavu.dcfb.server.rest.translate;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
 import fi.metatavu.dcfb.server.items.ItemController;
 import fi.metatavu.dcfb.server.persistence.model.Category;
-import fi.metatavu.dcfb.server.persistence.model.ItemDeliveryMethod;
 import fi.metatavu.dcfb.server.persistence.model.ItemImage;
 import fi.metatavu.dcfb.server.persistence.model.ItemReservation;
 import fi.metatavu.dcfb.server.persistence.model.ItemUser;
 import fi.metatavu.dcfb.server.persistence.model.Location;
-import fi.metatavu.dcfb.server.rest.model.DeliveryMethod;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
 import fi.metatavu.dcfb.server.rest.model.ItemPaymentMethods;
@@ -50,6 +44,10 @@ public class ItemTranslator extends AbstractTranslator {
     unitPrice.setCurrency(item.getPriceCurrency() != null ? item.getPriceCurrency().getCurrencyCode() : null);
     unitPrice.setPrice(item.getUnitPrice());
     
+    Price deliveryPrice = new Price();
+    deliveryPrice.setCurrency(item.getDeliveryCurrency() != null ? item.getDeliveryCurrency().getCurrencyCode() : null);
+    deliveryPrice.setPrice(item.getDeliveryPrice());
+
     ItemPaymentMethods paymentMethods = new ItemPaymentMethods();
     paymentMethods.setAllowContactSeller(item.getAllowPurchaseContactSeller());
     paymentMethods.setAllowCreditCard(item.getAllowPurchaseCreditCard());
@@ -78,8 +76,9 @@ public class ItemTranslator extends AbstractTranslator {
     result.setContactEmail(item.getContactEmail());
     result.setContactPhone(item.getContactPhone());
     result.setTermsOfDelivery(item.getTermsOfDelivery());
-    result.setDeliveryMethods(translateDeliveryMethods(itemController.listDeliveryMethods(item)));
-    
+    result.setAllowDelivery(item.getAllowDelivery());
+    result.setAllowPickup(item.getAllowPickup());
+    result.setDeliveryPrice(deliveryPrice);
     result.setPaymentMethods(paymentMethods);
     result.setMeta(itemController.listMetas(item).stream().map(itemMeta -> {
       Meta meta = new Meta();
@@ -91,34 +90,6 @@ public class ItemTranslator extends AbstractTranslator {
     return result;
   }
   
-  private List<DeliveryMethod> translateDeliveryMethods(List<ItemDeliveryMethod> deliveryMethods) {
-    if (deliveryMethods == null || deliveryMethods.isEmpty()) {
-      return Collections.emptyList();
-    }
-    
-    return deliveryMethods.stream()
-      .map(this::translateDeliveryMethod)
-      .filter(Objects::nonNull)
-      .collect(Collectors.toList());
-  }
-  
-  private DeliveryMethod translateDeliveryMethod(ItemDeliveryMethod itemDeliveryMethod) {
-    if (itemDeliveryMethod == null) {
-      return null;
-    }
-    
-    Price price = new Price();
-    price.setCurrency(itemDeliveryMethod.getCurrency() != null ? itemDeliveryMethod.getCurrency().getCurrencyCode() : null);
-    price.setPrice(itemDeliveryMethod.getPrice());
-
-    DeliveryMethod result = new DeliveryMethod();
-    result.setId(itemDeliveryMethod.getId());
-    result.setPrice(price);
-    result.setTitle(translatelocalizedValue(itemDeliveryMethod.getTitle()));
-    
-    return result;
-  }
-
   /**
    * Translates JPA item reservation object into REST item reservation object
    * 
