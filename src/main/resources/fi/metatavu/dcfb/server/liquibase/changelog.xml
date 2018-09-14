@@ -271,4 +271,41 @@
     </addColumn>
   </changeSet>
 
+  <changeSet id="item-delivery" author="antti.leppa">
+    <addColumn tableName="item">
+      <column name="deliverytime" type="integer"/>
+    </addColumn>
+    
+    <addColumn tableName="item">
+      <column name="contactemail" type="varchar(255)"/>
+    </addColumn>
+    
+    <addColumn tableName="item">
+      <column name="contactphone" type="varchar(255)"/>
+    </addColumn>
+    
+    <addColumn tableName="item">
+      <column name="termsofdelivery" type="longtext"/>
+    </addColumn>
+    
+    <createTable tableName="itemdeliverymethod">
+      <column name="id" type="uuid">
+        <constraints unique="true" nullable="false" primaryKey="true"/>
+      </column>
+      <column name="item_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEMDELIVERYMETHOD_ITEM_ID" referencedTableName="item" referencedColumnNames="id"/>
+      </column>
+      <column name="title_id" type="uuid">
+        <constraints nullable="false" foreignKeyName="FK_ITEMDELIVERYMETHOD_TITLE_ID" referencedTableName="localizedentry" referencedColumnNames="id"/>
+      </column>
+      <column name="price" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="currency" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    
+  </changeSet>
+
 </databaseChangeLog>

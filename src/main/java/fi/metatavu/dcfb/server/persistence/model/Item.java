@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -102,6 +103,15 @@ public class Item {
   @Column (nullable = false)
   private Boolean allowPurchaseContactSeller;
 
+  private Integer deliveryTime;
+
+  private String contactEmail;
+  
+  private String contactPhone;
+
+  @Lob
+  @Type(type = "org.hibernate.type.TextType")
+  private String termsOfDelivery;
 
   public UUID getId() {
     return id;
@@ -285,6 +295,38 @@ public class Item {
   
   public void setAllowPurchaseCreditCard(Boolean allowPurchaseCreditCard) {
     this.allowPurchaseCreditCard = allowPurchaseCreditCard;
+  }
+  
+  public Integer getDeliveryTime() {
+    return deliveryTime;
+  }
+
+  public void setDeliveryTime(Integer deliveryTime) {
+    this.deliveryTime = deliveryTime;
+  }
+
+  public String getContactEmail() {
+    return contactEmail;
+  }
+
+  public void setContactEmail(String contactEmail) {
+    this.contactEmail = contactEmail;
+  }
+
+  public String getContactPhone() {
+    return contactPhone;
+  }
+
+  public void setContactPhone(String contactPhone) {
+    this.contactPhone = contactPhone;
+  }
+
+  public String getTermsOfDelivery() {
+    return termsOfDelivery;
+  }
+
+  public void setTermsOfDelivery(String termsOfDelivery) {
+    this.termsOfDelivery = termsOfDelivery;
   }
 
   @PrePersist

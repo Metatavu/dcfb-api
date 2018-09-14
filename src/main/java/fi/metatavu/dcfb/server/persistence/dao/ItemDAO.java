@@ -39,10 +39,17 @@ public class ItemDAO extends AbstractDAO<Item> {
   * @param allowPurchaseCreditCard whether item is allowed to purchase directly with credit card
   * @param lastModifier modifier
   * @param sellerId sellerId
+  * @param deliveryTime delivery time
+  * @param contactEmail contact email
+  * @param contactPhone contact phone
+  * @param termsOfDelivery terms of delivery
   * @return created item
   */
   @SuppressWarnings ("squid:S00107")
-  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, UUID sellerId, UUID lastModifier) {
+  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, 
+      OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, 
+      UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, 
+      Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery, UUID sellerId, UUID lastModifier) {
     Item item = new Item();
     item.setId(id);
     item.setTitle(title);
@@ -61,6 +68,10 @@ public class ItemDAO extends AbstractDAO<Item> {
     item.setSellerId(sellerId);
     item.setAllowPurchaseContactSeller(allowPurchaseContactSeller);
     item.setAllowPurchaseCreditCard(allowPurchaseCreditCard);
+    item.setDeliveryTime(deliveryTime);
+    item.setContactEmail(contactEmail);
+    item.setContactPhone(contactPhone);
+    item.setTermsOfDelivery(termsOfDelivery);
     item.setLastModifier(lastModifier);
     return persist(item);
   }
@@ -277,13 +288,79 @@ public class ItemDAO extends AbstractDAO<Item> {
 
   /**
    * Updates allowPurchaseContactSeller
-   * @param item item to update  
-   * @param allowPurchaseContactSeller whether item is allowed to purchase directly with credit card
+   *
+   * @param allowPurchaseContactSeller allowPurchaseContactSeller
    * @param lastModifier modifier
+   * @return updated item
    */
-  public Item updateAllowPurchaseCreditCard(Item item, Boolean allowPurchaseCreditCard, UUID lastModifier) {
-    item.setAllowPurchaseContactSeller(allowPurchaseCreditCard);
+   public Item updateAllowPurchaseContactSeller(Item item, Boolean allowPurchaseContactSeller, UUID lastModifier) {
+     item.setLastModifier(lastModifier);
+     item.setAllowPurchaseContactSeller(allowPurchaseContactSeller);
+     return persist(item);
+   }
+
+   /**
+   * Updates allowPurchaseCreditCard
+   *
+   * @param allowPurchaseCreditCard allowPurchaseCreditCard
+   * @param lastModifier modifier
+   * @return updated item
+   */
+   public Item updateAllowPurchaseCreditCard(Item item, Boolean allowPurchaseCreditCard, UUID lastModifier) {
+     item.setLastModifier(lastModifier);
+     item.setAllowPurchaseCreditCard(allowPurchaseCreditCard);
+     return persist(item);
+   }
+
+  /**
+  * Updates deliveryTime
+  *
+  * @param deliveryTime deliveryTime
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateDeliveryTime(Item item, Integer deliveryTime, UUID lastModifier) {
     item.setLastModifier(lastModifier);
+    item.setDeliveryTime(deliveryTime);
+    return persist(item);
+  }
+
+  /**
+  * Updates contactEmail
+  *
+  * @param contactEmail contactEmail
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateContactEmail(Item item, String contactEmail, UUID lastModifier) {
+    item.setLastModifier(lastModifier);
+    item.setContactEmail(contactEmail);
+    return persist(item);
+  }
+
+  /**
+  * Updates contactPhone
+  *
+  * @param contactPhone contactPhone
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateContactPhone(Item item, String contactPhone, UUID lastModifier) {
+    item.setLastModifier(lastModifier);
+    item.setContactPhone(contactPhone);
+    return persist(item);
+  }
+
+  /**
+  * Updates termsOfDelivery
+  *
+  * @param termsOfDelivery termsOfDelivery
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateTermsOfDelivery(Item item, String termsOfDelivery, UUID lastModifier) {
+    item.setLastModifier(lastModifier);
+    item.setTermsOfDelivery(termsOfDelivery);
     return persist(item);
   }
   
