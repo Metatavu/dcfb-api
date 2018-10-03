@@ -56,7 +56,8 @@ public class ItemDAO extends AbstractDAO<Item> {
       OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, 
       UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, 
       Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,
-      Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, UUID sellerId, UUID lastModifier) {
+      Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, 
+      String businessName, String businessCode, UUID sellerId, UUID lastModifier) {
     Item item = new Item();
     item.setId(id);
     item.setTitle(title);
@@ -84,6 +85,9 @@ public class ItemDAO extends AbstractDAO<Item> {
     item.setAllowPickup(allowPickup);
     item.setDeliveryPrice(deliveryPrice);
     item.setDeliveryCurrency(deliveryCurrency);
+    item.setBusinessCode(businessCode);
+    item.setBusinessName(businessName);
+    
     return persist(item);
   }
 
@@ -411,6 +415,33 @@ public class ItemDAO extends AbstractDAO<Item> {
   */
   public Item updateDeliveryPrice(Item item, String deliveryPrice, UUID lastModifier) {
     item.setDeliveryPrice(deliveryPrice);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+  
+  /**
+  * Updates business code
+  *
+  * @param businessCode business code
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateBusinessCode(Item item, String businessCode, UUID lastModifier) {
+    item.setBusinessCode(businessCode);
+    item.setLastModifier(lastModifier);
+    return persist(item);
+  }
+
+
+  /**
+  * Updates business name
+  *
+  * @param businessName business name
+  * @param lastModifier modifier
+  * @return updated item
+  */
+  public Item updateBusinessName(Item item, String businessName, UUID lastModifier) {
+    item.setBusinessName(businessName);
     item.setLastModifier(lastModifier);
     return persist(item);
   }
