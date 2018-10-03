@@ -53,7 +53,11 @@ public class Item {
   @NotNull
   @NotEmpty
   private String slug;
-
+  
+  private String businessName;
+    
+  private String businessCode;
+  
   @Column (nullable = false)
   private OffsetDateTime createdAt;
 
@@ -391,6 +395,22 @@ public class Item {
    */
   public void setAllowPickup(Boolean allowPickup) {
     this.allowPickup = allowPickup;
+  }
+  
+  public String getBusinessCode() {
+    return businessCode;
+  }
+  
+  public void setBusinessCode(String businessCode) {
+    this.businessCode = businessCode;
+  }
+  
+  public String getBusinessName() {
+    return businessName;
+  }
+  
+  public void setBusinessName(String businessName) {
+    this.businessName = businessName;
   }
 
   @PrePersist

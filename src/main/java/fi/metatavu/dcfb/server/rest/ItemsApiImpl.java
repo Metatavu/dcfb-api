@@ -148,6 +148,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     Boolean allowPickup = payload.isAllowPickup() != null ? payload.isAllowPickup() : false;
     String deliveryPrice = payload.getDeliveryPrice() != null ? payload.getDeliveryPrice().getPrice() : null;
     Currency deliveryCurrency = getPriceCurrency(payload.getDeliveryPrice());
+    String businessCode = payload.getBusinessCode();
+    String businessName = payload.getBusinessName();
 
     Long soldAmount = payload.getSoldAmount();
     if (soldAmount == null) {
@@ -182,6 +184,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         allowPickup,
         deliveryPrice,
         deliveryCurrency,
+        businessName, 
+        businessCode,
         sellerId,
         modifier);
 
@@ -375,6 +379,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     Boolean allowPickup = payload.isAllowPickup() != null ? payload.isAllowPickup() : false;
     String deliveryPrice = payload.getDeliveryPrice() != null ? payload.getDeliveryPrice().getPrice() : null;
     Currency deliveryCurrency = getPriceCurrency(payload.getDeliveryPrice());
+    String businessCode = payload.getBusinessCode();
+    String businessName = payload.getBusinessName();
 
     Category category = categoryController.findCategory(payload.getCategoryId());
     if (category == null) {
@@ -414,6 +420,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
         allowPickup,
         deliveryPrice,
         deliveryCurrency,
+        businessName, 
+        businessCode,
         sellerId,
         modifier);
     

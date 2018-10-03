@@ -321,4 +321,12 @@
       <column name="deliverycurrency" type="varchar(255)" />
     </addColumn>
   </changeSet>
+  
+  <changeSet id="business-details" author="antti.leppa">
+    <addColumn tableName="item">
+      <column name="businessname" type="varchar(255)" />
+      <column name="businesscode" type="varchar(255)" />
+    </addColumn>
+  </changeSet>
+  
 </databaseChangeLog>
