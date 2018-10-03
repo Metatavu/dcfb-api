@@ -99,10 +99,11 @@ public class ItemController {
    * @return created item
    */
   @SuppressWarnings ("squid:S00107")
-  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, UUID sellerId, UUID modifier) {
+  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, String businessName, String businessCode, UUID sellerId, UUID modifier) {
     return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, 
         priceCurrency, amount, unit, visibilityLimited, resourceId, soldAmount, allowPurchaseContactSeller, allowPurchaseCreditCard,
-        deliveryTime, contactEmail, contactPhone, termsOfDelivery, allowDelivery, allowPickup, deliveryPrice, deliveryCurrency, sellerId, modifier);
+        deliveryTime, contactEmail, contactPhone, termsOfDelivery, allowDelivery, allowPickup, deliveryPrice, deliveryCurrency, 
+        businessName, businessCode, sellerId, modifier);
   }
 
   /**
@@ -145,7 +146,7 @@ public class ItemController {
 
    * @return updated item
    */
-  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, boolean visibilityLimited, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, UUID sellerId, UUID modifier) {
+  public Item updateItem(Item item, LocalizedEntry title, LocalizedEntry description, Category category, boolean visibilityLimited, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, String businessName, String businessCode, UUID sellerId, UUID modifier) {
     itemDAO.updateTitle(item, title, modifier);
     itemDAO.updateDescription(item, description, modifier);
     itemDAO.updateCategory(item, category, modifier);
@@ -169,6 +170,9 @@ public class ItemController {
     itemDAO.updateAllowPickup(item, allowPickup, modifier);
     itemDAO.updateDeliveryPrice(item, deliveryPrice, modifier);
     itemDAO.updateDeliveryCurrency(item, deliveryCurrency, modifier);
+    itemDAO.updateBusinessCode(item, businessCode, modifier);
+    itemDAO.updateBusinessName(item, businessName, modifier);
+    
     return item;
   }
 

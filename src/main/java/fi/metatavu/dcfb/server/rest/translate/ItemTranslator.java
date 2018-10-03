@@ -43,6 +43,8 @@ public class ItemTranslator extends AbstractTranslator {
     Price unitPrice = new Price();
     unitPrice.setCurrency(item.getPriceCurrency() != null ? item.getPriceCurrency().getCurrencyCode() : null);
     unitPrice.setPrice(item.getUnitPrice());
+    String businessCode = item.getBusinessCode();
+    String businessName = item.getBusinessName();
     
     Price deliveryPrice = new Price();
     deliveryPrice.setCurrency(item.getDeliveryCurrency() != null ? item.getDeliveryCurrency().getCurrencyCode() : null);
@@ -79,6 +81,8 @@ public class ItemTranslator extends AbstractTranslator {
     result.setAllowDelivery(item.getAllowDelivery());
     result.setAllowPickup(item.getAllowPickup());
     result.setDeliveryPrice(deliveryPrice);
+    result.setBusinessCode(businessCode);
+    result.setBusinessName(businessName);
     result.setPaymentMethods(paymentMethods);
     result.setMeta(itemController.listMetas(item).stream().map(itemMeta -> {
       Meta meta = new Meta();

@@ -68,6 +68,8 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       item.setDeliveryTime(12);
       item.setContactEmail("fake@example.com");
       item.setContactPhone("+356 1234 567");
+      item.setBusinessCode("1234-code");
+      item.setBusinessName("Business Name");
       
       item.setAmount(25l);
       item.setCategoryId(simpleCategory.getId());
@@ -118,6 +120,8 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(new Integer(12), createdItem.getDeliveryTime());
       assertEquals("fake@example.com", createdItem.getContactEmail());
       assertEquals("+356 1234 567", createdItem.getContactPhone());
+      assertEquals("1234-code", createdItem.getBusinessCode());
+      assertEquals("Business Name", createdItem.getBusinessName());
       assertEquals(true, createdItem.isAllowDelivery());
       assertEquals(false, createdItem.isAllowPickup());
       assertEquals("EUR", createdItem.getDeliveryPrice().getCurrency());
