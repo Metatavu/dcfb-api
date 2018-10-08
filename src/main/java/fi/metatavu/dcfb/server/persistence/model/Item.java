@@ -76,12 +76,8 @@ public class Item {
   @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID lastModifier;
 
-  @Column(nullable = false)
-  @NotNull
-  @NotEmpty
   private String unitPrice;
   
-  @Column (nullable = false)
   private Currency priceCurrency;
 
   @Column (nullable = false)

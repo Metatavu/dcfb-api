@@ -185,7 +185,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals("test value 1", metaMap.get("test-1"));
       assertEquals("test value 2", metaMap.get("test-2"));
       assertEquals(false, createdItem.getPaymentMethods().isAllowContactSeller());
-      assertEquals(true, createdItem.getPaymentMethods().isAllowCreditCard());
+      assertEquals(false, createdItem.getPaymentMethods().isAllowCreditCard());
 
       assertEquals("tos", createdItem.getTermsOfDelivery());
       assertEquals(new Integer(12), createdItem.getDeliveryTime());
@@ -513,6 +513,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload1.setDescription(dataBuilder.createLocalized("test description"));
       payload1.setCategoryId(simpleCategory.getId());
       payload1.setUnit("mm");
+      payload1.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload1.setUnitPrice(dataBuilder.createSimplePrice());
       payload1.setAmount(1l);
       payload1.setUnit("unit");
@@ -529,6 +530,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload2.setCategoryId(simpleCategory.getId());
       payload2.setUnitPrice(dataBuilder.createSimplePrice());
       payload2.setAmount(2l);
+      payload2.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload2.setUnit("unit");
       payload2.setSellerId(REALM1_USER_1_ID);
       payload2.setPaymentMethods(dataBuilder.createDefaultPaymentMethods());
@@ -564,6 +566,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload1.setUnit("mm");
       payload1.setUnitPrice(dataBuilder.createSimplePrice());
       payload1.setAmount(1l);
+      payload1.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload1.setUnit("unit");
       payload1.setSellerId(REALM1_USER_1_ID);
       payload1.setLocationId(dataBuilder.createSimpleLocation("61.6887", "27.2721").getId());
@@ -579,6 +582,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload2.setCategoryId(simpleCategory.getId());
       payload2.setUnitPrice(dataBuilder.createSimplePrice());
       payload2.setAmount(2l);
+      payload2.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload2.setUnit("unit");
       payload2.setSellerId(REALM1_USER_1_ID);
       payload2.setLocationId(dataBuilder.createSimpleLocation("60.1699", "24.9384").getId());
@@ -625,6 +629,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload.setCategoryId(simpleCategory.getId());
       payload.setDescription(dataBuilder.createLocalized("desc"));
       payload.setExpiresAt(null);
+      payload.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload.setImages(Collections.emptyList());
       payload.setTitle(dataBuilder.createLocalized("simple item"));
       payload.setUnit("Fake");
