@@ -24,6 +24,7 @@ import feign.FeignException;
 import fi.metatavu.dcfb.client.Category;
 import fi.metatavu.dcfb.client.Image;
 import fi.metatavu.dcfb.client.Item;
+import fi.metatavu.dcfb.client.Item.TypeOfBusinessEnum;
 import fi.metatavu.dcfb.client.ItemListSort;
 import fi.metatavu.dcfb.client.ItemPaymentMethods;
 import fi.metatavu.dcfb.client.ItemReservation;
@@ -70,6 +71,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       item.setContactPhone("+356 1234 567");
       item.setBusinessCode("1234-code");
       item.setBusinessName("Business Name");
+      item.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       
       item.setAmount(25l);
       item.setCategoryId(simpleCategory.getId());
@@ -126,6 +128,75 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(false, createdItem.isAllowPickup());
       assertEquals("EUR", createdItem.getDeliveryPrice().getCurrency());
       assertEquals("10.00", createdItem.getDeliveryPrice().getPrice());
+      assertEquals(TypeOfBusinessEnum.SALE, createdItem.getTypeOfBusiness());
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+
+  @Test
+  public void testCreateItemPurchase() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      Category simpleCategory = dataBuilder.createSimpleCategory();
+
+      fi.metatavu.dcfb.client.Item item = new fi.metatavu.dcfb.client.Item();
+      
+      item.setAllowDelivery(true);
+      item.setAllowPickup(false);
+      
+      item.setTermsOfDelivery("tos");
+      item.setDeliveryTime(12);
+      item.setContactEmail("fake@example.com");
+      item.setContactPhone("+356 1234 567");
+      item.setBusinessCode("1234-code");
+      item.setBusinessName("Business Name");
+      item.setTypeOfBusiness(TypeOfBusinessEnum.PURCHASE);
+      
+      item.setAmount(25l);
+      item.setCategoryId(simpleCategory.getId());
+      item.setDescription(dataBuilder.createLocalized(Locale.FRENCH, "PLURAL", "created description"));
+      item.setExpiresAt(getOffsetDateTime(2020, 5, 4, TIMEZONE));
+      item.setImages(Collections.emptyList());
+      item.setTitle(dataBuilder.createLocalized(Locale.JAPAN, "PLURAL", "created title"));
+      item.setUnit("Unit of Fake");
+      item.setSellerId(REALM1_USER_1_ID);
+      item.setMeta(Arrays.asList(
+        dataBuilder.createMeta("test-1", "test value 1"),
+        dataBuilder.createMeta("test-2", "test value 2")
+      ));
+
+      Item createdItem = dataBuilder.createItem(item);
+      Map<String, String> metaMap = mapMetas(createdItem.getMeta());
+      
+      assertNotNull(createdItem);
+      assertNotNull(createdItem.getId());
+      assertEquals(new Long(25l), createdItem.getAmount());
+      assertEquals(simpleCategory.getId(), createdItem.getCategoryId());
+      assertEquals(1, createdItem.getDescription().size());
+      assertEquals(Locale.FRENCH.getLanguage(), createdItem.getDescription().get(0).getLanguage());
+      assertEquals("created description", createdItem.getDescription().get(0).getValue());
+      assertEquals("PLURAL", createdItem.getDescription().get(0).getType());
+      assertEquals(getOffsetDateTime(2020, 5, 4, TIMEZONE).toInstant(), createdItem.getExpiresAt().toInstant());
+      assertEquals(Locale.JAPAN.getLanguage(), createdItem.getTitle().get(0).getLanguage());
+      assertEquals("created title", createdItem.getTitle().get(0).getValue());
+      assertEquals("PLURAL", createdItem.getTitle().get(0).getType());
+      assertEquals(2, createdItem.getMeta().size());
+      assertEquals("test value 1", metaMap.get("test-1"));
+      assertEquals("test value 2", metaMap.get("test-2"));
+      assertEquals(false, createdItem.getPaymentMethods().isAllowContactSeller());
+      assertEquals(false, createdItem.getPaymentMethods().isAllowCreditCard());
+
+      assertEquals("tos", createdItem.getTermsOfDelivery());
+      assertEquals(new Integer(12), createdItem.getDeliveryTime());
+      assertEquals("fake@example.com", createdItem.getContactEmail());
+      assertEquals("+356 1234 567", createdItem.getContactPhone());
+      assertEquals("1234-code", createdItem.getBusinessCode());
+      assertEquals("Business Name", createdItem.getBusinessName());
+      assertEquals(true, createdItem.isAllowDelivery());
+      assertEquals(false, createdItem.isAllowPickup());
+
+      assertEquals(TypeOfBusinessEnum.PURCHASE, createdItem.getTypeOfBusiness());
     } finally {
       dataBuilder.clean();
     }
@@ -442,6 +513,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload1.setDescription(dataBuilder.createLocalized("test description"));
       payload1.setCategoryId(simpleCategory.getId());
       payload1.setUnit("mm");
+      payload1.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload1.setUnitPrice(dataBuilder.createSimplePrice());
       payload1.setAmount(1l);
       payload1.setUnit("unit");
@@ -458,6 +530,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload2.setCategoryId(simpleCategory.getId());
       payload2.setUnitPrice(dataBuilder.createSimplePrice());
       payload2.setAmount(2l);
+      payload2.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload2.setUnit("unit");
       payload2.setSellerId(REALM1_USER_1_ID);
       payload2.setPaymentMethods(dataBuilder.createDefaultPaymentMethods());
@@ -493,6 +566,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload1.setUnit("mm");
       payload1.setUnitPrice(dataBuilder.createSimplePrice());
       payload1.setAmount(1l);
+      payload1.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload1.setUnit("unit");
       payload1.setSellerId(REALM1_USER_1_ID);
       payload1.setLocationId(dataBuilder.createSimpleLocation("61.6887", "27.2721").getId());
@@ -508,6 +582,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload2.setCategoryId(simpleCategory.getId());
       payload2.setUnitPrice(dataBuilder.createSimplePrice());
       payload2.setAmount(2l);
+      payload2.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload2.setUnit("unit");
       payload2.setSellerId(REALM1_USER_1_ID);
       payload2.setLocationId(dataBuilder.createSimpleLocation("60.1699", "24.9384").getId());
@@ -554,6 +629,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       payload.setCategoryId(simpleCategory.getId());
       payload.setDescription(dataBuilder.createLocalized("desc"));
       payload.setExpiresAt(null);
+      payload.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       payload.setImages(Collections.emptyList());
       payload.setTitle(dataBuilder.createLocalized("simple item"));
       payload.setUnit("Fake");
