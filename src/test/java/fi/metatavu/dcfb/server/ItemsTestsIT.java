@@ -71,7 +71,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       item.setContactPhone("+356 1234 567");
       item.setBusinessCode("1234-code");
       item.setBusinessName("Business Name");
-      item.setTypeOfBusiness(TypeOfBusinessEnum.PURCHASE);
+      item.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
       
       item.setAmount(25l);
       item.setCategoryId(simpleCategory.getId());
@@ -128,14 +128,14 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(false, createdItem.isAllowPickup());
       assertEquals("EUR", createdItem.getDeliveryPrice().getCurrency());
       assertEquals("10.00", createdItem.getDeliveryPrice().getPrice());
-      assertEquals(TypeOfBusinessEnum.PURCHASE, createdItem.getTypeOfBusiness());
+      assertEquals(TypeOfBusinessEnum.SALE, createdItem.getTypeOfBusiness());
     } finally {
       dataBuilder.clean();
     }
   }
 
   @Test
-  public void testCreateItemSale() throws IOException, URISyntaxException {
+  public void testCreateItemPurchase() throws IOException, URISyntaxException {
     TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
     try {
       Category simpleCategory = dataBuilder.createSimpleCategory();
@@ -151,7 +151,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       item.setContactPhone("+356 1234 567");
       item.setBusinessCode("1234-code");
       item.setBusinessName("Business Name");
-      item.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
+      item.setTypeOfBusiness(TypeOfBusinessEnum.PURCHASE);
       
       item.setAmount(25l);
       item.setCategoryId(simpleCategory.getId());
@@ -173,8 +173,6 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertNotNull(createdItem.getId());
       assertEquals(new Long(25l), createdItem.getAmount());
       assertEquals(simpleCategory.getId(), createdItem.getCategoryId());
-      assertEquals("15.00", createdItem.getUnitPrice().getPrice());
-      assertEquals("USD", createdItem.getUnitPrice().getCurrency());
       assertEquals(1, createdItem.getDescription().size());
       assertEquals(Locale.FRENCH.getLanguage(), createdItem.getDescription().get(0).getLanguage());
       assertEquals("created description", createdItem.getDescription().get(0).getValue());
@@ -183,12 +181,6 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(Locale.JAPAN.getLanguage(), createdItem.getTitle().get(0).getLanguage());
       assertEquals("created title", createdItem.getTitle().get(0).getValue());
       assertEquals("PLURAL", createdItem.getTitle().get(0).getType());
-      assertEquals("Unit of Fake", createdItem.getUnit());
-      assertEquals("USD", createdItem.getUnitPrice().getCurrency());
-      assertEquals("15.00", createdItem.getUnitPrice().getPrice());
-      assertEquals(1, createdItem.getImages().size());
-      assertEquals("image/jpeg", createdItem.getImages().get(0).getType());
-      assertEquals("https://www.example.com/jpeg.jpg", createdItem.getImages().get(0).getUrl());
       assertEquals(2, createdItem.getMeta().size());
       assertEquals("test value 1", metaMap.get("test-1"));
       assertEquals("test value 2", metaMap.get("test-2"));
@@ -204,7 +196,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(true, createdItem.isAllowDelivery());
       assertEquals(false, createdItem.isAllowPickup());
 
-      assertEquals(TypeOfBusinessEnum.SALE, createdItem.getTypeOfBusiness());
+      assertEquals(TypeOfBusinessEnum.PURCHASE, createdItem.getTypeOfBusiness());
     } finally {
       dataBuilder.clean();
     }
