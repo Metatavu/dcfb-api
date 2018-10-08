@@ -52,7 +52,7 @@ public class ItemDAO extends AbstractDAO<Item> {
    * @return created item
    */
   @SuppressWarnings ("squid:S00107")
-  public Item create(UUID id, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, 
+  public Item create(UUID id, String typeOfBusiness, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, 
       OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, 
       UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, 
       Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,
@@ -60,6 +60,7 @@ public class ItemDAO extends AbstractDAO<Item> {
       String businessName, String businessCode, UUID sellerId, UUID lastModifier) {
     Item item = new Item();
     item.setId(id);
+    item.setTypeOfBusiness(typeOfBusiness);
     item.setTitle(title);
     item.setDescription(description);
     item.setCategory(category);

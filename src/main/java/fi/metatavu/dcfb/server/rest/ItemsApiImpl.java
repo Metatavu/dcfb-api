@@ -161,6 +161,7 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     }
     
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.createItem(
+        payload.getTypeOfBusiness().toString(),
         title, 
         description, 
         category, 

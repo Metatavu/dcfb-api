@@ -36,6 +36,11 @@ public class Item {
   @Id
   @Type(type="org.hibernate.type.PostgresUUIDType")
   private UUID id;
+  
+  @NotNull
+  @NotEmpty
+  @Column (nullable = false)
+  private String typeOfBusiness;
 
   @ManyToOne (optional = false)
   private LocalizedEntry title;
@@ -131,6 +136,14 @@ public class Item {
 
   public void setId(UUID id) {
     this.id = id;
+  }
+  
+  public String getTypeOfBusiness() {
+    return typeOfBusiness;
+  }
+  
+  public void setTypeOfBusiness(String typeOfBusiness) {
+    this.typeOfBusiness = typeOfBusiness;
   }
 
   public LocalizedEntry getTitle() {

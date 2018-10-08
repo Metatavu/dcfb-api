@@ -329,4 +329,12 @@
     </addColumn>
   </changeSet>
   
+  <changeSet id="typeofbusiness" author="antti.leppa">
+    <addColumn tableName="item">
+      <column name="typeofbusiness" type="varchar(255)" defaultValue="SALE">
+        <constraints nullable="false"/> 
+      </column>
+    </addColumn>
+  </changeSet>
+  
 </databaseChangeLog>

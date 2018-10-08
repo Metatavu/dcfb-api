@@ -99,8 +99,8 @@ public class ItemController {
    * @return created item
    */
   @SuppressWarnings ("squid:S00107")
-  public Item createItem(LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, String businessName, String businessCode, UUID sellerId, UUID modifier) {
-    return itemDAO.create(UUID.randomUUID(), title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, 
+  public Item createItem(String typeOfBusiness, LocalizedEntry title, LocalizedEntry description, Category category, Location location, String slug, OffsetDateTime expiresAt, String unitPrice, Currency priceCurrency, Long amount, String unit, boolean visibilityLimited, UUID resourceId, Long soldAmount, Boolean allowPurchaseContactSeller, Boolean allowPurchaseCreditCard, Integer deliveryTime, String contactEmail, String contactPhone, String termsOfDelivery,Boolean allowDelivery, Boolean allowPickup, String deliveryPrice, Currency deliveryCurrency, String businessName, String businessCode, UUID sellerId, UUID modifier) {
+    return itemDAO.create(UUID.randomUUID(), typeOfBusiness, title, description, category, location, getUniqueSlug(slug), expiresAt, unitPrice, 
         priceCurrency, amount, unit, visibilityLimited, resourceId, soldAmount, allowPurchaseContactSeller, allowPurchaseCreditCard,
         deliveryTime, contactEmail, contactPhone, termsOfDelivery, allowDelivery, allowPickup, deliveryPrice, deliveryCurrency, 
         businessName, businessCode, sellerId, modifier);

@@ -24,6 +24,7 @@ import feign.FeignException;
 import fi.metatavu.dcfb.client.Category;
 import fi.metatavu.dcfb.client.Image;
 import fi.metatavu.dcfb.client.Item;
+import fi.metatavu.dcfb.client.Item.TypeOfBusinessEnum;
 import fi.metatavu.dcfb.client.ItemListSort;
 import fi.metatavu.dcfb.client.ItemPaymentMethods;
 import fi.metatavu.dcfb.client.ItemReservation;
@@ -70,6 +71,7 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       item.setContactPhone("+356 1234 567");
       item.setBusinessCode("1234-code");
       item.setBusinessName("Business Name");
+      item.setTypeOfBusiness(TypeOfBusinessEnum.PURCHASE);
       
       item.setAmount(25l);
       item.setCategoryId(simpleCategory.getId());
@@ -126,6 +128,83 @@ public class ItemsTestsIT extends AbstractIntegrationTest {
       assertEquals(false, createdItem.isAllowPickup());
       assertEquals("EUR", createdItem.getDeliveryPrice().getCurrency());
       assertEquals("10.00", createdItem.getDeliveryPrice().getPrice());
+      assertEquals(TypeOfBusinessEnum.PURCHASE, createdItem.getTypeOfBusiness());
+    } finally {
+      dataBuilder.clean();
+    }
+  }
+
+  @Test
+  public void testCreateItemSale() throws IOException, URISyntaxException {
+    TestDataBuilder dataBuilder = new TestDataBuilder(this, USER_1_USERNAME, USER_1_PASSWORD);
+    try {
+      Category simpleCategory = dataBuilder.createSimpleCategory();
+
+      fi.metatavu.dcfb.client.Item item = new fi.metatavu.dcfb.client.Item();
+      
+      item.setAllowDelivery(true);
+      item.setAllowPickup(false);
+      
+      item.setTermsOfDelivery("tos");
+      item.setDeliveryTime(12);
+      item.setContactEmail("fake@example.com");
+      item.setContactPhone("+356 1234 567");
+      item.setBusinessCode("1234-code");
+      item.setBusinessName("Business Name");
+      item.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
+      
+      item.setAmount(25l);
+      item.setCategoryId(simpleCategory.getId());
+      item.setDescription(dataBuilder.createLocalized(Locale.FRENCH, "PLURAL", "created description"));
+      item.setExpiresAt(getOffsetDateTime(2020, 5, 4, TIMEZONE));
+      item.setImages(Collections.emptyList());
+      item.setTitle(dataBuilder.createLocalized(Locale.JAPAN, "PLURAL", "created title"));
+      item.setUnit("Unit of Fake");
+      item.setSellerId(REALM1_USER_1_ID);
+      item.setMeta(Arrays.asList(
+        dataBuilder.createMeta("test-1", "test value 1"),
+        dataBuilder.createMeta("test-2", "test value 2")
+      ));
+
+      Item createdItem = dataBuilder.createItem(item);
+      Map<String, String> metaMap = mapMetas(createdItem.getMeta());
+      
+      assertNotNull(createdItem);
+      assertNotNull(createdItem.getId());
+      assertEquals(new Long(25l), createdItem.getAmount());
+      assertEquals(simpleCategory.getId(), createdItem.getCategoryId());
+      assertEquals("15.00", createdItem.getUnitPrice().getPrice());
+      assertEquals("USD", createdItem.getUnitPrice().getCurrency());
+      assertEquals(1, createdItem.getDescription().size());
+      assertEquals(Locale.FRENCH.getLanguage(), createdItem.getDescription().get(0).getLanguage());
+      assertEquals("created description", createdItem.getDescription().get(0).getValue());
+      assertEquals("PLURAL", createdItem.getDescription().get(0).getType());
+      assertEquals(getOffsetDateTime(2020, 5, 4, TIMEZONE).toInstant(), createdItem.getExpiresAt().toInstant());
+      assertEquals(Locale.JAPAN.getLanguage(), createdItem.getTitle().get(0).getLanguage());
+      assertEquals("created title", createdItem.getTitle().get(0).getValue());
+      assertEquals("PLURAL", createdItem.getTitle().get(0).getType());
+      assertEquals("Unit of Fake", createdItem.getUnit());
+      assertEquals("USD", createdItem.getUnitPrice().getCurrency());
+      assertEquals("15.00", createdItem.getUnitPrice().getPrice());
+      assertEquals(1, createdItem.getImages().size());
+      assertEquals("image/jpeg", createdItem.getImages().get(0).getType());
+      assertEquals("https://www.example.com/jpeg.jpg", createdItem.getImages().get(0).getUrl());
+      assertEquals(2, createdItem.getMeta().size());
+      assertEquals("test value 1", metaMap.get("test-1"));
+      assertEquals("test value 2", metaMap.get("test-2"));
+      assertEquals(false, createdItem.getPaymentMethods().isAllowContactSeller());
+      assertEquals(true, createdItem.getPaymentMethods().isAllowCreditCard());
+
+      assertEquals("tos", createdItem.getTermsOfDelivery());
+      assertEquals(new Integer(12), createdItem.getDeliveryTime());
+      assertEquals("fake@example.com", createdItem.getContactEmail());
+      assertEquals("+356 1234 567", createdItem.getContactPhone());
+      assertEquals("1234-code", createdItem.getBusinessCode());
+      assertEquals("Business Name", createdItem.getBusinessName());
+      assertEquals(true, createdItem.isAllowDelivery());
+      assertEquals(false, createdItem.isAllowPickup());
+
+      assertEquals(TypeOfBusinessEnum.SALE, createdItem.getTypeOfBusiness());
     } finally {
       dataBuilder.clean();
     }
