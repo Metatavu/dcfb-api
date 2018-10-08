@@ -24,6 +24,7 @@ import fi.metatavu.dcfb.client.Location;
 import fi.metatavu.dcfb.client.LocationsApi;
 import fi.metatavu.dcfb.client.Meta;
 import fi.metatavu.dcfb.client.Price;
+import fi.metatavu.dcfb.client.Item.TypeOfBusinessEnum;
 
 /**
  * Builder for integration test data
@@ -156,6 +157,7 @@ public class TestDataBuilder {
     payload.setExpiresAt(null);
     payload.setImages(Collections.emptyList());
     payload.setTitle(createLocalized("simple item"));
+    payload.setTypeOfBusiness(TypeOfBusinessEnum.SALE);
     payload.setUnit("Fake");
     payload.setUnitPrice(price);
     payload.setLocationId(locationId);

@@ -329,4 +329,17 @@
     </addColumn>
   </changeSet>
   
+  <changeSet id="typeofbusiness" author="antti.leppa">
+    <addColumn tableName="item">
+      <column name="typeofbusiness" type="varchar(255)" defaultValue="SALE">
+        <constraints nullable="false"/> 
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="dropunitpricenullconstracint" author="heikki.kurhinen">
+    <dropNotNullConstraint columnDataType="varchar(255)" columnName="unitprice" tableName="item"/>
+    <dropNotNullConstraint columnDataType="varchar(255)" columnName="pricecurrency" tableName="item"/>
+  </changeSet>
+  
 </databaseChangeLog>
