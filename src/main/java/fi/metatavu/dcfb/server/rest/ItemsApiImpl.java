@@ -34,6 +34,7 @@ import fi.metatavu.dcfb.server.persistence.model.LocalizedEntry;
 import fi.metatavu.dcfb.server.persistence.model.Location;
 import fi.metatavu.dcfb.server.rest.model.Image;
 import fi.metatavu.dcfb.server.rest.model.Item;
+import fi.metatavu.dcfb.server.rest.model.Item.TypeOfBusinessEnum;
 import fi.metatavu.dcfb.server.rest.model.ItemListSort;
 import fi.metatavu.dcfb.server.rest.model.ItemReservation;
 import fi.metatavu.dcfb.server.rest.model.Meta;
@@ -88,9 +89,27 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createForbidden("Anonymous users can not create items");
     }
     
-    if (payload.getPaymentMethods() == null) {
-      return createBadRequest("PaymentMethods is required");
+    Currency priceCurrency = getPriceCurrency(payload.getUnitPrice());
+    
+    if (payload.getTypeOfBusiness() == TypeOfBusinessEnum.SALE) {
+      if (payload.getPaymentMethods() == null) {
+        return createBadRequest("PaymentMethods is required");
+      }
+      
+      if (payload.getUnitPrice() == null) {
+        return createBadRequest(String.format("Price is required"));
+      }
+      
+      if (payload.getUnitPrice().getPrice() == null) {
+        return createBadRequest(String.format("Price is required"));
+      }
+      
+      if (priceCurrency == null) {
+        return createBadRequest(String.format("Invalid currency %s", payload.getUnitPrice().getCurrency()));
+      }
     }
+    
+    String unitPrice = payload.getUnitPrice() != null ? payload.getUnitPrice().getPrice() : null;
 
     UUID sellerId = payload.getSellerId();
     if (!isRealmAdmin() && !sellerId.equals(getLoggerUserId())) {
@@ -119,13 +138,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createBadRequest(String.format("Invalid location %s", payload.getLocationId()));
     }
     
-    Currency priceCurrency = getPriceCurrency(payload.getUnitPrice());
-    if (priceCurrency == null) {
-      return createBadRequest(String.format("Invalid currency %s", payload.getUnitPrice().getCurrency()));
-    }
-    
-    Boolean allowPurchaseContactSeller = payload.getPaymentMethods().isAllowContactSeller();
-    Boolean allowPurchaseCreditCard = payload.getPaymentMethods().isAllowCreditCard();
+    Boolean allowPurchaseContactSeller = payload.getPaymentMethods() != null ? payload.getPaymentMethods().isAllowContactSeller() : false;
+    Boolean allowPurchaseCreditCard = payload.getPaymentMethods() != null ? payload.getPaymentMethods().isAllowCreditCard() : false;
     
     if (allowPurchaseCreditCard && !keycloakAdminController.userHasAttribute(sellerId, KeycloakConsts.KEYCLOAK_STRIPE_ACCOUNT_ATTRIBUTE)) {
       return createBadRequest("Users without stripe account id cannot create items with credit card payment");
@@ -135,7 +149,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     LocalizedEntry description = createLocalizedEntry(payload.getDescription());
     String slug = StringUtils.isNotBlank(payload.getSlug()) ? payload.getSlug() : slugifyLocalized(payload.getTitle());
     OffsetDateTime expiresAt = payload.getExpiresAt();
-    String unitPrice = payload.getUnitPrice().getPrice();
     Long amount = payload.getAmount();
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
@@ -353,6 +366,28 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     if (!isRealmUser()) {
       return createForbidden("Anonymous users can not update items");
     }
+    
+Currency priceCurrency = getPriceCurrency(payload.getUnitPrice());
+    
+    if (payload.getTypeOfBusiness() == TypeOfBusinessEnum.SALE) {
+      if (payload.getPaymentMethods() == null) {
+        return createBadRequest("PaymentMethods is required");
+      }
+      
+      if (payload.getUnitPrice() == null) {
+        return createBadRequest(String.format("Price is required"));
+      }
+      
+      if (payload.getUnitPrice().getPrice() == null) {
+        return createBadRequest(String.format("Price is required"));
+      }
+      
+      if (priceCurrency == null) {
+        return createBadRequest(String.format("Invalid currency %s", payload.getUnitPrice().getCurrency()));
+      }
+    }
+    
+    String unitPrice = payload.getUnitPrice() != null ? payload.getUnitPrice().getPrice() : null;
 
     fi.metatavu.dcfb.server.persistence.model.Item item = itemController.findItem(itemId);
     if (item == null) {
@@ -363,7 +398,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     LocalizedEntry description = updateLocalizedEntry(item.getDescription(), payload.getDescription());
     String slug = payload.getSlug();
     OffsetDateTime expiresAt = payload.getExpiresAt();
-    String unitPrice = payload.getUnitPrice().getPrice();
     Long amount = payload.getAmount();
     String unit = payload.getUnit();
     UUID modifier = getLoggerUserId();
@@ -374,8 +408,8 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
     String contactEmail = payload.getContactEmail();
     String contactPhone = payload.getContactPhone();
     String termsOfDelivery = payload.getTermsOfDelivery();
-    Boolean allowPurchaseContactSeller = payload.getPaymentMethods().isAllowContactSeller();
-    Boolean allowPurchaseCreditCard = payload.getPaymentMethods().isAllowCreditCard();
+    Boolean allowPurchaseContactSeller = payload.getPaymentMethods() != null ? payload.getPaymentMethods().isAllowContactSeller() : false;
+    Boolean allowPurchaseCreditCard = payload.getPaymentMethods() != null ? payload.getPaymentMethods().isAllowCreditCard() : false;
     Boolean allowDelivery = payload.isAllowDelivery() != null ? payload.isAllowDelivery() : false;
     Boolean allowPickup = payload.isAllowPickup() != null ? payload.isAllowPickup() : false;
     String deliveryPrice = payload.getDeliveryPrice() != null ? payload.getDeliveryPrice().getPrice() : null;
@@ -393,11 +427,6 @@ public class ItemsApiImpl extends AbstractApi implements ItemsApi {
       return createBadRequest(String.format("Invalid location %s", payload.getLocationId()));
     }
     
-    Currency priceCurrency = getPriceCurrency(payload.getUnitPrice());
-    if (priceCurrency == null) {
-      return createBadRequest(String.format("Invalid currency %s", payload.getUnitPrice().getCurrency()));
-    }
-
     item = itemController.updateItem(item, 
         title, 
         description, 
