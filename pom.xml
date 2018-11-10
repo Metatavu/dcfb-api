@@ -67,8 +67,8 @@
     
     <!-- Keycloak admin client -->
     
-    <keycloak-admin-client.version>4.2.1.Final</keycloak-admin-client.version>
-    <keycloak-adapter.version>4.2.1.Final</keycloak-adapter.version>
+    <keycloak-admin-client.version>4.5.0.Final</keycloak-admin-client.version>
+    <keycloak-adapter.version>4.5.0.Final</keycloak-adapter.version>
     
     <!-- Mailgun -->
     
